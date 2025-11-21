@@ -137,6 +137,12 @@ MUST_CHECK int process_prepared_tx_part(buffer_t *buf) {
                 return SW_TX_HASH_FAIL;
             }
 
+            res = parse_input_contract_for_display(buf);
+            if (res != 0) {
+                PRINTF("Failed to parse Input Contract for display: %d\n", res);
+                return SW_TX_PARSING_FAIL;
+            }
+
             G_context.tx_info.recv_node_idx++;
 
             if (G_context.tx_info.recv_node_idx ==

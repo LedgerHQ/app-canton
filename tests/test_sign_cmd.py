@@ -291,6 +291,45 @@ def test_sign_token_transfer_32_node_children(
         custom_screen_text="Sign transaction to",
     )
 
+def test_sign_proxy_token_transfer(
+    backend: BackendInterface, scenario_navigator: NavigateWithScenario
+) -> None:
+    _sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_proxy.json",
+        custom_screen_text="Sign transaction to",
+    )
+
+def test_sign_token_transfer_accept(
+    backend: BackendInterface, scenario_navigator: NavigateWithScenario
+) -> None:
+    _sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_accept.json",
+        custom_screen_text="Sign transaction to",
+    )
+
+def test_sign_token_transfer_reject(
+    backend: BackendInterface, scenario_navigator: NavigateWithScenario
+) -> None:
+    _sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_reject.json",
+        custom_screen_text="Sign transaction to",
+    )
+
+def test_sign_token_transfer_withdraw(
+    backend: BackendInterface, scenario_navigator: NavigateWithScenario
+) -> None:
+    _sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_withdraw.json",
+        custom_screen_text="Sign transaction to",
+    )
 
 def test_sign_preapproval_proposal(
     backend: BackendInterface, scenario_navigator: NavigateWithScenario

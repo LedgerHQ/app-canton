@@ -63,3 +63,12 @@ MUST_CHECK bool is_digit(char c);
  * @return The integer value, or 0 on error.
  */
 MUST_CHECK int atoint(const char *str);
+
+/**
+ * @brief Convert a string of digits to an unsigned long long integer.
+ *        Returns 0 if the string contains non-digit characters.
+ *
+ * @param str Null-terminated string to convert.
+ * @return The unsigned long long integer value, or 0 on error.
+ */
+MUST_CHECK uint64_t atoull(const char *str);

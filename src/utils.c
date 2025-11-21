@@ -71,3 +71,18 @@ MUST_CHECK int atoint(const char *str) {
 
     return res;
 }
+
+MUST_CHECK uint64_t atoull(const char *str) {
+    LEDGER_ASSERT(str != NULL, "NULL string pointer passed to atoull");
+
+    uint64_t res = 0;
+
+    for (int i = 0; str[i] != '\0'; i++) {
+        if (!is_digit(str[i])) {
+            return 0;
+        }
+        res = res * 10 + str[i] - '0';
+    }
+
+    return res;
+}
