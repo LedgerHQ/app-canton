@@ -19,327 +19,28 @@
 #include "canonical_hash.h"
 #include "pb_decode.h"
 #include "pb_node_display_parser.h"
-#include "utils.h"  // for atoull
+#include "pb_node_display_definitions.h"  // Shared structs/consts
+#include "utils.h"                        // for atoull
 
 #include <stdio.h>
 #include <time.h>
-#include <stddef.h>
 #include "bytewriter.h"
 #include "read.h"
-
-/* -------------------------------------------------------------------------- */
-/* Constants                                                                  */
-/* -------------------------------------------------------------------------- */
-
-#define MAX_DISPLAY_FIELDS_NB             10
-#define TOKEN_TRANSFER_FIELDS_NB          5
-#define TOKEN_TRANSFER_ACCEPT_FIELDS_NB   6
-#define TOKEN_TRANSFER_REJECT_FIELDS_NB   6
-#define TOKEN_TRANSFER_WITHDRAW_FIELDS_NB 3
-
-#define NATIVE_TRANSFER_FIELDS_NB      4
-#define PREAPPROVAL_PROPOSAL_FIELDS_NB 3
-#define PROXY_TRANSFER_FIELDS_NB       5
-
-#define MAX_FIELD_PATH_LEN  128
-#define MAX_HASH_TABLE_SIZE 53  // Large enough to avoid collisions for small sets (faster lookups)
-
-#define TOKEN_TRANSFER_INSTRUMENT_ID_FIELD_INDEX 3
-#define PREAPPROVAL_ASSET_FIELD_INDEX            1
-
-#define NATIVE_COIN_TICKER        "CC"
-#define NATIVE_COIN_INSTRUMENT_ID "Amulet"
-
-/* -------------------------------------------------------------------------- */
-/* Function pointers type                                                     */
-/* -------------------------------------------------------------------------- */
-
-typedef struct pb_callback_context_t pb_callback_context_t;
-typedef struct tx_field_t tx_field_t;
-typedef void (*field_format_callback_t)(pb_callback_context_t *ctx, tx_field_t *field);
-
-/* -------------------------------------------------------------------------- */
-/* Structures                                                                 */
-/* -------------------------------------------------------------------------- */
-typedef struct {
-    const char *module_name;
-    const char *entity_name;
-} identifier_config_t;
-
-typedef struct {
-    const char *path;
-    const char *item_name;
-    field_format_callback_t format_callback;
-    bool mandatory;
-} field_config_t;
-
-struct tx_field_t {
-    char *value;                   // Dynamically allocated field value
-    size_t value_len;              // Length of the field
-    const field_config_t *config;  // Pointer to const config
-    bool found;                    // Mutable state
-    bool display;                  // Whether the field should be displayed
-};
-
-typedef struct {
-    const identifier_config_t *identifier;
-    const identifier_config_t *metadata_contract_identifier;
-    const field_config_t *const *fields;
-    size_t fields_count;
-    const char *review_title;
-    const char *review_finish;
-} display_config_t;
-
-struct pb_callback_context_t {
-    char *field_path;
-    transaction_ctx_t *tx_info;
-    tx_field_t *tx_fields;
-    uint8_t nb_fields;
-    const char *review_title;
-    const char *review_finish;
-};
 
 /* -------------------------------------------------------------------------- */
 /* Static functions declarations                                              */
 /* -------------------------------------------------------------------------- */
 
+static bool decode_record_field(pb_istream_t *stream, const pb_field_t *field, void **arg);
+static bool decode_record_id_field(pb_istream_t *stream, const pb_field_t *field, void **arg);
+static bool decode_value(pb_istream_t *stream, const pb_field_t *field, void **arg);
+static bool decode_value_text_map(pb_istream_t *stream, const pb_field_t *field, void **arg);
 static bool decode_value_variant(pb_istream_t *stream, const pb_field_t *field, void **arg);
-static void format_amount_field(pb_callback_context_t *ctx, tx_field_t *field);
-static void format_token_amount_field(pb_callback_context_t *ctx, tx_field_t *field);
-static void format_native_amount_field(pb_callback_context_t *ctx, tx_field_t *field);
-static void format_timestamp_field(pb_callback_context_t *ctx, tx_field_t *field);
+static bool decode_textmap_key(pb_istream_t *stream, const pb_field_t *field, void **arg);
 
 /* -------------------------------------------------------------------------- */
-/* Review titles for different transaction types                              */
+/* Static Global State                                                        */
 /* -------------------------------------------------------------------------- */
-
-#define TOKEN_TRANSFER_REVIEW_TITLE           "Review transaction to send tokens"
-#define TOKEN_TRANSFER_REVIEW_FINISH          "Sign transaction to send tokens?"
-#define TOKEN_TRANSFER_ACCEPT_REVIEW_TITLE    "Review transaction to accept incoming transfer"
-#define TOKEN_TRANSFER_ACCEPT_REVIEW_FINISH   "Sign transaction to accept incoming transfer?"
-#define TOKEN_TRANSFER_REJECT_REVIEW_TITLE    "Review transaction to reject incoming transfer"
-#define TOKEN_TRANSFER_REJECT_REVIEW_FINISH   "Sign transaction to reject incoming transfer?"
-#define TOKEN_TRANSFER_WITHDRAW_REVIEW_TITLE  "Review transaction to withdraw transfer offer"
-#define TOKEN_TRANSFER_WITHDRAW_REVIEW_FINISH "Sign transaction to withdraw transfer offer?"
-#define NATIVE_COIN_TRANSFER_REVIEW_TITLE     "Review transaction to send Canton Coin"
-#define NATIVE_COIN_TRANSFER_REVIEW_FINISH    "Sign transaction to send Canton Coin?"
-#define PREAPPROVAL_PROPOSAL_REVIEW_TITLE     "Review transaction to pre-approve incoming transfers"
-#define PREAPPROVAL_PROPOSAL_REVIEW_FINISH    "Sign transaction to pre-approve incoming transfers?"
-#define PREAPPROVAL_ASSET_FIELD_VALUE         "Canton Coin (CC)"
-
-/* -------------------------------------------------------------------------- */
-/* Known identifiers for matching transaction types                           */
-/* -------------------------------------------------------------------------- */
-
-static const identifier_config_t PREAPPROVAL_PROPOSAL_ID = {
-    .module_name = "Splice.Wallet.TransferPreapproval",
-    .entity_name = "TransferPreapprovalProposal"};
-
-static const identifier_config_t TOKEN_TRANSFER_ID = {
-    .module_name = "Splice.Api.Token.TransferInstructionV1",
-    .entity_name = "TransferFactory_Transfer"};
-
-static const identifier_config_t NATIVE_COIN_TRANSFER_ID = {
-    .module_name = "Splice.ExternalPartyAmuletRules",
-    .entity_name = "ExternalPartyAmuletRules_CreateTransferCommand"};
-
-static const identifier_config_t TOKEN_TRANSFER_ACCEPT_ID = {
-    .module_name = "Splice.Api.Token.TransferInstructionV1",
-    .entity_name = "TransferInstruction_Accept"};
-
-static const identifier_config_t TOKEN_TRANSFER_INSTRUCTION_METADATA_ID = {
-    .module_name = "Splice.AmuletTransferInstruction",
-    .entity_name = "AmuletTransferInstruction"};
-
-static const identifier_config_t TOKEN_TRANSFER_REJECT_ID = {
-    .module_name = "Splice.Api.Token.TransferInstructionV1",
-    .entity_name = "TransferInstruction_Reject"};
-
-static const identifier_config_t TOKEN_TRANSFER_WITHDRAW_ID = {
-    .module_name = "Splice.Api.Token.TransferInstructionV1",
-    .entity_name = "TransferInstruction_Withdraw"};
-
-static const identifier_config_t TOKEN_TRANSFER_PROXY_ID = {
-    .module_name = "Splice.Util.FeaturedApp.WalletUserProxy",
-    .entity_name = "WalletUserProxy_TransferFactory_Transfer"};
-
-/* -------------------------------------------------------------------------- */
-/* Known instrument id to ticker mapping                                      */
-/* -------------------------------------------------------------------------- */
-
-static const char *INSTRUMENT_ID_TO_TICKER_MAPPING[] = {
-    "Amulet",
-    NATIVE_COIN_TICKER,  // Canton Coin
-    "amulet",
-    NATIVE_COIN_TICKER,  // Canton Coin lowercase
-};
-
-/* -------------------------------------------------------------------------- */
-/* Field display configuration                                                */
-/* -------------------------------------------------------------------------- */
-
-// Transfer commands fields
-const field_config_t SENDER_FIELD = {"transfer.sender", "From", NULL, true};
-const field_config_t AMOUNT_FIELD = {"transfer.amount", "Amount", format_token_amount_field, true};
-const field_config_t RECEIVER_FIELD = {"transfer.receiver", "To", NULL, true};
-const field_config_t INSTRUMENT_ID_FIELD = {"transfer.instrumentId.id", "Token", NULL, true};
-// Transfer accept command additional fields
-const field_config_t EXPIRATION_FIELD = {"transfer.executeBefore",
-                                         "Expiration time",
-                                         format_timestamp_field,
-                                         true};
-// Transfer withdraw command additional fields
-const field_config_t WITHDRAW_RECEIVER_FIELD = {
-    "transfer.sender",  // Sender is receiver in withdraw
-    "Withdraw to",
-    format_token_amount_field,
-    true};
-// Memo field has dots in path : escape them with backslashes (paths are stored with backslashes in
-// hash table)
-const field_config_t MEMO_FIELD = {
-    "transfer.meta.values.splice\\.lfdecentralizedtrust\\.org/reason",
-    "Memo",
-    NULL,
-    false};
-// Native coin transfer fields
-const field_config_t NATIVE_SENDER_FIELD = {"sender", "From", NULL, true};
-const field_config_t NATIVE_AMOUNT_FIELD = {"amount", "Amount", format_native_amount_field, true};
-const field_config_t NATIVE_RECEIVER_FIELD = {"receiver", "To", NULL, true};
-const field_config_t NATIVE_MEMO_FIELD = {"description", "Memo", NULL, false};
-// Pre-approval proposal fields
-const field_config_t PREAPPROVAL_RECEIVER_FIELD = {"receiver",
-                                                   "Pre-approve for account",
-                                                   NULL,
-                                                   true};
-// Static field not parsed from tx but added manually in set_display_config
-const field_config_t PREAPPROVAL_ASSET_FIELD = {"asset", "For asset", NULL, true};
-const field_config_t PROVIDER_FIELD = {"provider", "By validator", NULL, true};
-
-// Proxy transfer commands fields
-const field_config_t PROXY_SENDER_FIELD = {"proxyArg.choiceArg.transfer.sender",
-                                           "From",
-                                           NULL,
-                                           true};
-const field_config_t PROXY_AMOUNT_FIELD = {"proxyArg.choiceArg.transfer.amount",
-                                           "Amount",
-                                           format_token_amount_field,
-                                           true};
-const field_config_t PROXY_RECEIVER_FIELD = {"proxyArg.choiceArg.transfer.receiver",
-                                             "To",
-                                             NULL,
-                                             true};
-const field_config_t PROXY_INSTRUMENT_ID_FIELD = {"proxyArg.choiceArg.transfer.instrumentId.id",
-                                                  "Token",
-                                                  NULL,
-                                                  true};
-// Memo field has dots in path : escape them with backslashes (paths are stored with backslashes in
-// hash table)
-const field_config_t PROXY_MEMO_FIELD = {
-    "proxyArg.choiceArg.transfer.meta.values.splice\\.lfdecentralizedtrust\\.org/reason",
-    "Memo",
-    NULL,
-    false};
-
-static const field_config_t *const TOKEN_TRANSFER_FIELDS[TOKEN_TRANSFER_FIELDS_NB] =
-    {&SENDER_FIELD, &AMOUNT_FIELD, &RECEIVER_FIELD, &INSTRUMENT_ID_FIELD, &MEMO_FIELD};
-
-static const field_config_t *const TOKEN_TRANSFER_ACCEPT_FIELDS[TOKEN_TRANSFER_ACCEPT_FIELDS_NB] = {
-    &SENDER_FIELD,
-    &AMOUNT_FIELD,
-    &RECEIVER_FIELD,
-    &INSTRUMENT_ID_FIELD,
-    &EXPIRATION_FIELD,
-    &MEMO_FIELD};
-
-static const field_config_t *const TOKEN_TRANSFER_REJECT_FIELDS[TOKEN_TRANSFER_REJECT_FIELDS_NB] = {
-    &SENDER_FIELD,
-    &AMOUNT_FIELD,
-    &RECEIVER_FIELD,
-    &INSTRUMENT_ID_FIELD,
-    &EXPIRATION_FIELD,
-    &MEMO_FIELD};
-
-static const field_config_t *const
-    TOKEN_TRANSFER_WITHDRAW_FIELDS[TOKEN_TRANSFER_WITHDRAW_FIELDS_NB] = {&WITHDRAW_RECEIVER_FIELD,
-                                                                         &AMOUNT_FIELD,
-                                                                         &INSTRUMENT_ID_FIELD};
-
-static const field_config_t *const NATIVE_COIN_TRANSFER_FIELDS[NATIVE_TRANSFER_FIELDS_NB] = {
-    &NATIVE_SENDER_FIELD,
-    &NATIVE_AMOUNT_FIELD,
-    &NATIVE_RECEIVER_FIELD,
-    &NATIVE_MEMO_FIELD};
-
-static const field_config_t *const PREAPPROVAL_PROPOSAL_FIELDS[PREAPPROVAL_PROPOSAL_FIELDS_NB] = {
-    &PREAPPROVAL_RECEIVER_FIELD,
-    &PREAPPROVAL_ASSET_FIELD,
-    &PROVIDER_FIELD};
-
-static const field_config_t *const PROXY_TRANSFER_FIELDS[PROXY_TRANSFER_FIELDS_NB] = {
-    &PROXY_SENDER_FIELD,
-    &PROXY_AMOUNT_FIELD,
-    &PROXY_RECEIVER_FIELD,
-    &PROXY_INSTRUMENT_ID_FIELD,
-    &PROXY_MEMO_FIELD};
-
-const display_config_t DISPLAY_CONFIGS[] = {
-    {
-        .identifier = &TOKEN_TRANSFER_ID,
-        .metadata_contract_identifier = NULL,
-        .fields = TOKEN_TRANSFER_FIELDS,
-        .fields_count = TOKEN_TRANSFER_FIELDS_NB,
-        .review_title = TOKEN_TRANSFER_REVIEW_TITLE,
-        .review_finish = TOKEN_TRANSFER_REVIEW_FINISH,
-    },
-    {
-        .identifier = &NATIVE_COIN_TRANSFER_ID,
-        .metadata_contract_identifier = NULL,
-        .fields = NATIVE_COIN_TRANSFER_FIELDS,
-        .fields_count = NATIVE_TRANSFER_FIELDS_NB,
-        .review_title = NATIVE_COIN_TRANSFER_REVIEW_TITLE,
-        .review_finish = NATIVE_COIN_TRANSFER_REVIEW_FINISH,
-    },
-    {
-        .identifier = &PREAPPROVAL_PROPOSAL_ID,
-        .metadata_contract_identifier = NULL,
-        .fields = PREAPPROVAL_PROPOSAL_FIELDS,
-        .fields_count = PREAPPROVAL_PROPOSAL_FIELDS_NB,
-        .review_title = PREAPPROVAL_PROPOSAL_REVIEW_TITLE,
-        .review_finish = PREAPPROVAL_PROPOSAL_REVIEW_FINISH,
-    },
-    {
-        .identifier = &TOKEN_TRANSFER_PROXY_ID,
-        .metadata_contract_identifier = NULL,
-        .fields = PROXY_TRANSFER_FIELDS,
-        .fields_count = PROXY_TRANSFER_FIELDS_NB,
-        .review_title = TOKEN_TRANSFER_REVIEW_TITLE,
-        .review_finish = TOKEN_TRANSFER_REVIEW_FINISH,
-    },
-    {
-        .identifier = &TOKEN_TRANSFER_ACCEPT_ID,
-        .metadata_contract_identifier = &TOKEN_TRANSFER_INSTRUCTION_METADATA_ID,
-        .fields = TOKEN_TRANSFER_ACCEPT_FIELDS,
-        .fields_count = TOKEN_TRANSFER_ACCEPT_FIELDS_NB,
-        .review_title = TOKEN_TRANSFER_ACCEPT_REVIEW_TITLE,
-        .review_finish = TOKEN_TRANSFER_ACCEPT_REVIEW_FINISH,
-    },
-    {
-        .identifier = &TOKEN_TRANSFER_REJECT_ID,
-        .metadata_contract_identifier = &TOKEN_TRANSFER_INSTRUCTION_METADATA_ID,
-        .fields = TOKEN_TRANSFER_REJECT_FIELDS,
-        .fields_count = TOKEN_TRANSFER_REJECT_FIELDS_NB,
-        .review_title = TOKEN_TRANSFER_REJECT_REVIEW_TITLE,
-        .review_finish = TOKEN_TRANSFER_REJECT_REVIEW_FINISH,
-    },
-    {
-        .identifier = &TOKEN_TRANSFER_WITHDRAW_ID,
-        .metadata_contract_identifier = &TOKEN_TRANSFER_INSTRUCTION_METADATA_ID,
-        .fields = TOKEN_TRANSFER_WITHDRAW_FIELDS,
-        .fields_count = TOKEN_TRANSFER_WITHDRAW_FIELDS_NB,
-        .review_title = TOKEN_TRANSFER_WITHDRAW_REVIEW_TITLE,
-        .review_finish = TOKEN_TRANSFER_WITHDRAW_REVIEW_FINISH,
-    },
-};
 
 static tx_field_t tx_fields[MAX_DISPLAY_FIELDS_NB];
 static identifier_config_t *global_tx_metadata_contract_identifier = NULL;
@@ -383,7 +84,7 @@ static void format_amount_field(pb_callback_context_t *ctx, tx_field_t *field) {
     PRINTF("Formatted amount: %s\n", field->value);
 }
 
-static void format_token_amount_field(pb_callback_context_t *ctx, tx_field_t *field) {
+void format_token_amount_field(pb_callback_context_t *ctx, tx_field_t *field) {
     LEDGER_ASSERT(ctx != NULL, "NULL context passed to format_token_amount_field");
     LEDGER_ASSERT(field != NULL, "NULL field passed to format_token_amount_field");
 
@@ -406,7 +107,7 @@ static void format_token_amount_field(pb_callback_context_t *ctx, tx_field_t *fi
     }
 
     // Look for the instrument id in the mapping to add the ticker if found
-    for (size_t i = 0; i < sizeof(INSTRUMENT_ID_TO_TICKER_MAPPING) / (2 * sizeof(char *)); i++) {
+    for (size_t i = 0; i < INSTRUMENT_ID_TO_TICKER_MAPPING_NB; i++) {
         const char *instrument_id = (const char *) PIC(INSTRUMENT_ID_TO_TICKER_MAPPING[2 * i]);
         const char *ticker = (const char *) PIC(INSTRUMENT_ID_TO_TICKER_MAPPING[2 * i + 1]);
         // Check if stored instrument id in available display items matches
@@ -438,7 +139,7 @@ static void format_token_amount_field(pb_callback_context_t *ctx, tx_field_t *fi
     }
 }
 
-static void format_native_amount_field(pb_callback_context_t *ctx, tx_field_t *field) {
+void format_native_amount_field(pb_callback_context_t *ctx, tx_field_t *field) {
     LEDGER_ASSERT(ctx != NULL, "NULL context passed to format_native_amount_field");
     LEDGER_ASSERT(field != NULL, "NULL field passed to format_native_amount_field");
 
@@ -461,7 +162,7 @@ static void format_native_amount_field(pb_callback_context_t *ctx, tx_field_t *f
     field->value_len = new_len;
 }
 
-static void format_timestamp_field(pb_callback_context_t *ctx, tx_field_t *field) {
+void format_timestamp_field(pb_callback_context_t *ctx, tx_field_t *field) {
     LEDGER_ASSERT(ctx != NULL, "NULL context passed to format_timestamp_field");
     LEDGER_ASSERT(field != NULL, "NULL field passed to format_timestamp_field");
     UNUSED(ctx);
@@ -606,15 +307,14 @@ static void set_field_value(tx_field_t *field_state, const void *value, pb_size_
     }
 }
 
-// Helper function to set display configuration from a const array.
+// Helper function to set display configuration
 static void set_display_config(pb_callback_context_t *ctx, const display_config_t *config_source) {
     LEDGER_ASSERT(ctx != NULL, "NULL context passed to set_display_config");
     LEDGER_ASSERT(config_source != NULL, "NULL config source passed to set_display_config");
 
     PRINTF("Setting display config with %d fields\n", config_source->fields_count);
 
-    const field_config_t *const *source =
-        (const field_config_t *const *) PIC(config_source->fields);
+    const field_config_t *source = (const field_config_t *) PIC(config_source->fields);
 
     ctx->nb_fields = config_source->fields_count;
     ctx->review_title = config_source->review_title;
@@ -622,7 +322,7 @@ static void set_display_config(pb_callback_context_t *ctx, const display_config_
 
     // Initialize field states
     for (size_t i = 0; i < ctx->nb_fields; i++) {
-        tx_fields[i].config = (const field_config_t *) PIC(source[i]);
+        tx_fields[i].config = &source[i];
         tx_fields[i].found = false;
         tx_fields[i].display = true;
     }
@@ -672,9 +372,9 @@ static void find_tx_type_and_config(pb_callback_context_t *ctx, const Identifier
         return;
     }
 
-    for (size_t i = 0; i < sizeof(DISPLAY_CONFIGS) / sizeof(DISPLAY_CONFIGS[0]); i++) {
+    for (size_t i = 0; i < DISPLAY_CONFIGS_NB; i++) {
         const display_config_t *config = (const display_config_t *) PIC(&DISPLAY_CONFIGS[i]);
-        if (match_identifier(id, (const identifier_config_t *) PIC(config->identifier))) {
+        if (match_identifier(id, &config->identifier)) {
             // If metadata contract identifier is set, set it in global transaction context for
             // later use and do not set display config yet
             if (config->metadata_contract_identifier != NULL) {
