@@ -26,6 +26,8 @@ repos:
     rev: v2.4.1
     hooks:
       - id: codespell
+        args:
+          - --skip=tests/tx_examples/*
 
   - repo: https://github.com/pre-commit/mirrors-clang-format
     rev: v14.0.6
