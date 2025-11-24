@@ -190,17 +190,39 @@ const display_config_t DISPLAY_CONFIGS[] = {
               TOKEN_TRANSFER_ACCEPT_REVIEW_TITLE,
               TOKEN_TRANSFER_ACCEPT_REVIEW_FINISH),
 
+    CFG_ENTRY(
+        ID("Splice.Util.FeaturedApp.WalletUserProxy", "WalletUserProxy_TransferInstruction_Accept"),
+        &META_ID,
+        TOKEN_TRANSFER_ACCEPT_FIELDS,
+        TOKEN_TRANSFER_ACCEPT_REVIEW_TITLE,
+        TOKEN_TRANSFER_ACCEPT_REVIEW_FINISH),
+
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV1", "TransferInstruction_Reject"),
               &META_ID,
               TOKEN_TRANSFER_ACCEPT_FIELDS,
               TOKEN_TRANSFER_REJECT_REVIEW_TITLE,
               TOKEN_TRANSFER_REJECT_REVIEW_FINISH),
 
+    CFG_ENTRY(
+        ID("Splice.Util.FeaturedApp.WalletUserProxy", "WalletUserProxy_TransferInstruction_Reject"),
+        &META_ID,
+        TOKEN_TRANSFER_ACCEPT_FIELDS,
+        TOKEN_TRANSFER_REJECT_REVIEW_TITLE,
+        TOKEN_TRANSFER_REJECT_REVIEW_FINISH),
+
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV1", "TransferInstruction_Withdraw"),
               &META_ID,
               TOKEN_TRANSFER_WITHDRAW_FIELDS,
               TOKEN_TRANSFER_WITHDRAW_REVIEW_TITLE,
               TOKEN_TRANSFER_WITHDRAW_REVIEW_FINISH),
+
+    CFG_ENTRY(ID("Splice.Util.FeaturedApp.WalletUserProxy",
+                 "WalletUserProxy_TransferInstruction_Withdraw"),
+              &META_ID,
+              TOKEN_TRANSFER_WITHDRAW_FIELDS,
+              TOKEN_TRANSFER_WITHDRAW_REVIEW_TITLE,
+              TOKEN_TRANSFER_WITHDRAW_REVIEW_FINISH),
+
 };
 
 const size_t DISPLAY_CONFIGS_NB = sizeof(DISPLAY_CONFIGS) / sizeof(DISPLAY_CONFIGS[0]);
