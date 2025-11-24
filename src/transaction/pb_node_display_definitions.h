@@ -53,6 +53,12 @@ typedef struct tx_field_t tx_field_t;
 typedef void (*field_format_callback_t)(pb_callback_context_t *ctx, tx_field_t *field);
 
 typedef struct {
+    const char *admin;
+    const char *id;
+    const char *ticker;
+} instrument_to_ticker_mapping_t;
+
+typedef struct {
     const char *module_name;
     const char *entity_name;
 } identifier_config_t;
@@ -88,6 +94,7 @@ struct pb_callback_context_t {
     uint8_t nb_fields;
     const char *review_title;
     const char *review_finish;
+    bool unknown_token;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -102,8 +109,10 @@ extern const display_config_t DISPLAY_CONFIGS[];
 extern const size_t DISPLAY_CONFIGS_NB;
 
 extern const field_config_t INSTRUMENT_ID_FIELD;
+extern const field_config_t INSTRUMENT_ID_ADMIN_FIELD;
+extern const field_config_t INSTRUMENT_ID_PROXY_ADMIN_FIELD;
 extern const field_config_t PROXY_INSTRUMENT_ID_FIELD;
 extern const field_config_t PREAPPROVAL_ASSET_FIELD;
 
-extern const char *const INSTRUMENT_ID_TO_TICKER_MAPPING[];
-extern const size_t INSTRUMENT_ID_TO_TICKER_MAPPING_NB;
+extern const instrument_to_ticker_mapping_t INSTRUMENT_TO_TICKER_MAPPINGS[];
+extern const size_t INSTRUMENT_TO_TICKER_MAPPING_NB;

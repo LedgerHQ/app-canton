@@ -91,27 +91,36 @@ void format_token_amount_field(pb_callback_context_t *ctx, tx_field_t *field) {
     // Call the generic amount formatter first
     format_amount_field(ctx, field);
 
-    // Find the instrument ID field dynamically
+    // Find the instrument admin and id fields
     tx_field_t *instrument_field = NULL;
+    tx_field_t *admin_field = NULL;
     for (size_t i = 0; i < ctx->nb_fields; i++) {
         const char *path = (const char *) PIC(ctx->tx_fields[i].config->path);
         if (strcmp(path, (const char *) PIC(INSTRUMENT_ID_FIELD.path)) == 0 ||
             strcmp(path, (const char *) PIC(PROXY_INSTRUMENT_ID_FIELD.path)) == 0) {
             instrument_field = &ctx->tx_fields[i];
-            break;
+        }
+        if (strcmp(path, (const char *) PIC(INSTRUMENT_ID_ADMIN_FIELD.path)) == 0 ||
+            strcmp(path, (const char *) PIC(INSTRUMENT_ID_PROXY_ADMIN_FIELD.path)) == 0) {
+            admin_field = &ctx->tx_fields[i];
         }
     }
 
-    if (instrument_field == NULL || !instrument_field->found || instrument_field->value == NULL) {
+    if (instrument_field == NULL || !instrument_field->found || instrument_field->value == NULL ||
+        admin_field == NULL || !admin_field->found || admin_field->value == NULL) {
         return;
     }
 
+    bool ticker_found = false;
     // Look for the instrument id in the mapping to add the ticker if found
-    for (size_t i = 0; i < INSTRUMENT_ID_TO_TICKER_MAPPING_NB; i++) {
-        const char *instrument_id = (const char *) PIC(INSTRUMENT_ID_TO_TICKER_MAPPING[2 * i]);
-        const char *ticker = (const char *) PIC(INSTRUMENT_ID_TO_TICKER_MAPPING[2 * i + 1]);
+    for (size_t i = 0; i < INSTRUMENT_TO_TICKER_MAPPING_NB; i++) {
+        const char *admin = (const char *) PIC(INSTRUMENT_TO_TICKER_MAPPINGS[i].admin);
+        const char *instrument_id = (const char *) PIC(INSTRUMENT_TO_TICKER_MAPPINGS[i].id);
+        const char *ticker = (const char *) PIC(INSTRUMENT_TO_TICKER_MAPPINGS[i].ticker);
         // Check if stored instrument id in available display items matches
-        if (strcmp(instrument_field->value, instrument_id) == 0) {
+        if (strcmp(instrument_field->value, instrument_id) == 0 &&
+            strcmp(admin_field->value, admin) == 0) {
+            ticker_found = true;
             // Append ticker to value
             size_t new_len = strlen(field->value) + 1 + strlen(ticker) + 1;
             char *new_value = (char *) app_mem_alloc(new_len);
@@ -126,6 +135,7 @@ void format_token_amount_field(pb_callback_context_t *ctx, tx_field_t *field) {
 
             // If matched no need to display the instrument id field
             instrument_field->display = false;
+            admin_field->display = false;
 
             // If matched "Amulet" update review title and finish to mention Canton Coin
             if (strcmp(ticker, NATIVE_COIN_TICKER) == 0 &&
@@ -133,9 +143,13 @@ void format_token_amount_field(pb_callback_context_t *ctx, tx_field_t *field) {
                 ctx->review_title = NATIVE_COIN_TRANSFER_REVIEW_TITLE;
                 ctx->review_finish = NATIVE_COIN_TRANSFER_REVIEW_FINISH;
             }
-
             break;
         }
+    }
+    // If no ticker found, mark unknown token. The transaction will be blind signed in that
+    // case if allowed in the settings, otherwise an error will be thrown.
+    if (!ticker_found) {
+        ctx->unknown_token = true;
     }
 }
 
@@ -797,6 +811,15 @@ MUST_CHECK int format_and_populate_display_items(pb_callback_context_t *ctx) {
                 callback(ctx, (void *) &state->value);
             }
         }
+
+        // If token cannot be identified, return : tx will be blind signed (if allowed in settings)
+        // This is relevant only for token transfers. Unknown token can be detected during amount
+        // formatting.
+        if (ctx->unknown_token) {
+            PRINTF("Unknown token detected, aborting display population\n");
+            G_context.tx_info.clear_signing_available = false;
+            return 0;
+        }
     }
 
     // Second loop: populate display items
@@ -822,6 +845,8 @@ MUST_CHECK int format_and_populate_display_items(pb_callback_context_t *ctx) {
             }
         }
     }
+
+    G_context.tx_info.clear_signing_available = true;
     return 0;
 }
 
@@ -872,7 +897,6 @@ MUST_CHECK int parse_node_for_display(buffer_t *buf) {
         return -1;
     }
 
-    G_context.tx_info.clear_signing_available = true;
     G_context.tx_info.review_title = ctx.review_title;
     G_context.tx_info.review_finish = ctx.review_finish;
 
@@ -954,7 +978,6 @@ MUST_CHECK int parse_input_contract_for_display(buffer_t *buf) {
         return -1;
     }
 
-    G_context.tx_info.clear_signing_available = true;
     G_context.tx_info.review_title = ctx.review_title;
     G_context.tx_info.review_finish = ctx.review_finish;
 

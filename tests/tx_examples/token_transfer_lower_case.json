@@ -979,7 +979,7 @@
                                                       {
                                                          "label":"admin",
                                                          "value":{
-                                                            "party":"DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9"
+                                                            "party":"DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                                                          }
                                                       },
                                                       {
@@ -3318,6 +3318,6 @@
          "maxLedgerEffectiveTime":"1756217906501963"
       }
    },
-   "prepared_transaction_hash": "46D25BDD3C41428BEA93DEFD50E3D0DB8617AC7F2FAA190793D566816DB2EAF3",
+   "prepared_transaction_hash": "547be2578f7bd14a5df68f0bb6cb651a89be0eaa334137f12f243958b70af397",
    "hashing_scheme_version": "HASHING_SCHEME_VERSION_V2"
 }

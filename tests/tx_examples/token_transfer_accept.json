@@ -2488,7 +2488,7 @@
                                   {
                                     "label": "admin",
                                     "value": {
-                                      "party": "DSO::12207a75b6449d239875200607f39bd009e5a231ecaf5e03bea44f8ea5806d3ab6a8"
+                                      "party": "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                                     }
                                   },
                                   {
@@ -3108,5 +3108,5 @@
       "maxLedgerEffectiveTime": "1758723720520651"
     }
   },
-  "hash": "ac85626430fd4f7e743cc216254cdc74b4e421dfabb0a868e5111a1680755c1d"
+  "hash": "33ac2cd9e0851e89e0894b9765f705d409c71be51146a912df991675ea213ed5"
 }
