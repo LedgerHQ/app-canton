@@ -361,6 +361,38 @@ def test_sign_token_transfer_withdraw_proxy(
         custom_screen_text="Sign transaction to",
     )
 
+def test_sign_token_transfer_wrong_token_admin_blind_signing_disabled(
+    backend: BackendInterface, navigator: Navigator, test_name: str
+) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(
+        "tests/tx_examples/token_transfer_unknown_token_admin.json")
+    if backend.device.is_nano:
+        validation_instructions=[NavInsID.BOTH_CLICK]
+        pattern = "Blind signing"
+    else:
+        validation_instructions=[NavInsID.USE_CASE_CHOICE_REJECT]
+        pattern = "Enable blind signing"
+    _check_blind_signing_rejection(backend, serialized_parts)
+    navigator.navigate_until_text_and_compare(navigate_instruction=None,
+                                                validation_instructions=validation_instructions,
+                                                text=pattern,
+                                                path=ROOT_SCREENSHOT_PATH,
+                                                test_case_name=test_name)
+
+def test_sign_token_transfer_wrong_token_id_blind_signing_enabled(
+    backend: BackendInterface, scenario_navigator: NavigateWithScenario, device: Device, navigator
+) -> None:
+    _sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        device=device,
+        navigator=navigator,
+        tx_json="tests/tx_examples/token_transfer_unknown_token_id.json",
+        blind_sign=True,
+        test_name="test_sign_token_transfer_wrong_token_id_blind_signing_enabled",
+    )
+
+
 def test_sign_preapproval_proposal(
     backend: BackendInterface, scenario_navigator: NavigateWithScenario
 ) -> None:
