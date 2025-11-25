@@ -301,6 +301,16 @@ def test_sign_proxy_token_transfer(
         custom_screen_text="Sign transaction to",
     )
 
+def test_sign_proxy_cbtc_token_transfer(
+    backend: BackendInterface, scenario_navigator: NavigateWithScenario
+) -> None:
+    _sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_cbtc_proxy.json",
+        custom_screen_text="Sign transaction to",
+    )
+
 def test_sign_token_transfer_accept(
     backend: BackendInterface, scenario_navigator: NavigateWithScenario
 ) -> None:
