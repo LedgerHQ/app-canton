@@ -850,59 +850,6 @@ MUST_CHECK int format_and_populate_display_items(pb_callback_context_t *ctx) {
     return 0;
 }
 
-MUST_CHECK int parse_node_for_display(buffer_t *buf) {
-    LEDGER_ASSERT(buf != NULL, "NULL buffer passed to parse_node_for_display");
-
-    // Only parse if we haven't already found all fields or if no metadata contract identifier is
-    // set
-    if (G_context.tx_info.clear_signing_available ||
-        global_tx_metadata_contract_identifier != NULL) {
-        return 0;
-    }
-
-    pb_callback_context_t ctx = {0};
-    init_field_path(&ctx);
-    ctx.tx_info = &G_context.tx_info;
-    ctx.tx_fields = NULL;
-    global_tx_metadata_contract_identifier = NULL;
-
-    G_context.tx_info.tx_parts_ctx.node.cb_versioned_node.funcs.decode =
-        &versioned_node_decode_callback;
-    G_context.tx_info.tx_parts_ctx.node.cb_versioned_node.arg = &ctx;
-
-    pb_istream_t stream = pb_istream_from_buffer(buf->ptr, buf->size);
-
-    if (!pb_decode(&stream,
-                   com_daml_ledger_api_v2_interactive_DeviceDamlTransactionDisplay_Node_fields,
-                   &G_context.tx_info.tx_parts_ctx.node)) {
-        PRINTF("Decode failed: %s\n", PB_GET_ERROR(&stream));
-        return -1;
-    }
-
-    pb_release(com_daml_ledger_api_v2_interactive_DeviceDamlTransactionDisplay_Node_fields,
-               &G_context.tx_info.tx_parts_ctx.node);
-
-    free_field_path(&ctx);
-
-    G_context.tx_info.tx_parts_ctx.node.cb_versioned_node.funcs.decode = NULL;
-    G_context.tx_info.tx_parts_ctx.node.cb_versioned_node.arg = NULL;
-
-    if (ctx.tx_fields == NULL) {
-        PRINTF("No display configuration set during parsing, skipping display population\n");
-        G_context.tx_info.clear_signing_available = false;
-        return 0;
-    }
-
-    if (format_and_populate_display_items(&ctx) != 0) {
-        return -1;
-    }
-
-    G_context.tx_info.review_title = ctx.review_title;
-    G_context.tx_info.review_finish = ctx.review_finish;
-
-    return 0;
-}
-
 MUST_CHECK static bool decode_create(pb_istream_t *stream, const pb_field_t *field, void **arg) {
     (void) field;
     LEDGER_ASSERT(arg != NULL, "NULL arg passed to decode_create");
@@ -933,43 +880,53 @@ MUST_CHECK static bool decode_create(pb_istream_t *stream, const pb_field_t *fie
     return true;
 }
 
-MUST_CHECK int parse_input_contract_for_display(buffer_t *buf) {
-    LEDGER_ASSERT(buf != NULL, "NULL buffer passed to proto_deserialize_input_contract");
+typedef enum { PARSE_TYPE_NODE, PARSE_TYPE_INPUT_CONTRACT } parse_type_t;
 
-    if (G_context.tx_info.clear_signing_available ||
-        global_tx_metadata_contract_identifier == NULL) {
-        return 0;
-    }
-
+MUST_CHECK static int process_display_parsing(buffer_t *buf,
+                                              void *dest,
+                                              const pb_msgdesc_t *fields,
+                                              parse_type_t type) {
     pb_callback_context_t ctx = {0};
     init_field_path(&ctx);
     ctx.tx_info = &G_context.tx_info;
     ctx.tx_fields = NULL;
 
+    // Setup specific callbacks based on type
+    if (type == PARSE_TYPE_NODE) {
+        ((com_daml_ledger_api_v2_interactive_DeviceDamlTransactionDisplay_Node *) dest)
+            ->cb_versioned_node.funcs.decode = &versioned_node_decode_callback;
+        ((com_daml_ledger_api_v2_interactive_DeviceDamlTransactionDisplay_Node *) dest)
+            ->cb_versioned_node.arg = &ctx;
+    } else {
+        ((com_daml_ledger_api_v2_interactive_DeviceMetadata_InputContract *) dest)
+            ->cb_contract.funcs.decode = &decode_create;
+        ((com_daml_ledger_api_v2_interactive_DeviceMetadata_InputContract *) dest)
+            ->cb_contract.arg = &ctx;
+    }
+
+    // Decode
     pb_istream_t stream = pb_istream_from_buffer(buf->ptr, buf->size);
+    bool status = pb_decode(&stream, fields, dest);
 
-    PRINTF("Decoding Input contract from buffer of size %d bytes\n", buf->size);
+    // Cleanup callbacks (to avoid stale pointers)
+    if (type == PARSE_TYPE_NODE) {
+        ((com_daml_ledger_api_v2_interactive_DeviceDamlTransactionDisplay_Node *) dest)
+            ->cb_versioned_node.funcs.decode = NULL;
+    } else {
+        ((com_daml_ledger_api_v2_interactive_DeviceMetadata_InputContract *) dest)
+            ->cb_contract.funcs.decode = NULL;
+    }
 
-    G_context.tx_info.tx_parts_ctx.input_contract.cb_contract.funcs.decode = &decode_create;
-    G_context.tx_info.tx_parts_ctx.input_contract.cb_contract.arg = &ctx;
+    pb_release(fields, dest);
+    free_field_path(&ctx);
 
-    if (!pb_decode(&stream,
-                   com_daml_ledger_api_v2_interactive_DeviceMetadata_InputContract_fields,
-                   &G_context.tx_info.tx_parts_ctx.input_contract)) {
-        PRINTF("Failed to decode Input contract: %s\n", PB_GET_ERROR(&stream));
+    if (!status) {
+        PRINTF("Decode failed: %s\n", PB_GET_ERROR(&stream));
         return -1;
     }
 
-    pb_release(com_daml_ledger_api_v2_interactive_DeviceMetadata_InputContract_fields,
-               &G_context.tx_info.tx_parts_ctx.input_contract);
-
-    free_field_path(&ctx);
-
-    G_context.tx_info.tx_parts_ctx.node.cb_versioned_node.funcs.decode = NULL;
-    G_context.tx_info.tx_parts_ctx.node.cb_versioned_node.arg = NULL;
-
     if (ctx.tx_fields == NULL) {
-        PRINTF("No display configuration set during parsing, skipping display population\n");
+        PRINTF("No display configuration set, skipping population\n");
         G_context.tx_info.clear_signing_available = false;
         return 0;
     }
@@ -980,6 +937,37 @@ MUST_CHECK int parse_input_contract_for_display(buffer_t *buf) {
 
     G_context.tx_info.review_title = ctx.review_title;
     G_context.tx_info.review_finish = ctx.review_finish;
-
     return 0;
+}
+
+MUST_CHECK int parse_node_for_display(buffer_t *buf) {
+    LEDGER_ASSERT(buf != NULL, "NULL buffer passed to parse_node_for_display");
+
+    if (G_context.tx_info.clear_signing_available ||
+        global_tx_metadata_contract_identifier != NULL) {
+        return 0;
+    }
+    global_tx_metadata_contract_identifier = NULL;
+
+    return process_display_parsing(
+        buf,
+        &G_context.tx_info.tx_parts_ctx.node,
+        com_daml_ledger_api_v2_interactive_DeviceDamlTransactionDisplay_Node_fields,
+        PARSE_TYPE_NODE);
+}
+
+MUST_CHECK int parse_input_contract_for_display(buffer_t *buf) {
+    LEDGER_ASSERT(buf != NULL, "NULL buffer passed to parse_input_contract_for_display");
+
+    if (G_context.tx_info.clear_signing_available ||
+        global_tx_metadata_contract_identifier == NULL) {
+        return 0;
+    }
+    PRINTF("Decoding Input contract from buffer of size %d bytes\n", buf->size);
+
+    return process_display_parsing(
+        buf,
+        &G_context.tx_info.tx_parts_ctx.input_contract,
+        com_daml_ledger_api_v2_interactive_DeviceMetadata_InputContract_fields,
+        PARSE_TYPE_INPUT_CONTRACT);
 }
