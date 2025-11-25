@@ -34,18 +34,14 @@
 #include "tx_types.h"
 #include "menu.h"
 
-#define NB_PAIR_LIST 1
-
-static nbgl_layoutTagValue_t pairs[NB_PAIR_LIST];
-static nbgl_layoutTagValueList_t pairList;
-static uint8_t g_party_id[PARTY_ID_LEN];
+static char g_party_id[PARTY_ID_LEN];
 
 static void review_choice(bool confirm) {
     validate_pubkey(confirm);
     if (confirm) {
-        nbgl_useCaseStatus("Party ID\napproved", true, ui_menu_main);
+        nbgl_useCaseReviewStatus(STATUS_TYPE_ADDRESS_VERIFIED, ui_menu_main);
     } else {
-        nbgl_useCaseStatus("Party ID\nrejected", false, ui_menu_main);
+        nbgl_useCaseReviewStatus(STATUS_TYPE_ADDRESS_REJECTED, ui_menu_main);
     }
 }
 
@@ -56,23 +52,17 @@ MUST_CHECK int ui_display_party_id() {
     }
 
     memset(g_party_id, 0, sizeof(g_party_id));
-    if (!party_id_from_pubkey(G_context.pk_info.raw_public_key, g_party_id, sizeof(g_party_id))) {
+    if (!party_id_from_pubkey(G_context.pk_info.raw_public_key,
+                              (uint8_t *) g_party_id,
+                              sizeof(g_party_id))) {
         return io_send_sw(SW_DISPLAY_ADDRESS_FAIL);
     }
 
-    pairs[0].item = "Party ID";
-    pairs[0].value = (const char*) g_party_id;
-
-    pairList.nbMaxLinesForValue = 0;
-    pairList.nbPairs = NB_PAIR_LIST;
-    pairList.pairs = pairs;
-
-    nbgl_useCaseReviewLight(TYPE_OPERATION,
-                            &pairList,
-                            &ICON_APP_CANTON,
-                            "Confirm party ID",
-                            NULL,
-                            "Approve party ID",
-                            review_choice);
+    nbgl_useCaseAddressReview(g_party_id,
+                              NULL,
+                              &ICON_APP_CANTON,
+                              "Verify Canton address",
+                              NULL,
+                              review_choice);
     return 0;
 }
