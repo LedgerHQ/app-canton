@@ -847,6 +847,8 @@ MUST_CHECK int format_and_populate_display_items(pb_callback_context_t *ctx) {
     }
 
     G_context.tx_info.clear_signing_available = true;
+    global_tx_metadata_contract_identifier = NULL;
+    global_tx_metadata_display_conf = NULL;
     return 0;
 }
 

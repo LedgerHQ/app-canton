@@ -492,3 +492,29 @@ def test_sign_onboard_then_preapprove(backend: BackendInterface, scenario_naviga
             custom_screen_text="Sign transaction to",
             snapshot_check=False
         )
+
+def test_sign_withdraw_then_send(
+    backend: BackendInterface, scenario_navigator: NavigateWithScenario
+) -> None:
+    for _ in range(2):
+        _sign_and_verify_prepared_transaction(
+            backend,
+            scenario_navigator,
+            tx_json="tests/tx_examples/token_transfer_withdraw.json",
+            custom_screen_text="Sign transaction to",
+            snapshot_check=False,
+        )
+        _sign_and_verify_prepared_transaction(
+            backend,
+            scenario_navigator,
+            tx_json="tests/tx_examples/token_transfer.json",
+            custom_screen_text="Sign transaction to",
+            snapshot_check=False,
+        )
+        _sign_and_verify_prepared_transaction(
+            backend,
+            scenario_navigator,
+            tx_json="tests/tx_examples/token_transfer_accept.json",
+            custom_screen_text="Sign transaction to",
+            snapshot_check=False,
+        )
