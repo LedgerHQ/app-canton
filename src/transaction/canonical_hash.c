@@ -126,8 +126,7 @@ void hw_init(HashWriter *hw) {
 
 void hw_put(HashWriter *hw, const void *p, size_t n) {
     LEDGER_ASSERT(hw != NULL, "Null HashWriter passed to hw_put");
-    LEDGER_ASSERT(p != NULL, "Null pointer passed to hw_put");
-    LEDGER_ASSERT(n > 0, "Zero length passed to hw_put");
+    LEDGER_ASSERT(p == NULL ? n == 0 : true, "Null pointer with non-zero length passed to hw_put");
     CX_ASSERT(cx_hash_update((cx_hash_t *) &hw->ctx, p, n));
 }
 
