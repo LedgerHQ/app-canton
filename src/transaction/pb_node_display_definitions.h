@@ -80,11 +80,12 @@ struct tx_field_t {
 
 typedef struct {
     identifier_config_t identifier;
-    const identifier_config_t *metadata_contract_identifier;
     const field_config_t *fields;
     size_t fields_count;
     const char *review_title;
     const char *review_finish;
+    const identifier_config_t *const *metadata_contract_identifiers;
+    const size_t metadata_contract_identifiers_count;
 } display_config_t;
 
 struct pb_callback_context_t {

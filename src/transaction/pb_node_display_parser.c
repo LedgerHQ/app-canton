@@ -43,7 +43,8 @@ static bool decode_textmap_key(pb_istream_t *stream, const pb_field_t *field, vo
 /* -------------------------------------------------------------------------- */
 
 static tx_field_t tx_fields[MAX_DISPLAY_FIELDS_NB];
-static identifier_config_t *global_tx_metadata_contract_identifier = NULL;
+static identifier_config_t *const *global_tx_metadata_contract_identifiers = NULL;
+static size_t global_tx_metadata_contract_identifiers_count = 0;
 static display_config_t *global_tx_metadata_display_conf = NULL;
 
 /* -------------------------------------------------------------------------- */
@@ -376,14 +377,16 @@ static void find_tx_type_and_config(pb_callback_context_t *ctx, const Identifier
         return;
     }
 
-    if (global_tx_metadata_contract_identifier != NULL) {
+    if (global_tx_metadata_contract_identifiers != NULL) {
         // Check if current id matches metadata contract identifier
-        if (match_identifier(
-                id,
-                (const identifier_config_t *) PIC(global_tx_metadata_contract_identifier))) {
-            set_display_config(ctx, global_tx_metadata_display_conf);
+        for (size_t i = 0; i < global_tx_metadata_contract_identifiers_count; i++) {
+            if (match_identifier(id,
+                                 (const identifier_config_t *) PIC(
+                                     global_tx_metadata_contract_identifiers[i]))) {
+                set_display_config(ctx, global_tx_metadata_display_conf);
+                return;
+            }
         }
-        return;
     }
 
     for (size_t i = 0; i < DISPLAY_CONFIGS_NB; i++) {
@@ -391,9 +394,11 @@ static void find_tx_type_and_config(pb_callback_context_t *ctx, const Identifier
         if (match_identifier(id, &config->identifier)) {
             // If metadata contract identifier is set, set it in global transaction context for
             // later use and do not set display config yet
-            if (config->metadata_contract_identifier != NULL) {
-                global_tx_metadata_contract_identifier =
-                    (identifier_config_t *) PIC(config->metadata_contract_identifier);
+            if (config->metadata_contract_identifiers_count > 0) {
+                global_tx_metadata_contract_identifiers =
+                    (identifier_config_t *const *) PIC(config->metadata_contract_identifiers);
+                global_tx_metadata_contract_identifiers_count =
+                    config->metadata_contract_identifiers_count;
                 global_tx_metadata_display_conf = (display_config_t *) PIC(config);
                 PRINTF("Metadata contract identifier set, deferring display config setting\n");
                 return;
@@ -847,7 +852,7 @@ MUST_CHECK int format_and_populate_display_items(pb_callback_context_t *ctx) {
     }
 
     G_context.tx_info.clear_signing_available = true;
-    global_tx_metadata_contract_identifier = NULL;
+    global_tx_metadata_contract_identifiers = NULL;
     global_tx_metadata_display_conf = NULL;
     return 0;
 }
@@ -946,10 +951,10 @@ MUST_CHECK int parse_node_for_display(buffer_t *buf) {
     LEDGER_ASSERT(buf != NULL, "NULL buffer passed to parse_node_for_display");
 
     if (G_context.tx_info.clear_signing_available ||
-        global_tx_metadata_contract_identifier != NULL) {
+        global_tx_metadata_contract_identifiers != NULL) {
         return 0;
     }
-    global_tx_metadata_contract_identifier = NULL;
+    global_tx_metadata_contract_identifiers = NULL;
 
     return process_display_parsing(
         buf,
@@ -962,7 +967,7 @@ MUST_CHECK int parse_input_contract_for_display(buffer_t *buf) {
     LEDGER_ASSERT(buf != NULL, "NULL buffer passed to parse_input_contract_for_display");
 
     if (G_context.tx_info.clear_signing_available ||
-        global_tx_metadata_contract_identifier == NULL) {
+        global_tx_metadata_contract_identifiers == NULL) {
         return 0;
     }
     PRINTF("Decoding Input contract from buffer of size %d bytes\n", buf->size);
