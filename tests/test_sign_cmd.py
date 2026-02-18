@@ -1,5 +1,6 @@
 import json
 import os
+from enum import IntEnum
 from pathlib import Path
 from typing import Optional
 import pytest
@@ -26,11 +27,20 @@ from generateCryptoData import get_keys_bytes
 
 ROOT_SCREENSHOT_PATH = Path(__file__).parent.resolve()
 
-# 32 bytes seeds for validators
-VALIDATOR_SEED_1 = b"validator1______________________"
-VALIDATOR_SEED_2 = b"validator2______________________"
-VALIDATOR_SEED_3 = b"validator3______________________"
+MAINNET_VALIDATOR_PARTY_ID_1 = \
+    "ledger-ledgerops-2::12207a4859ad414f4f47c2d773ddf4ea88de8c3a1aab19abaa197e504acdbf679d3c"
+MAINNET_VALIDATOR_PARTY_ID_2 = \
+    "Ledger-Kiln-1::12200386019c89269f5541595286cf5ebf24fe7884d8c6b05ce042c999f9161cb9d0"
 
+TESTNET_VALIDATOR_PARTY_ID_1 = \
+    "ledger-ledgeropstestnet-0::122095f38f5c73cc18fbeb3290f8c17f7a1ff190f66fe159c671cf1fb0dc634eedaf"
+TESTNET_VALIDATOR_PARTY_ID_2 = \
+    "kiln-testnetValidator-1::12209e8bea40fab859b041eaa8d247b98e44fcaa0b041b9136e8ce62574d493202d3"
+
+DEVNET_VALIDATOR_PARTY_ID_1 = \
+    "ledger-ledgeropsdevnet-0::12208f74f551f8c28b68414fc3bb4b8466178055845485878a1af8ac1fe96f88fad2"
+DEVNET_VALIDATOR_PARTY_ID_2 = \
+    "kiln-devnetValidator-1::122030d0afac1b1d797fcef6095ca7c60a38ce644295c730389e0276d213d23f1a10"
 
 def _nano_enable_blind_signing() -> list[NavInsID]:
     # initial: go to settings
@@ -440,11 +450,14 @@ def test_sign_preapproval_proposal(
 
 def _onboard_party(backend: BackendInterface,
                    scenario_navigator: NavigateWithScenario,
-                   validator_seeds: list[bytes],
+                   validator_uids: Optional[list[str]] = None,
                    attestation_keys: Optional[tuple[bytes,bytes]] = None,
                    der_key_format: bool = True,
                    snapshot_check: bool = True) -> None:
     client = CantonCommandSender(backend)
+
+    if validator_uids is None:
+        validator_uids = [MAINNET_VALIDATOR_PARTY_ID_1, MAINNET_VALIDATOR_PARTY_ID_2]
 
     # Get public key
     _, raw_key, _, _ = unpack_get_public_key_response(
@@ -457,7 +470,7 @@ def _onboard_party(backend: BackendInterface,
     txs = [
         Transaction.namespace_delegation(public_key, der_key_format),
         Transaction.party_to_key(public_key, der_key_format),
-        Transaction.party_to_participant(public_key, validator_seeds)
+        Transaction.party_to_participant_from_uid(public_key, validator_uids)
     ]
     multi_hash = Transaction.compute_multi_transaction_hash(
         [Transaction.compute_topology_transaction_hash(tx) for tx in txs]
@@ -482,6 +495,90 @@ def _onboard_party(backend: BackendInterface,
         assert challenge_sig is None
         assert challenge_sig_len is None
 
+class WhichPartyTx(IntEnum):
+    PARTY_TO_KEY = 1
+    PARTY_TO_PARTICIPANT = 2
+
+def _onboard_party_expect_error(backend: BackendInterface,
+                              validator_uids: Optional[list[str]] = None,
+                              der_key_format: bool = True,
+                              threshold: Optional[int] = None,
+                              party_id: Optional[str] = None,
+                              which_party_tx: Optional[WhichPartyTx] = None,
+                              expected_error: int = Errors.SW_WRONG_RESPONSE_LENGTH) -> None:
+    client = CantonCommandSender(backend)
+
+    if validator_uids is None:
+        validator_uids = [MAINNET_VALIDATOR_PARTY_ID_1, MAINNET_VALIDATOR_PARTY_ID_2]
+
+    # Get public key
+    _, raw_key, _, _ = unpack_get_public_key_response(
+        client.get_public_key(path="m/44'/6767'/0'/0'/0'").data)
+
+    # Convert to DER format for inclusion in topology transactions
+    public_key = b"\x30\x2A\x30\x05\x06\x03\x2B\x65\x70\x03\x21\x00" + raw_key if der_key_format else raw_key
+
+    if which_party_tx is None:
+        which_party_tx = WhichPartyTx.PARTY_TO_PARTICIPANT
+
+    party_to_key_party_id = None
+    party_to_participant_party_id = None
+
+    if which_party_tx == WhichPartyTx.PARTY_TO_KEY:
+        party_to_key_party_id = party_id
+    else:
+        party_to_participant_party_id = party_id
+
+    # Create transactions
+    txs = [
+        Transaction.namespace_delegation(public_key, der_key_format),
+        Transaction.party_to_key(public_key, der_key_format, party_to_key_party_id),
+        Transaction.party_to_participant_from_uid(public_key, validator_uids, threshold, party_to_participant_party_id)
+    ]
+
+    # Sign transactions and expect error
+    path = "m/44'/6767'/0'/0'/0'"
+    with pytest.raises(ExceptionRAPDU) as e:
+        with client.sign_topology_tx(path=path, transactions=txs):
+            pass
+    assert e.value.status == expected_error
+
+def test_sign_onboarding_expect_error_unexpected_participant_id(backend: BackendInterface) -> None:
+    _onboard_party_expect_error(backend,
+                                validator_uids=[MAINNET_VALIDATOR_PARTY_ID_1, "invalid_validator_id_2"],
+                                expected_error=Errors.SW_TOPOLOGY_UNEXPECTED_PARTICIPANT_ID)
+
+def test_sign_onboarding_expect_error_unexpected_participant_id_single(backend: BackendInterface) -> None:
+    _onboard_party_expect_error(backend,
+                                validator_uids=[DEVNET_VALIDATOR_PARTY_ID_2],
+                                expected_error=Errors.SW_TOPOLOGY_UNEXPECTED_PARTICIPANT_ID)
+
+def test_sign_onboarding_expect_error_unexpected_threshold(backend: BackendInterface) -> None:
+    _onboard_party_expect_error(backend,
+                                threshold=3,
+                                expected_error=Errors.SW_TOPOLOGY_UNEXPECTED_THRESHOLD_VALUE)
+
+def test_sign_onboarding_expect_error_unexpected_number_of_participants(backend: BackendInterface) -> None:
+    _onboard_party_expect_error(backend,
+                                validator_uids=[MAINNET_VALIDATOR_PARTY_ID_1, MAINNET_VALIDATOR_PARTY_ID_2, "extra_validator_id_3"],
+                                expected_error=Errors.SW_TOPOLOGY_UNEXPECTED_NUMBER_OF_PARTICIPANTS)
+
+def test_sign_onboarding_expect_error_duplicate_participants(backend: BackendInterface) -> None:
+    _onboard_party_expect_error(backend,
+                                validator_uids=[MAINNET_VALIDATOR_PARTY_ID_1, MAINNET_VALIDATOR_PARTY_ID_1],
+                                expected_error=Errors.SW_TOPOLOGY_UNEXPECTED_DUPLICATE_PARTICIPANT)
+
+def test_sign_onboarding_expect_error_wrong_party_id_in_party_to_key(backend: BackendInterface) -> None:
+    _onboard_party_expect_error(backend,
+                                party_id="invalid_party_id_in_party_to_key",
+                                which_party_tx=WhichPartyTx.PARTY_TO_KEY,
+                                expected_error=Errors.SW_TOPOLOGY_PARTY_ID_MISMATCH)
+
+def test_sign_onboarding_expect_error_wrong_party_id_in_party_to_participant(backend: BackendInterface) -> None:
+    _onboard_party_expect_error(backend,
+                                party_id="invalid_party_id_in_party_to_participant",
+                                which_party_tx=WhichPartyTx.PARTY_TO_PARTICIPANT,
+                                expected_error=Errors.SW_TOPOLOGY_PARTY_ID_MISMATCH)
 
 def _verify_attestation(attest_pub_key: bytes, multi_hash: bytes, challenge: Optional[bytes],
                         challenge_sig: Optional[bytes], challenge_sig_len: int | None) -> None:
@@ -493,22 +590,30 @@ def _verify_attestation(attest_pub_key: bytes, multi_hash: bytes, challenge: Opt
 
 def test_sign_onboarding_attested(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
     attest_key, attest_pub_key = get_keys_bytes("attestations/data/test/priv-key.pem")
-    _onboard_party(backend, scenario_navigator, validator_seeds=[VALIDATOR_SEED_1],
-                   attestation_keys=(attest_key, attest_pub_key))
+    _onboard_party(backend, scenario_navigator, attestation_keys=(attest_key, attest_pub_key))
+
+def test_sign_onboarding_attested_devnet_single(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
+    attest_key, attest_pub_key = get_keys_bytes("attestations/data/test/priv-key.pem")
+    _onboard_party(backend, scenario_navigator, attestation_keys=(attest_key, attest_pub_key), validator_uids=[DEVNET_VALIDATOR_PARTY_ID_1])
+
+def test_sign_onboarding_attested_devnet_multi(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
+    attest_key, attest_pub_key = get_keys_bytes("attestations/data/test/priv-key.pem")
+    _onboard_party(backend, scenario_navigator, attestation_keys=(attest_key, attest_pub_key), validator_uids=[DEVNET_VALIDATOR_PARTY_ID_1, DEVNET_VALIDATOR_PARTY_ID_2])
+
+def test_sign_onboarding_attested_testnet_single(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
+    attest_key, attest_pub_key = get_keys_bytes("attestations/data/test/priv-key.pem")
+    _onboard_party(backend, scenario_navigator, attestation_keys=(attest_key, attest_pub_key), validator_uids=[TESTNET_VALIDATOR_PARTY_ID_1])
+
+def test_sign_onboarding_attested_testnet_multi(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
+    attest_key, attest_pub_key = get_keys_bytes("attestations/data/test/priv-key.pem")
+    _onboard_party(backend, scenario_navigator, attestation_keys=(attest_key, attest_pub_key), validator_uids=[TESTNET_VALIDATOR_PARTY_ID_1, TESTNET_VALIDATOR_PARTY_ID_2])
 
 def test_sign_onboarding_raw_format_key(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
-    _onboard_party(backend, scenario_navigator, validator_seeds=[VALIDATOR_SEED_1], der_key_format=False)
-
-def test_sign_onboarding_single_validator(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
-    _onboard_party(backend, scenario_navigator, validator_seeds=[VALIDATOR_SEED_1])
-
-def test_sign_onboarding_three_validators(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
-    _onboard_party(backend, scenario_navigator, validator_seeds=[VALIDATOR_SEED_1, VALIDATOR_SEED_2, VALIDATOR_SEED_3])
+    _onboard_party(backend, scenario_navigator, der_key_format=False)
 
 def test_sign_onboard_then_preapprove(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
     for _ in range(10):
-        _onboard_party(backend, scenario_navigator,
-                       validator_seeds=[VALIDATOR_SEED_1, VALIDATOR_SEED_2, VALIDATOR_SEED_3], snapshot_check=False)
+        _onboard_party(backend, scenario_navigator, snapshot_check=False)
         _sign_and_verify_prepared_transaction(
             backend,
             scenario_navigator,

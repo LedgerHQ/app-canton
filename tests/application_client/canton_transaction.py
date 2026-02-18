@@ -2,7 +2,7 @@ import json
 import base64
 import hashlib
 from io import BytesIO
-from typing import Union, List
+from typing import Optional, Union, List
 
 from nacl.signing import SigningKey
 
@@ -253,7 +253,7 @@ class Transaction:
         )
 
     @classmethod
-    def party_to_key(cls, public_key: bytes, der_format: bool) -> bytes:
+    def party_to_key(cls, public_key: bytes, der_format: bool, party_id: Optional[str] = None) -> bytes:
         if der_format:
             key_format = CryptoKeyFormat.CRYPTO_KEY_FORMAT_DER_X509_SUBJECT_PUBLIC_KEY_INFO
         else:
@@ -269,8 +269,9 @@ class Transaction:
             usage=[SigningKeyUsage.SIGNING_KEY_USAGE_NAMESPACE, SigningKeyUsage.SIGNING_KEY_USAGE_PROTOCOL],
         )
 
-        party_fingerprint = cls._compute_party_fingerprint(public_key)
-        party_id = DEFAULT_PARTY_NAME + "::" + party_fingerprint
+        if party_id is None:
+            party_fingerprint = cls._compute_party_fingerprint(public_key)
+            party_id = DEFAULT_PARTY_NAME + "::" + party_fingerprint
 
         party_to_key_mapping = TopologyMapping(
             party_to_key_mapping=PartyToKeyMapping(
@@ -309,6 +310,41 @@ class Transaction:
             )
 
         threshold = validators_count - 1 if validators_count > 1 else 1
+
+        party_to_participant_mapping = TopologyMapping(
+            party_to_participant=PartyToParticipant(
+                party=party_id,
+                threshold=threshold,
+                participants=validators,
+            )
+        )
+
+        return cls._build_topology_transaction(
+            mapping=party_to_participant_mapping,
+            serial=1,
+        )
+
+    @classmethod
+    def party_to_participant_from_uid(cls,
+                                      public_key: bytes,
+                                      participant_uid: list[str],
+                                      threshold: Optional[int] = None,
+                                      party_id: Optional[str] = None) -> bytes:
+        if party_id is None:
+            party_fingerprint = cls._compute_party_fingerprint(public_key)
+            party_id = DEFAULT_PARTY_NAME + "::" + party_fingerprint
+
+        validators: List[PartyToParticipant.HostingParticipant] = []
+        validators_count = len(participant_uid)
+
+        for uid in participant_uid:
+            participant = PartyToParticipant.HostingParticipant(
+                participant_uid=uid,
+                permission=Enums.ParticipantPermission.PARTICIPANT_PERMISSION_CONFIRMATION,
+            )
+            validators.append(participant)
+
+        threshold = threshold if threshold is not None else validators_count
 
         party_to_participant_mapping = TopologyMapping(
             party_to_participant=PartyToParticipant(
