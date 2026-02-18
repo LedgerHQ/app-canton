@@ -72,21 +72,65 @@ typedef struct {
     const char *participant_name;
 } participant_id_to_name_mapping_t;
 
-#define PARTY_FIELD_IDX           0
-#define PARTICIPANT_1_FIELD_IDX   1
-#define PARTICIPANT_2_FIELD_IDX   2
-#define MANDATORY_PARTICIPANTS_NB 2
-#define THRESHOLD_FIELD_IDX       3
+typedef struct {
+    const participant_id_to_name_mapping_t *mappings;
+    size_t count;
+} valid_participants_config_t;
 
-const participant_id_to_name_mapping_t VALID_PARTICIPANTS[MANDATORY_PARTICIPANTS_NB] = {
+#define PARTY_FIELD_IDX         0
+#define PARTICIPANT_1_FIELD_IDX 1
+#define PARTICIPANT_2_FIELD_IDX 2
+#define MAX_PARTICIPANTS_NB     2
+#define THRESHOLD_FIELD_IDX     3
+
+const participant_id_to_name_mapping_t MAINNET_VALIDATORS[] = {
     {"ledger-ledgerops-2::12207a4859ad414f4f47c2d773ddf4ea88de8c3a1aab19abaa197e504acdbf679d3c",
      "Ledger Validator"},
     {"Ledger-Kiln-1::12200386019c89269f5541595286cf5ebf24fe7884d8c6b05ce042c999f9161cb9d0",
      "Kiln Validator"},
 };
 
+const participant_id_to_name_mapping_t TESTNET_SINGLE_VALIDATOR[] = {
+    {"ledger-ledgeropstestnet-0::"
+     "122095f38f5c73cc18fbeb3290f8c17f7a1ff190f66fe159c671cf1fb0dc634eedaf",
+     "Ledger Testnet\nValidator"},
+};
+
+const participant_id_to_name_mapping_t TESTNET_DUAL_VALIDATORS[] = {
+    {"ledger-ledgeropstestnet-0::"
+     "122095f38f5c73cc18fbeb3290f8c17f7a1ff190f66fe159c671cf1fb0dc634eedaf",
+     "Ledger Testnet\nValidator"},
+    {"kiln-testnetValidator-1::"
+     "12209e8bea40fab859b041eaa8d247b98e44fcaa0b041b9136e8ce62574d493202d3",
+     "Kiln Testnet\nValidator"},
+};
+
+const participant_id_to_name_mapping_t DEVNET_SINGLE_VALIDATOR[] = {
+    {"ledger-ledgeropsdevnet-0::"
+     "12208f74f551f8c28b68414fc3bb4b8466178055845485878a1af8ac1fe96f88fad2",
+     "Ledger Devnet\nValidator"},
+};
+
+const participant_id_to_name_mapping_t DEVNET_DUAL_VALIDATORS[] = {
+    {"ledger-ledgeropsdevnet-0::"
+     "12208f74f551f8c28b68414fc3bb4b8466178055845485878a1af8ac1fe96f88fad2",
+     "Ledger Devnet\nValidator"},
+    {"kiln-devnetValidator-1::122030d0afac1b1d797fcef6095ca7c60a38ce644295c730389e0276d213d23f1a10",
+     "Kiln Devnet\nValidator"},
+};
+
+const valid_participants_config_t VALID_PARTICIPANTS_CONFIGS[] = {
+    {MAINNET_VALIDATORS, sizeof(MAINNET_VALIDATORS) / sizeof(MAINNET_VALIDATORS[0])},
+    {TESTNET_SINGLE_VALIDATOR,
+     sizeof(TESTNET_SINGLE_VALIDATOR) / sizeof(TESTNET_SINGLE_VALIDATOR[0])},
+    {TESTNET_DUAL_VALIDATORS, sizeof(TESTNET_DUAL_VALIDATORS) / sizeof(TESTNET_DUAL_VALIDATORS[0])},
+    {DEVNET_SINGLE_VALIDATOR, sizeof(DEVNET_SINGLE_VALIDATOR) / sizeof(DEVNET_SINGLE_VALIDATOR[0])},
+    {DEVNET_DUAL_VALIDATORS, sizeof(DEVNET_DUAL_VALIDATORS) / sizeof(DEVNET_DUAL_VALIDATORS[0])},
+};
+
 // Const configurations (stored in flash)
 const field_config_t PARTY_FIELD_CONFIG = {"Add account", true};
+static const char *SINGLE_VALIDATOR_LABEL = "Associate to validator";
 const field_config_t PARTICIPANT_1_UID_FIELD_CONFIG = {"Associate to validator 1", true};
 const field_config_t PARTICIPANT_2_UID_FIELD_CONFIG = {"Associate to validator 2", false};
 const field_config_t THRESHOLD_FIELD_CONFIG = {"Validators threshold", false};
@@ -458,7 +502,6 @@ static int process_party_to_key_mapping(const PartyToKeyMapping *mapping,
 }
 
 // Process party to participant mapping
-// Process party to participant mapping
 static int process_party_to_participant(const PartyToParticipant *mapping,
                                         transaction_ctx_t *tx_info) {
     LEDGER_ASSERT(!has_parsed_party_to_participant, "Multiple party to participant mappings found");
@@ -474,7 +517,7 @@ static int process_party_to_participant(const PartyToParticipant *mapping,
         return SW_TOPOLOGY_PARTY_ID_MISMATCH;
     }
 
-    if (mapping->participants_count != MANDATORY_PARTICIPANTS_NB) {
+    if (mapping->participants_count > MAX_PARTICIPANTS_NB) {
         return SW_TOPOLOGY_UNEXPECTED_NUMBER_OF_PARTICIPANTS;
     }
 
@@ -490,53 +533,77 @@ static int process_party_to_participant(const PartyToParticipant *mapping,
     LEDGER_ASSERT(set_field_value(tx_info, PARTY_FIELD_IDX, mapping->party) == true,
                   "Failed to set party field");
 
-    // Participants validation and field setting
+    size_t configs_count =
+        sizeof(VALID_PARTICIPANTS_CONFIGS) / sizeof(VALID_PARTICIPANTS_CONFIGS[0]);
+    size_t pc = mapping->participants_count;
     uint8_t found_valid = 0;
-    bool found_participants[MANDATORY_PARTICIPANTS_NB] = {false};
+    bool matched_valid[MAX_PARTICIPANTS_NB] = {false};
+    char *participant_names[MAX_PARTICIPANTS_NB] = {NULL};
 
-    for (size_t i = 0; i < mapping->participants_count; i++) {
-        const char *uid = (const char *) PIC(mapping->participants[i].participant_uid);
-        char *participant_name = (char *) uid;
+    for (size_t i = 0; i < configs_count; i++) {
+        found_valid = 0;
+        memset(matched_valid, 0, sizeof(matched_valid));
+        memset(participant_names, 0, sizeof(participant_names));
 
-        if (uid == NULL || *uid == '\0') {
-            return SW_TOPOLOGY_MISSING_PARTICIPANT_DATA;
-        }
+        valid_participants_config_t config = VALID_PARTICIPANTS_CONFIGS[i];
 
-        for (size_t j = 0; j < MANDATORY_PARTICIPANTS_NB; j++) {
-            // VALID_PARTICIPANTS[j].participant_id);
-            const char *valid_id = (const char *) PIC(VALID_PARTICIPANTS[j].participant_id);
-            const char *valid_name = (const char *) PIC(VALID_PARTICIPANTS[j].participant_name);
-            if (strcmp(uid, valid_id) == 0) {
-                if (found_participants[j]) {
-                    return SW_TOPOLOGY_UNEXPECTED_DUPLICATE_PARTICIPANT;
+        if (config.count == pc) {
+            for (size_t j = 0; j < pc; j++) {
+                const char *uid = (const char *) PIC(mapping->participants[j].participant_uid);
+                if (uid == NULL || *uid == '\0') {
+                    return SW_TOPOLOGY_MISSING_PARTICIPANT_DATA;
                 }
-                found_participants[j] = true;
-                found_valid++;
-                participant_name = (char *) valid_name;
-                break;
+                for (size_t k = 0; k < config.count; k++) {
+                    participant_id_to_name_mapping_t *mappings =
+                        (participant_id_to_name_mapping_t *) PIC(config.mappings);
+                    const char *valid_id = (const char *) PIC(mappings[k].participant_id);
+                    const char *valid_name = (const char *) PIC(mappings[k].participant_name);
+                    if (strcmp(uid, valid_id) == 0) {
+                        if (matched_valid[k]) {
+                            return SW_TOPOLOGY_UNEXPECTED_DUPLICATE_PARTICIPANT;
+                        }
+                        matched_valid[k] = true;
+                        found_valid++;
+                        participant_names[j] = (char *) valid_name;
+                        break;
+                    }
+                }
             }
         }
-
-        LEDGER_ASSERT(
-            set_field_value(tx_info, PARTICIPANT_1_FIELD_IDX + i, participant_name) == true,
-            "Failed to set participant field");
+        if (found_valid == pc) {
+            break;  // Found a matching config, no need to check further
+        }
     }
 
     // Final check for missing mandatory participants
-    if (found_valid != MANDATORY_PARTICIPANTS_NB) {
+    if (found_valid != pc) {
         return SW_TOPOLOGY_UNEXPECTED_PARTICIPANT_ID;
     }
 
-    // Set threshold field
-    char threshold_str[DEFAULT_DECODE_BUFFER_SIZE];
-    SNPRINTF(threshold_str,
-             sizeof(threshold_str),
-             "%u out of %u",
-             mapping->threshold,
-             mapping->participants_count);
+    // Set participant name fields
+    for (size_t j = 0; j < pc; j++) {
+        size_t field_idx = (j == 0) ? PARTICIPANT_1_FIELD_IDX : PARTICIPANT_2_FIELD_IDX;
+        LEDGER_ASSERT(set_field_value(tx_info, field_idx, participant_names[j]) == true,
+                      "Failed to set participant name field");
+    }
 
-    LEDGER_ASSERT(set_field_value(tx_info, THRESHOLD_FIELD_IDX, threshold_str) == true,
-                  "Failed to set threshold field");
+    // When only one participant, use singular label instead of "Associate to validator 1"
+    if (pc == 1) {
+        tx_info->pairs[tx_info->pairs_count - 1].item = (char *) PIC(SINGLE_VALIDATOR_LABEL);
+    }
+
+    // Set threshold field
+    if (mapping->threshold > 1) {
+        char threshold_str[DEFAULT_DECODE_BUFFER_SIZE];
+        SNPRINTF(threshold_str,
+                 sizeof(threshold_str),
+                 "%u out of %u",
+                 mapping->threshold,
+                 mapping->participants_count);
+
+        LEDGER_ASSERT(set_field_value(tx_info, THRESHOLD_FIELD_IDX, threshold_str) == true,
+                      "Failed to set threshold field");
+    }
 
     has_parsed_party_to_participant = true;
     return 0;

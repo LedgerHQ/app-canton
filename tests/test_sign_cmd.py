@@ -27,11 +27,20 @@ from generateCryptoData import get_keys_bytes
 
 ROOT_SCREENSHOT_PATH = Path(__file__).parent.resolve()
 
-VALIDATOR_PARTY_ID_1 = \
+MAINNET_VALIDATOR_PARTY_ID_1 = \
     "ledger-ledgerops-2::12207a4859ad414f4f47c2d773ddf4ea88de8c3a1aab19abaa197e504acdbf679d3c"
-VALIDATOR_PARTY_ID_2 = \
+MAINNET_VALIDATOR_PARTY_ID_2 = \
     "Ledger-Kiln-1::12200386019c89269f5541595286cf5ebf24fe7884d8c6b05ce042c999f9161cb9d0"
 
+TESTNET_VALIDATOR_PARTY_ID_1 = \
+    "ledger-ledgeropstestnet-0::122095f38f5c73cc18fbeb3290f8c17f7a1ff190f66fe159c671cf1fb0dc634eedaf"
+TESTNET_VALIDATOR_PARTY_ID_2 = \
+    "kiln-testnetValidator-1::12209e8bea40fab859b041eaa8d247b98e44fcaa0b041b9136e8ce62574d493202d3"
+
+DEVNET_VALIDATOR_PARTY_ID_1 = \
+    "ledger-ledgeropsdevnet-0::12208f74f551f8c28b68414fc3bb4b8466178055845485878a1af8ac1fe96f88fad2"
+DEVNET_VALIDATOR_PARTY_ID_2 = \
+    "kiln-devnetValidator-1::122030d0afac1b1d797fcef6095ca7c60a38ce644295c730389e0276d213d23f1a10"
 
 def _nano_enable_blind_signing() -> list[NavInsID]:
     # initial: go to settings
@@ -448,7 +457,7 @@ def _onboard_party(backend: BackendInterface,
     client = CantonCommandSender(backend)
 
     if validator_uids is None:
-        validator_uids = [VALIDATOR_PARTY_ID_1, VALIDATOR_PARTY_ID_2]
+        validator_uids = [MAINNET_VALIDATOR_PARTY_ID_1, MAINNET_VALIDATOR_PARTY_ID_2]
 
     # Get public key
     _, raw_key, _, _ = unpack_get_public_key_response(
@@ -500,7 +509,7 @@ def _onboard_party_expect_error(backend: BackendInterface,
     client = CantonCommandSender(backend)
 
     if validator_uids is None:
-        validator_uids = [VALIDATOR_PARTY_ID_1, VALIDATOR_PARTY_ID_2]
+        validator_uids = [MAINNET_VALIDATOR_PARTY_ID_1, MAINNET_VALIDATOR_PARTY_ID_2]
 
     # Get public key
     _, raw_key, _, _ = unpack_get_public_key_response(
@@ -536,22 +545,27 @@ def _onboard_party_expect_error(backend: BackendInterface,
 
 def test_sign_onboarding_expect_error_unexpected_participant_id(backend: BackendInterface) -> None:
     _onboard_party_expect_error(backend,
-                                validator_uids=[VALIDATOR_PARTY_ID_1, "invalid_validator_id_2"],
+                                validator_uids=[MAINNET_VALIDATOR_PARTY_ID_1, "invalid_validator_id_2"],
+                                expected_error=Errors.SW_TOPOLOGY_UNEXPECTED_PARTICIPANT_ID)
+
+def test_sign_onboarding_expect_error_unexpected_participant_id_single(backend: BackendInterface) -> None:
+    _onboard_party_expect_error(backend,
+                                validator_uids=[DEVNET_VALIDATOR_PARTY_ID_2],
                                 expected_error=Errors.SW_TOPOLOGY_UNEXPECTED_PARTICIPANT_ID)
 
 def test_sign_onboarding_expect_error_unexpected_threshold(backend: BackendInterface) -> None:
     _onboard_party_expect_error(backend,
-                                threshold=99,
+                                threshold=3,
                                 expected_error=Errors.SW_TOPOLOGY_UNEXPECTED_THRESHOLD_VALUE)
 
 def test_sign_onboarding_expect_error_unexpected_number_of_participants(backend: BackendInterface) -> None:
     _onboard_party_expect_error(backend,
-                                validator_uids=[VALIDATOR_PARTY_ID_1, VALIDATOR_PARTY_ID_2, "extra_validator_id_3"],
+                                validator_uids=[MAINNET_VALIDATOR_PARTY_ID_1, MAINNET_VALIDATOR_PARTY_ID_2, "extra_validator_id_3"],
                                 expected_error=Errors.SW_TOPOLOGY_UNEXPECTED_NUMBER_OF_PARTICIPANTS)
 
 def test_sign_onboarding_expect_error_duplicate_participants(backend: BackendInterface) -> None:
     _onboard_party_expect_error(backend,
-                                validator_uids=[VALIDATOR_PARTY_ID_1, VALIDATOR_PARTY_ID_1],
+                                validator_uids=[MAINNET_VALIDATOR_PARTY_ID_1, MAINNET_VALIDATOR_PARTY_ID_1],
                                 expected_error=Errors.SW_TOPOLOGY_UNEXPECTED_DUPLICATE_PARTICIPANT)
 
 def test_sign_onboarding_expect_error_wrong_party_id_in_party_to_key(backend: BackendInterface) -> None:
@@ -577,6 +591,22 @@ def _verify_attestation(attest_pub_key: bytes, multi_hash: bytes, challenge: Opt
 def test_sign_onboarding_attested(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
     attest_key, attest_pub_key = get_keys_bytes("attestations/data/test/priv-key.pem")
     _onboard_party(backend, scenario_navigator, attestation_keys=(attest_key, attest_pub_key))
+
+def test_sign_onboarding_attested_devnet_single(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
+    attest_key, attest_pub_key = get_keys_bytes("attestations/data/test/priv-key.pem")
+    _onboard_party(backend, scenario_navigator, attestation_keys=(attest_key, attest_pub_key), validator_uids=[DEVNET_VALIDATOR_PARTY_ID_1])
+
+def test_sign_onboarding_attested_devnet_multi(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
+    attest_key, attest_pub_key = get_keys_bytes("attestations/data/test/priv-key.pem")
+    _onboard_party(backend, scenario_navigator, attestation_keys=(attest_key, attest_pub_key), validator_uids=[DEVNET_VALIDATOR_PARTY_ID_1, DEVNET_VALIDATOR_PARTY_ID_2])
+
+def test_sign_onboarding_attested_testnet_single(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
+    attest_key, attest_pub_key = get_keys_bytes("attestations/data/test/priv-key.pem")
+    _onboard_party(backend, scenario_navigator, attestation_keys=(attest_key, attest_pub_key), validator_uids=[TESTNET_VALIDATOR_PARTY_ID_1])
+
+def test_sign_onboarding_attested_testnet_multi(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
+    attest_key, attest_pub_key = get_keys_bytes("attestations/data/test/priv-key.pem")
+    _onboard_party(backend, scenario_navigator, attestation_keys=(attest_key, attest_pub_key), validator_uids=[TESTNET_VALIDATOR_PARTY_ID_1, TESTNET_VALIDATOR_PARTY_ID_2])
 
 def test_sign_onboarding_raw_format_key(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
     _onboard_party(backend, scenario_navigator, der_key_format=False)
