@@ -59,7 +59,7 @@ MUST_CHECK cx_err_t derive_public_key(uint32_t *bip32_path,
         return error;
     }
 
-    for (uint i = 0; i < PUBKEY_LEN; i++) {
+    for (unsigned int i = 0; i < PUBKEY_LEN; i++) {
         raw_public_key[i] = rawPubkey[PUBKEY_LEN + PRIVKEY_LEN - i];
     }
     if ((rawPubkey[PUBKEY_LEN] & 1) != 0) {
