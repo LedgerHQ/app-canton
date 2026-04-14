@@ -855,10 +855,10 @@ MUST_CHECK int format_and_populate_display_items(pb_callback_context_t *ctx) {
                 ret = -1;
                 goto cleanup;
             }
-                memcpy((void *) ctx->tx_info->pairs[idx].value, state->value, state->value_len);
-                ctx->tx_info->pairs[idx].item = (char *) PIC(state->config->item_name);
-                ctx->tx_info->pairs_count++;
-                idx++;
+            memcpy((void *) ctx->tx_info->pairs[idx].value, state->value, state->value_len);
+            ctx->tx_info->pairs[idx].item = (char *) PIC(state->config->item_name);
+            ctx->tx_info->pairs_count++;
+            idx++;
         }
     }
 
