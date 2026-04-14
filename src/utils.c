@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  *   Ledger App Boilerplate.
  *   (c) 2020 Ledger SAS.
  *
@@ -78,6 +78,7 @@ void clean_context(void) {
     // Free any allocated display items
     // before resetting the context
     cleanup_display_items();
+    reset_display_parser_state();
     // Reset the global context
     explicit_bzero(&G_context, sizeof(G_context));
 }

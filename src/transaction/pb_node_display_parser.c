@@ -47,6 +47,21 @@ static identifier_config_t *const *global_tx_metadata_contract_identifiers = NUL
 static size_t global_tx_metadata_contract_identifiers_count = 0;
 static display_config_t *global_tx_metadata_display_conf = NULL;
 
+void reset_display_parser_state(void) {
+    global_tx_metadata_contract_identifiers = NULL;
+    global_tx_metadata_contract_identifiers_count = 0;
+    global_tx_metadata_display_conf = NULL;
+
+    for (size_t i = 0; i < MAX_DISPLAY_FIELDS_NB; i++) {
+        if (tx_fields[i].value != NULL) {
+            app_mem_free(tx_fields[i].value);
+            tx_fields[i].value = NULL;
+        }
+    }
+
+    memset(tx_fields, 0, sizeof(tx_fields));
+}
+
 /* -------------------------------------------------------------------------- */
 /*  Field formatting callbacks                                                */
 /* -------------------------------------------------------------------------- */
@@ -791,6 +806,8 @@ MUST_CHECK static bool versioned_node_decode_callback(pb_istream_t *stream,
 MUST_CHECK int format_and_populate_display_items(pb_callback_context_t *ctx) {
     LEDGER_ASSERT(ctx != NULL, "NULL context passed to format_and_populate_display_items");
 
+    int ret = 0;
+
     // Loop for mandatory check + format callbacks
     for (size_t i = 0; i < ctx->nb_fields; i++) {
         const tx_field_t *state = &ctx->tx_fields[i];
@@ -800,7 +817,9 @@ MUST_CHECK int format_and_populate_display_items(pb_callback_context_t *ctx) {
         if (cfg->mandatory && !state->found) {
             PRINTF("Mandatory field not found: %s\n", (char *) PIC(cfg->path));
             G_context.tx_info.clear_signing_available = false;
-            return -1;
+            cleanup_display_items();
+            ret = -1;
+            goto cleanup;
         }
 
         // Execute formatting callback if applicable
@@ -840,20 +859,10 @@ MUST_CHECK int format_and_populate_display_items(pb_callback_context_t *ctx) {
     }
 
     G_context.tx_info.clear_signing_available = true;
-    global_tx_metadata_contract_identifiers = NULL;
-    global_tx_metadata_display_conf = NULL;
 cleanup:
-    for (size_t j = 0; j < ctx->nb_fields; j++) {
-        tx_field_t *field = &ctx->tx_fields[j];
-        // Free any allocated value
-        if (field->value != NULL) {
-            app_mem_free(field->value);
-            field->value = NULL;
-            field->value_len = 0;
-        }
-    }
+    reset_display_parser_state();
 
-    return 0;
+    return ret;
 }
 
 MUST_CHECK static bool decode_create(pb_istream_t *stream, const pb_field_t *field, void **arg) {
@@ -928,6 +937,8 @@ MUST_CHECK static int process_display_parsing(buffer_t *buf,
 
     if (!status) {
         PRINTF("Decode failed: %s\n", PB_GET_ERROR(&stream));
+        cleanup_display_items();
+        reset_display_parser_state();
         return -1;
     }
 
@@ -954,6 +965,8 @@ MUST_CHECK int parse_node_for_display(buffer_t *buf) {
         return 0;
     }
     global_tx_metadata_contract_identifiers = NULL;
+    global_tx_metadata_contract_identifiers_count = 0;
+    global_tx_metadata_display_conf = NULL;
 
     return process_display_parsing(
         buf,
