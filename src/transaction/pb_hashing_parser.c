@@ -1099,4 +1099,3 @@ parser_status_e proto_deserialize_input_contract(buffer_t *buf, transaction_ctx_
 
     return PARSING_OK;
 }
-
