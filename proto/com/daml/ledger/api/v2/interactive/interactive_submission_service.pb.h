@@ -5,6 +5,7 @@
 #define PB_COM_DAML_LEDGER_API_V2_INTERACTIVE_COM_DAML_LEDGER_API_V2_INTERACTIVE_INTERACTIVE_SUBMISSION_SERVICE_PB_H_INCLUDED
 #include <pb.h>
 #include "com/daml/ledger/api/v2/commands.pb.h"
+#include "com/daml/ledger/api/v2/crypto.pb.h"
 #include "com/daml/ledger/api/v2/interactive/interactive_submission_common_data.pb.h"
 #include "com/daml/ledger/api/v2/interactive/transaction/v1/interactive_submission_data.pb.h"
 #include "com/daml/ledger/api/v2/package_reference.pb.h"
@@ -26,43 +27,37 @@ typedef enum _com_daml_ledger_api_v2_interactive_HashingSchemeVersion {
     com_daml_ledger_api_v2_interactive_HashingSchemeVersion_HASHING_SCHEME_VERSION_V2 = 2
 } com_daml_ledger_api_v2_interactive_HashingSchemeVersion;
 
-typedef enum _com_daml_ledger_api_v2_interactive_SigningAlgorithmSpec {
-    com_daml_ledger_api_v2_interactive_SigningAlgorithmSpec_SIGNING_ALGORITHM_SPEC_UNSPECIFIED = 0,
-    /* EdDSA Signature based on Curve25519 with SHA-512
- http://ed25519.cr.yp.to/ */
-    com_daml_ledger_api_v2_interactive_SigningAlgorithmSpec_SIGNING_ALGORITHM_SPEC_ED25519 = 1,
-    /* Elliptic Curve Digital Signature Algorithm with SHA256 */
-    com_daml_ledger_api_v2_interactive_SigningAlgorithmSpec_SIGNING_ALGORITHM_SPEC_EC_DSA_SHA_256 = 2,
-    /* Elliptic Curve Digital Signature Algorithm with SHA384 */
-    com_daml_ledger_api_v2_interactive_SigningAlgorithmSpec_SIGNING_ALGORITHM_SPEC_EC_DSA_SHA_384 = 3
-} com_daml_ledger_api_v2_interactive_SigningAlgorithmSpec;
-
-typedef enum _com_daml_ledger_api_v2_interactive_SignatureFormat {
-    com_daml_ledger_api_v2_interactive_SignatureFormat_SIGNATURE_FORMAT_UNSPECIFIED = 0,
-    /* Signature scheme specific signature format
- Legacy format no longer used, except for migrations */
-    com_daml_ledger_api_v2_interactive_SignatureFormat_SIGNATURE_FORMAT_RAW = 1,
-    /* ASN.1 + DER-encoding of the `r` and `s` integers, as defined in https://datatracker.ietf.org/doc/html/rfc3279#section-2.2.3
- Used for ECDSA signatures */
-    com_daml_ledger_api_v2_interactive_SignatureFormat_SIGNATURE_FORMAT_DER = 2,
-    /* Concatenation of the integers `r || s` in little-endian form, as defined in https://datatracker.ietf.org/doc/html/rfc8032#section-3.3
- Note that this is different from the format defined in IEEE P1363, which uses concatenation in big-endian form.
- Used for EdDSA signatures */
-    com_daml_ledger_api_v2_interactive_SignatureFormat_SIGNATURE_FORMAT_CONCAT = 3,
-    /* Symbolic crypto, must only be used for testing */
-    com_daml_ledger_api_v2_interactive_SignatureFormat_SIGNATURE_FORMAT_SYMBOLIC = 10000
-} com_daml_ledger_api_v2_interactive_SignatureFormat;
-
 /* Struct definitions */
-typedef PB_BYTES_ARRAY_T(1024) com_daml_ledger_api_v2_interactive_Signature_signature_t;
-typedef struct _com_daml_ledger_api_v2_interactive_Signature {
-    com_daml_ledger_api_v2_interactive_SignatureFormat format;
-    com_daml_ledger_api_v2_interactive_Signature_signature_t signature;
-    /* The fingerprint/id of the keypair used to create this signature and needed to verify. */
-    char signed_by[1024];
-    /* The signing algorithm specification used to produce this signature */
-    com_daml_ledger_api_v2_interactive_SigningAlgorithmSpec signing_algorithm_spec;
-} com_daml_ledger_api_v2_interactive_Signature;
+/* Hints to improve cost estimation precision of a prepared transaction */
+typedef struct _com_daml_ledger_api_v2_interactive_CostEstimationHints {
+    /* Disable cost estimation
+ Default (not set) is false */
+    bool disabled;
+    /* Details on the keys that will be used to sign the transaction (how many and of which type).
+ Signature size impacts the cost of the transaction.
+ If empty, the signature sizes will be approximated with threshold-many signatures (where threshold is defined
+ in the PartyToKeyMapping of the external party), using keys in the order they are registered.
+ Optional (empty list is equivalent to not providing this field) */
+    pb_callback_t expected_signatures;
+} com_daml_ledger_api_v2_interactive_CostEstimationHints;
+
+/* Estimation of the cost of submitting the prepared transaction
+ The estimation is done against the synchronizer chosen during preparation of the transaction
+ (or the one explicitly requested).
+ The cost of re-assigning contracts to another synchronizer when necessary is not included in the estimation. */
+typedef struct _com_daml_ledger_api_v2_interactive_CostEstimation {
+    /* Timestamp at which the estimation was made */
+    bool has_estimation_timestamp;
+    google_protobuf_Timestamp estimation_timestamp;
+    /* Estimated traffic cost of the confirmation request associated with the transaction */
+    uint64_t confirmation_request_traffic_cost_estimation;
+    /* Estimated traffic cost of the confirmation response associated with the transaction
+ This field can also be used as an indication of the cost that other potential confirming nodes
+ of the party will incur to approve or reject the transaction */
+    uint64_t confirmation_response_traffic_cost_estimation;
+    /* Sum of the fields above */
+    uint64_t total_traffic_cost_estimation;
+} com_daml_ledger_api_v2_interactive_CostEstimation;
 
 /* Signatures provided by a single party */
 typedef struct _com_daml_ledger_api_v2_interactive_SinglePartySignatures {
@@ -167,7 +162,8 @@ typedef struct _com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest {
  Optional */
     pb_callback_t disclosed_contracts;
     /* Must be a valid synchronizer id
- Required */
+ If not set, a suitable synchronizer that this node is connected to will be chosen
+ Optional */
     char synchronizer_id[1024];
     /* The package-id selection preference of the client for resolving
  package names and interface instances in command submission and interpretation
@@ -177,12 +173,32 @@ typedef struct _com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest {
  This can be useful for troubleshooting of hash mismatches. Should only be used for debugging.
  Optional, default to false */
     bool verbose_hashing;
+    /* Maximum timestamp at which the transaction can be recorded onto the ledger via the synchronizer specified in the `PrepareSubmissionResponse`.
+ If submitted after it will be rejected even if otherwise valid, in which case it needs to be prepared and signed again
+ with a new valid max_record_time.
+ Use this to limit the time-to-life of a prepared transaction,
+ which is useful to know when it can definitely not be accepted
+ anymore and resorting to preparing another transaction for the same
+ intent is safe again.
+ Optional */
+    bool has_max_record_time;
+    google_protobuf_Timestamp max_record_time;
     /* Fetches the contract keys into the caches to speed up the command processing.
  Should only contain contract keys that are expected to be resolved during interpretation of the commands.
  Keys of disclosed contracts do not need prefetching.
 
  Optional */
     pb_callback_t prefetch_contract_keys;
+    /* Hints to improve the accuracy of traffic cost estimation.
+ The estimation logic assumes that this node will be used for the execution of the transaction
+ If another node is used instead, the estimation may be less precise.
+ Request amplification is not accounted for in the estimation: each amplified request will
+ result in the cost of the confirmation request to be charged additionally.
+
+ Optional - Traffic cost estimation is enabled by default if this field is not set
+ To turn off cost estimation, set the CostEstimationHints#disabled field to true */
+    bool has_estimate_traffic_cost;
+    com_daml_ledger_api_v2_interactive_CostEstimationHints estimate_traffic_cost;
 } com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest;
 
 typedef struct _com_daml_ledger_api_v2_interactive_Metadata_SubmitterInfo {
@@ -213,6 +229,14 @@ typedef struct _com_daml_ledger_api_v2_interactive_Metadata {
     uint64_t min_ledger_effective_time;
     bool has_max_ledger_effective_time;
     uint64_t max_ledger_effective_time;
+    /* Maximum timestamp at which the transaction can be recorded onto the ledger via the synchronizer `synchronizer_id`.
+ If submitted after it will be rejected even if otherwise valid, in which case it needs to be prepared and signed again
+ with a new valid max_record_time.
+ Unsigned in 3.3 to avoid a breaking protocol change
+ Will be signed in 3.4+
+ Set max_record_time in the PreparedTransactionRequest to get this field set accordingly */
+    bool has_max_record_time;
+    uint64_t max_record_time;
 } com_daml_ledger_api_v2_interactive_Metadata;
 
 typedef struct _com_daml_ledger_api_v2_interactive_Metadata_GlobalKeyMappingEntry {
@@ -236,7 +260,7 @@ typedef struct _com_daml_ledger_api_v2_interactive_Metadata_InputContract {
 /* Daml Transaction.
  This represents the effect on the ledger if this transaction is successfully committed. */
 typedef struct _com_daml_ledger_api_v2_interactive_DamlTransaction {
-    /* Transaction version, will be >= max(nodes version) */
+    /* serialization version, will be >= max(nodes version) */
     char version[1024];
     /* Root nodes of the transaction */
     pb_callback_t roots;
@@ -273,6 +297,10 @@ typedef struct _com_daml_ledger_api_v2_interactive_PrepareSubmissionResponse {
  Note that there are no guarantees on the stability of the format or content of this field.
  Its content should NOT be parsed and should only be used for troubleshooting purposes. */
     char *hashing_details;
+    /* Traffic cost estimation of the prepared transaction
+ Optional */
+    bool has_cost_estimation;
+    com_daml_ledger_api_v2_interactive_CostEstimation cost_estimation;
 } com_daml_ledger_api_v2_interactive_PrepareSubmissionResponse;
 
 typedef struct _com_daml_ledger_api_v2_interactive_ExecuteSubmissionRequest {
@@ -529,19 +557,11 @@ extern "C" {
 #define _com_daml_ledger_api_v2_interactive_HashingSchemeVersion_MAX com_daml_ledger_api_v2_interactive_HashingSchemeVersion_HASHING_SCHEME_VERSION_V2
 #define _com_daml_ledger_api_v2_interactive_HashingSchemeVersion_ARRAYSIZE ((com_daml_ledger_api_v2_interactive_HashingSchemeVersion)(com_daml_ledger_api_v2_interactive_HashingSchemeVersion_HASHING_SCHEME_VERSION_V2+1))
 
-#define _com_daml_ledger_api_v2_interactive_SigningAlgorithmSpec_MIN com_daml_ledger_api_v2_interactive_SigningAlgorithmSpec_SIGNING_ALGORITHM_SPEC_UNSPECIFIED
-#define _com_daml_ledger_api_v2_interactive_SigningAlgorithmSpec_MAX com_daml_ledger_api_v2_interactive_SigningAlgorithmSpec_SIGNING_ALGORITHM_SPEC_EC_DSA_SHA_384
-#define _com_daml_ledger_api_v2_interactive_SigningAlgorithmSpec_ARRAYSIZE ((com_daml_ledger_api_v2_interactive_SigningAlgorithmSpec)(com_daml_ledger_api_v2_interactive_SigningAlgorithmSpec_SIGNING_ALGORITHM_SPEC_EC_DSA_SHA_384+1))
+#define com_daml_ledger_api_v2_interactive_CostEstimationHints_expected_signatures_ENUMTYPE com_daml_ledger_api_v2_SigningAlgorithmSpec
 
-#define _com_daml_ledger_api_v2_interactive_SignatureFormat_MIN com_daml_ledger_api_v2_interactive_SignatureFormat_SIGNATURE_FORMAT_UNSPECIFIED
-#define _com_daml_ledger_api_v2_interactive_SignatureFormat_MAX com_daml_ledger_api_v2_interactive_SignatureFormat_SIGNATURE_FORMAT_SYMBOLIC
-#define _com_daml_ledger_api_v2_interactive_SignatureFormat_ARRAYSIZE ((com_daml_ledger_api_v2_interactive_SignatureFormat)(com_daml_ledger_api_v2_interactive_SignatureFormat_SIGNATURE_FORMAT_SYMBOLIC+1))
 
 
 #define com_daml_ledger_api_v2_interactive_PrepareSubmissionResponse_hashing_scheme_version_ENUMTYPE com_daml_ledger_api_v2_interactive_HashingSchemeVersion
-
-#define com_daml_ledger_api_v2_interactive_Signature_format_ENUMTYPE com_daml_ledger_api_v2_interactive_SignatureFormat
-#define com_daml_ledger_api_v2_interactive_Signature_signing_algorithm_spec_ENUMTYPE com_daml_ledger_api_v2_interactive_SigningAlgorithmSpec
 
 
 
@@ -571,9 +591,10 @@ extern "C" {
 
 
 /* Initializer values for message structs */
-#define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_init_default {"", "", {{NULL}, NULL}, false, com_daml_ledger_api_v2_interactive_MinLedgerTime_init_default, {{NULL}, NULL}, {{NULL}, NULL}, {{NULL}, NULL}, "", {{NULL}, NULL}, 0, {{NULL}, NULL}}
-#define com_daml_ledger_api_v2_interactive_PrepareSubmissionResponse_init_default {false, com_daml_ledger_api_v2_interactive_PreparedTransaction_init_default, {0, {0}}, _com_daml_ledger_api_v2_interactive_HashingSchemeVersion_MIN, NULL}
-#define com_daml_ledger_api_v2_interactive_Signature_init_default {_com_daml_ledger_api_v2_interactive_SignatureFormat_MIN, {0, {0}}, "", _com_daml_ledger_api_v2_interactive_SigningAlgorithmSpec_MIN}
+#define com_daml_ledger_api_v2_interactive_CostEstimationHints_init_default {0, {{NULL}, NULL}}
+#define com_daml_ledger_api_v2_interactive_CostEstimation_init_default {false, google_protobuf_Timestamp_init_default, 0, 0, 0}
+#define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_init_default {"", "", {{NULL}, NULL}, false, com_daml_ledger_api_v2_interactive_MinLedgerTime_init_default, {{NULL}, NULL}, {{NULL}, NULL}, {{NULL}, NULL}, "", {{NULL}, NULL}, 0, false, google_protobuf_Timestamp_init_default, {{NULL}, NULL}, false, com_daml_ledger_api_v2_interactive_CostEstimationHints_init_default}
+#define com_daml_ledger_api_v2_interactive_PrepareSubmissionResponse_init_default {false, com_daml_ledger_api_v2_interactive_PreparedTransaction_init_default, {0, {0}}, _com_daml_ledger_api_v2_interactive_HashingSchemeVersion_MIN, NULL, false, com_daml_ledger_api_v2_interactive_CostEstimation_init_default}
 #define com_daml_ledger_api_v2_interactive_SinglePartySignatures_init_default {"", {{NULL}, NULL}}
 #define com_daml_ledger_api_v2_interactive_PartySignatures_init_default {{{NULL}, NULL}}
 #define com_daml_ledger_api_v2_interactive_ExecuteSubmissionRequest_init_default {false, com_daml_ledger_api_v2_interactive_PreparedTransaction_init_default, false, com_daml_ledger_api_v2_interactive_PartySignatures_init_default, 0, {google_protobuf_Duration_init_default}, NULL, NULL, _com_daml_ledger_api_v2_interactive_HashingSchemeVersion_MIN, false, com_daml_ledger_api_v2_interactive_MinLedgerTime_init_default}
@@ -584,7 +605,7 @@ extern "C" {
 #define com_daml_ledger_api_v2_interactive_ExecuteSubmissionAndWaitForTransactionResponse_init_default {false, com_daml_ledger_api_v2_Transaction_init_default}
 #define com_daml_ledger_api_v2_interactive_MinLedgerTime_init_default {0, {google_protobuf_Timestamp_init_default}}
 #define com_daml_ledger_api_v2_interactive_PreparedTransaction_init_default {false, com_daml_ledger_api_v2_interactive_DamlTransaction_init_default, false, com_daml_ledger_api_v2_interactive_Metadata_init_default}
-#define com_daml_ledger_api_v2_interactive_Metadata_init_default {false, com_daml_ledger_api_v2_interactive_Metadata_SubmitterInfo_init_default, "", 0, "", 0, {{NULL}, NULL}, {{NULL}, NULL}, false, 0, false, 0}
+#define com_daml_ledger_api_v2_interactive_Metadata_init_default {false, com_daml_ledger_api_v2_interactive_Metadata_SubmitterInfo_init_default, "", 0, "", 0, {{NULL}, NULL}, {{NULL}, NULL}, false, 0, false, 0, false, 0}
 #define com_daml_ledger_api_v2_interactive_Metadata_SubmitterInfo_init_default {{{NULL}, NULL}, ""}
 #define com_daml_ledger_api_v2_interactive_Metadata_GlobalKeyMappingEntry_init_default {false, com_daml_ledger_api_v2_interactive_GlobalKey_init_default, false, com_daml_ledger_api_v2_Value_init_default}
 #define com_daml_ledger_api_v2_interactive_Metadata_InputContract_init_default {0, {com_daml_ledger_api_v2_interactive_transaction_v1_Create_init_default}, 0, {0, {0}}}
@@ -597,9 +618,10 @@ extern "C" {
 #define com_daml_ledger_api_v2_interactive_PackageVettingRequirement_init_default {{{NULL}, NULL}, ""}
 #define com_daml_ledger_api_v2_interactive_GetPreferredPackagesRequest_init_default {{{NULL}, NULL}, "", false, google_protobuf_Timestamp_init_default}
 #define com_daml_ledger_api_v2_interactive_GetPreferredPackagesResponse_init_default {{{NULL}, NULL}, ""}
-#define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_init_zero {"", "", {{NULL}, NULL}, false, com_daml_ledger_api_v2_interactive_MinLedgerTime_init_zero, {{NULL}, NULL}, {{NULL}, NULL}, {{NULL}, NULL}, "", {{NULL}, NULL}, 0, {{NULL}, NULL}}
-#define com_daml_ledger_api_v2_interactive_PrepareSubmissionResponse_init_zero {false, com_daml_ledger_api_v2_interactive_PreparedTransaction_init_zero, {0, {0}}, _com_daml_ledger_api_v2_interactive_HashingSchemeVersion_MIN, NULL}
-#define com_daml_ledger_api_v2_interactive_Signature_init_zero {_com_daml_ledger_api_v2_interactive_SignatureFormat_MIN, {0, {0}}, "", _com_daml_ledger_api_v2_interactive_SigningAlgorithmSpec_MIN}
+#define com_daml_ledger_api_v2_interactive_CostEstimationHints_init_zero {0, {{NULL}, NULL}}
+#define com_daml_ledger_api_v2_interactive_CostEstimation_init_zero {false, google_protobuf_Timestamp_init_zero, 0, 0, 0}
+#define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_init_zero {"", "", {{NULL}, NULL}, false, com_daml_ledger_api_v2_interactive_MinLedgerTime_init_zero, {{NULL}, NULL}, {{NULL}, NULL}, {{NULL}, NULL}, "", {{NULL}, NULL}, 0, false, google_protobuf_Timestamp_init_zero, {{NULL}, NULL}, false, com_daml_ledger_api_v2_interactive_CostEstimationHints_init_zero}
+#define com_daml_ledger_api_v2_interactive_PrepareSubmissionResponse_init_zero {false, com_daml_ledger_api_v2_interactive_PreparedTransaction_init_zero, {0, {0}}, _com_daml_ledger_api_v2_interactive_HashingSchemeVersion_MIN, NULL, false, com_daml_ledger_api_v2_interactive_CostEstimation_init_zero}
 #define com_daml_ledger_api_v2_interactive_SinglePartySignatures_init_zero {"", {{NULL}, NULL}}
 #define com_daml_ledger_api_v2_interactive_PartySignatures_init_zero {{{NULL}, NULL}}
 #define com_daml_ledger_api_v2_interactive_ExecuteSubmissionRequest_init_zero {false, com_daml_ledger_api_v2_interactive_PreparedTransaction_init_zero, false, com_daml_ledger_api_v2_interactive_PartySignatures_init_zero, 0, {google_protobuf_Duration_init_zero}, NULL, NULL, _com_daml_ledger_api_v2_interactive_HashingSchemeVersion_MIN, false, com_daml_ledger_api_v2_interactive_MinLedgerTime_init_zero}
@@ -610,7 +632,7 @@ extern "C" {
 #define com_daml_ledger_api_v2_interactive_ExecuteSubmissionAndWaitForTransactionResponse_init_zero {false, com_daml_ledger_api_v2_Transaction_init_zero}
 #define com_daml_ledger_api_v2_interactive_MinLedgerTime_init_zero {0, {google_protobuf_Timestamp_init_zero}}
 #define com_daml_ledger_api_v2_interactive_PreparedTransaction_init_zero {false, com_daml_ledger_api_v2_interactive_DamlTransaction_init_zero, false, com_daml_ledger_api_v2_interactive_Metadata_init_zero}
-#define com_daml_ledger_api_v2_interactive_Metadata_init_zero {false, com_daml_ledger_api_v2_interactive_Metadata_SubmitterInfo_init_zero, "", 0, "", 0, {{NULL}, NULL}, {{NULL}, NULL}, false, 0, false, 0}
+#define com_daml_ledger_api_v2_interactive_Metadata_init_zero {false, com_daml_ledger_api_v2_interactive_Metadata_SubmitterInfo_init_zero, "", 0, "", 0, {{NULL}, NULL}, {{NULL}, NULL}, false, 0, false, 0, false, 0}
 #define com_daml_ledger_api_v2_interactive_Metadata_SubmitterInfo_init_zero {{{NULL}, NULL}, ""}
 #define com_daml_ledger_api_v2_interactive_Metadata_GlobalKeyMappingEntry_init_zero {false, com_daml_ledger_api_v2_interactive_GlobalKey_init_zero, false, com_daml_ledger_api_v2_Value_init_zero}
 #define com_daml_ledger_api_v2_interactive_Metadata_InputContract_init_zero {0, {com_daml_ledger_api_v2_interactive_transaction_v1_Create_init_zero}, 0, {0, {0}}}
@@ -625,10 +647,12 @@ extern "C" {
 #define com_daml_ledger_api_v2_interactive_GetPreferredPackagesResponse_init_zero {{{NULL}, NULL}, ""}
 
 /* Field tags (for use in manual encoding/decoding) */
-#define com_daml_ledger_api_v2_interactive_Signature_format_tag 1
-#define com_daml_ledger_api_v2_interactive_Signature_signature_tag 2
-#define com_daml_ledger_api_v2_interactive_Signature_signed_by_tag 3
-#define com_daml_ledger_api_v2_interactive_Signature_signing_algorithm_spec_tag 4
+#define com_daml_ledger_api_v2_interactive_CostEstimationHints_disabled_tag 1
+#define com_daml_ledger_api_v2_interactive_CostEstimationHints_expected_signatures_tag 2
+#define com_daml_ledger_api_v2_interactive_CostEstimation_estimation_timestamp_tag 1
+#define com_daml_ledger_api_v2_interactive_CostEstimation_confirmation_request_traffic_cost_estimation_tag 2
+#define com_daml_ledger_api_v2_interactive_CostEstimation_confirmation_response_traffic_cost_estimation_tag 3
+#define com_daml_ledger_api_v2_interactive_CostEstimation_total_traffic_cost_estimation_tag 4
 #define com_daml_ledger_api_v2_interactive_SinglePartySignatures_party_tag 1
 #define com_daml_ledger_api_v2_interactive_SinglePartySignatures_signatures_tag 2
 #define com_daml_ledger_api_v2_interactive_PartySignatures_signatures_tag 1
@@ -647,7 +671,9 @@ extern "C" {
 #define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_synchronizer_id_tag 8
 #define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_package_id_selection_preference_tag 9
 #define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_verbose_hashing_tag 10
+#define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_max_record_time_tag 11
 #define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_prefetch_contract_keys_tag 15
+#define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_estimate_traffic_cost_tag 16
 #define com_daml_ledger_api_v2_interactive_Metadata_SubmitterInfo_act_as_tag 1
 #define com_daml_ledger_api_v2_interactive_Metadata_SubmitterInfo_command_id_tag 2
 #define com_daml_ledger_api_v2_interactive_Metadata_submitter_info_tag 2
@@ -659,6 +685,7 @@ extern "C" {
 #define com_daml_ledger_api_v2_interactive_Metadata_global_key_mapping_tag 8
 #define com_daml_ledger_api_v2_interactive_Metadata_min_ledger_effective_time_tag 9
 #define com_daml_ledger_api_v2_interactive_Metadata_max_ledger_effective_time_tag 10
+#define com_daml_ledger_api_v2_interactive_Metadata_max_record_time_tag 11
 #define com_daml_ledger_api_v2_interactive_Metadata_GlobalKeyMappingEntry_key_tag 1
 #define com_daml_ledger_api_v2_interactive_Metadata_GlobalKeyMappingEntry_value_tag 2
 #define com_daml_ledger_api_v2_interactive_Metadata_InputContract_v1_tag 1
@@ -674,6 +701,7 @@ extern "C" {
 #define com_daml_ledger_api_v2_interactive_PrepareSubmissionResponse_prepared_transaction_hash_tag 2
 #define com_daml_ledger_api_v2_interactive_PrepareSubmissionResponse_hashing_scheme_version_tag 3
 #define com_daml_ledger_api_v2_interactive_PrepareSubmissionResponse_hashing_details_tag 4
+#define com_daml_ledger_api_v2_interactive_PrepareSubmissionResponse_cost_estimation_tag 5
 #define com_daml_ledger_api_v2_interactive_ExecuteSubmissionRequest_prepared_transaction_tag 1
 #define com_daml_ledger_api_v2_interactive_ExecuteSubmissionRequest_party_signatures_tag 2
 #define com_daml_ledger_api_v2_interactive_ExecuteSubmissionRequest_deduplication_duration_tag 3
@@ -719,6 +747,21 @@ extern "C" {
 #define com_daml_ledger_api_v2_interactive_GetPreferredPackagesResponse_synchronizer_id_tag 2
 
 /* Struct field encoding specification for nanopb */
+#define com_daml_ledger_api_v2_interactive_CostEstimationHints_FIELDLIST(X, a) \
+X(a, STATIC,   SINGULAR, BOOL,     disabled,          1) \
+X(a, CALLBACK, REPEATED, UENUM,    expected_signatures,   2)
+#define com_daml_ledger_api_v2_interactive_CostEstimationHints_CALLBACK pb_default_field_callback
+#define com_daml_ledger_api_v2_interactive_CostEstimationHints_DEFAULT NULL
+
+#define com_daml_ledger_api_v2_interactive_CostEstimation_FIELDLIST(X, a) \
+X(a, STATIC,   OPTIONAL, MESSAGE,  estimation_timestamp,   1) \
+X(a, STATIC,   SINGULAR, UINT64,   confirmation_request_traffic_cost_estimation,   2) \
+X(a, STATIC,   SINGULAR, UINT64,   confirmation_response_traffic_cost_estimation,   3) \
+X(a, STATIC,   SINGULAR, UINT64,   total_traffic_cost_estimation,   4)
+#define com_daml_ledger_api_v2_interactive_CostEstimation_CALLBACK NULL
+#define com_daml_ledger_api_v2_interactive_CostEstimation_DEFAULT NULL
+#define com_daml_ledger_api_v2_interactive_CostEstimation_estimation_timestamp_MSGTYPE google_protobuf_Timestamp
+
 #define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_FIELDLIST(X, a) \
 X(a, STATIC,   SINGULAR, STRING,   user_id,           1) \
 X(a, STATIC,   SINGULAR, STRING,   command_id,        2) \
@@ -730,37 +773,35 @@ X(a, CALLBACK, REPEATED, MESSAGE,  disclosed_contracts,   7) \
 X(a, STATIC,   SINGULAR, STRING,   synchronizer_id,   8) \
 X(a, CALLBACK, REPEATED, STRING,   package_id_selection_preference,   9) \
 X(a, STATIC,   SINGULAR, BOOL,     verbose_hashing,  10) \
-X(a, CALLBACK, REPEATED, MESSAGE,  prefetch_contract_keys,  15)
+X(a, STATIC,   OPTIONAL, MESSAGE,  max_record_time,  11) \
+X(a, CALLBACK, REPEATED, MESSAGE,  prefetch_contract_keys,  15) \
+X(a, STATIC,   OPTIONAL, MESSAGE,  estimate_traffic_cost,  16)
 #define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_CALLBACK pb_default_field_callback
 #define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_DEFAULT NULL
 #define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_commands_MSGTYPE com_daml_ledger_api_v2_Command
 #define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_min_ledger_time_MSGTYPE com_daml_ledger_api_v2_interactive_MinLedgerTime
 #define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_disclosed_contracts_MSGTYPE com_daml_ledger_api_v2_DisclosedContract
+#define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_max_record_time_MSGTYPE google_protobuf_Timestamp
 #define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_prefetch_contract_keys_MSGTYPE com_daml_ledger_api_v2_PrefetchContractKey
+#define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_estimate_traffic_cost_MSGTYPE com_daml_ledger_api_v2_interactive_CostEstimationHints
 
 #define com_daml_ledger_api_v2_interactive_PrepareSubmissionResponse_FIELDLIST(X, a) \
 X(a, STATIC,   OPTIONAL, MESSAGE,  prepared_transaction,   1) \
 X(a, STATIC,   SINGULAR, BYTES,    prepared_transaction_hash,   2) \
 X(a, STATIC,   SINGULAR, UENUM,    hashing_scheme_version,   3) \
-X(a, POINTER,  OPTIONAL, STRING,   hashing_details,   4)
+X(a, POINTER,  OPTIONAL, STRING,   hashing_details,   4) \
+X(a, STATIC,   OPTIONAL, MESSAGE,  cost_estimation,   5)
 #define com_daml_ledger_api_v2_interactive_PrepareSubmissionResponse_CALLBACK NULL
 #define com_daml_ledger_api_v2_interactive_PrepareSubmissionResponse_DEFAULT NULL
 #define com_daml_ledger_api_v2_interactive_PrepareSubmissionResponse_prepared_transaction_MSGTYPE com_daml_ledger_api_v2_interactive_PreparedTransaction
-
-#define com_daml_ledger_api_v2_interactive_Signature_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, UENUM,    format,            1) \
-X(a, STATIC,   SINGULAR, BYTES,    signature,         2) \
-X(a, STATIC,   SINGULAR, STRING,   signed_by,         3) \
-X(a, STATIC,   SINGULAR, UENUM,    signing_algorithm_spec,   4)
-#define com_daml_ledger_api_v2_interactive_Signature_CALLBACK NULL
-#define com_daml_ledger_api_v2_interactive_Signature_DEFAULT NULL
+#define com_daml_ledger_api_v2_interactive_PrepareSubmissionResponse_cost_estimation_MSGTYPE com_daml_ledger_api_v2_interactive_CostEstimation
 
 #define com_daml_ledger_api_v2_interactive_SinglePartySignatures_FIELDLIST(X, a) \
 X(a, STATIC,   SINGULAR, STRING,   party,             1) \
 X(a, CALLBACK, REPEATED, MESSAGE,  signatures,        2)
 #define com_daml_ledger_api_v2_interactive_SinglePartySignatures_CALLBACK pb_default_field_callback
 #define com_daml_ledger_api_v2_interactive_SinglePartySignatures_DEFAULT NULL
-#define com_daml_ledger_api_v2_interactive_SinglePartySignatures_signatures_MSGTYPE com_daml_ledger_api_v2_interactive_Signature
+#define com_daml_ledger_api_v2_interactive_SinglePartySignatures_signatures_MSGTYPE com_daml_ledger_api_v2_Signature
 
 #define com_daml_ledger_api_v2_interactive_PartySignatures_FIELDLIST(X, a) \
 X(a, CALLBACK, REPEATED, MESSAGE,  signatures,        1)
@@ -860,7 +901,8 @@ X(a, STATIC,   SINGULAR, UINT64,   preparation_time,   6) \
 X(a, CALLBACK, REPEATED, MESSAGE,  input_contracts,   7) \
 X(a, CALLBACK, REPEATED, MESSAGE,  global_key_mapping,   8) \
 X(a, STATIC,   OPTIONAL, UINT64,   min_ledger_effective_time,   9) \
-X(a, STATIC,   OPTIONAL, UINT64,   max_ledger_effective_time,  10)
+X(a, STATIC,   OPTIONAL, UINT64,   max_ledger_effective_time,  10) \
+X(a, STATIC,   OPTIONAL, UINT64,   max_record_time,  11)
 #define com_daml_ledger_api_v2_interactive_Metadata_CALLBACK pb_default_field_callback
 #define com_daml_ledger_api_v2_interactive_Metadata_DEFAULT NULL
 #define com_daml_ledger_api_v2_interactive_Metadata_submitter_info_MSGTYPE com_daml_ledger_api_v2_interactive_Metadata_SubmitterInfo
@@ -956,9 +998,10 @@ X(a, STATIC,   SINGULAR, STRING,   synchronizer_id,   2)
 #define com_daml_ledger_api_v2_interactive_GetPreferredPackagesResponse_DEFAULT NULL
 #define com_daml_ledger_api_v2_interactive_GetPreferredPackagesResponse_package_references_MSGTYPE com_daml_ledger_api_v2_PackageReference
 
+extern const pb_msgdesc_t com_daml_ledger_api_v2_interactive_CostEstimationHints_msg;
+extern const pb_msgdesc_t com_daml_ledger_api_v2_interactive_CostEstimation_msg;
 extern const pb_msgdesc_t com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_msg;
 extern const pb_msgdesc_t com_daml_ledger_api_v2_interactive_PrepareSubmissionResponse_msg;
-extern const pb_msgdesc_t com_daml_ledger_api_v2_interactive_Signature_msg;
 extern const pb_msgdesc_t com_daml_ledger_api_v2_interactive_SinglePartySignatures_msg;
 extern const pb_msgdesc_t com_daml_ledger_api_v2_interactive_PartySignatures_msg;
 extern const pb_msgdesc_t com_daml_ledger_api_v2_interactive_ExecuteSubmissionRequest_msg;
@@ -984,9 +1027,10 @@ extern const pb_msgdesc_t com_daml_ledger_api_v2_interactive_GetPreferredPackage
 extern const pb_msgdesc_t com_daml_ledger_api_v2_interactive_GetPreferredPackagesResponse_msg;
 
 /* Defines for backwards compatibility with code written before nanopb-0.4.0 */
+#define com_daml_ledger_api_v2_interactive_CostEstimationHints_fields &com_daml_ledger_api_v2_interactive_CostEstimationHints_msg
+#define com_daml_ledger_api_v2_interactive_CostEstimation_fields &com_daml_ledger_api_v2_interactive_CostEstimation_msg
 #define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_fields &com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_msg
 #define com_daml_ledger_api_v2_interactive_PrepareSubmissionResponse_fields &com_daml_ledger_api_v2_interactive_PrepareSubmissionResponse_msg
-#define com_daml_ledger_api_v2_interactive_Signature_fields &com_daml_ledger_api_v2_interactive_Signature_msg
 #define com_daml_ledger_api_v2_interactive_SinglePartySignatures_fields &com_daml_ledger_api_v2_interactive_SinglePartySignatures_msg
 #define com_daml_ledger_api_v2_interactive_PartySignatures_fields &com_daml_ledger_api_v2_interactive_PartySignatures_msg
 #define com_daml_ledger_api_v2_interactive_ExecuteSubmissionRequest_fields &com_daml_ledger_api_v2_interactive_ExecuteSubmissionRequest_msg
@@ -1016,6 +1060,7 @@ extern const pb_msgdesc_t com_daml_ledger_api_v2_interactive_GetPreferredPackage
 #endif
 #if defined(com_daml_ledger_api_v2_interactive_transaction_v1_Node_size)
 #endif
+/* com_daml_ledger_api_v2_interactive_CostEstimationHints_size depends on runtime parameters */
 /* com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_size depends on runtime parameters */
 /* com_daml_ledger_api_v2_interactive_PrepareSubmissionResponse_size depends on runtime parameters */
 /* com_daml_ledger_api_v2_interactive_SinglePartySignatures_size depends on runtime parameters */
@@ -1032,13 +1077,13 @@ extern const pb_msgdesc_t com_daml_ledger_api_v2_interactive_GetPreferredPackage
 /* com_daml_ledger_api_v2_interactive_GetPreferredPackagesRequest_size depends on runtime parameters */
 /* com_daml_ledger_api_v2_interactive_GetPreferredPackagesResponse_size depends on runtime parameters */
 #define COM_DAML_LEDGER_API_V2_INTERACTIVE_COM_DAML_LEDGER_API_V2_INTERACTIVE_INTERACTIVE_SUBMISSION_SERVICE_PB_H_MAX_SIZE com_daml_ledger_api_v2_interactive_GetPreferredPackageVersionResponse_size
+#define com_daml_ledger_api_v2_interactive_CostEstimation_size 57
 #define com_daml_ledger_api_v2_interactive_DamlTransaction_NodeSeed_size 1038
 #define com_daml_ledger_api_v2_interactive_ExecuteSubmissionAndWaitResponse_size 1037
 #define com_daml_ledger_api_v2_interactive_ExecuteSubmissionResponse_size 0
 #define com_daml_ledger_api_v2_interactive_GetPreferredPackageVersionResponse_size 4110
 #define com_daml_ledger_api_v2_interactive_MinLedgerTime_size 24
 #define com_daml_ledger_api_v2_interactive_PackagePreference_size 4107
-#define com_daml_ledger_api_v2_interactive_Signature_size 2058
 #if defined(com_daml_ledger_api_v2_Transaction_size)
 #define com_daml_ledger_api_v2_interactive_ExecuteSubmissionAndWaitForTransactionResponse_size (6 + com_daml_ledger_api_v2_Transaction_size)
 #endif

@@ -63,6 +63,9 @@ PB_BIND(com_digitalasset_canton_crypto_v30_PasswordBasedEncrypted, com_digitalas
 PB_BIND(com_digitalasset_canton_crypto_v30_AsymmetricEncrypted, com_digitalasset_canton_crypto_v30_AsymmetricEncrypted, 2)
 
 
+PB_BIND(com_digitalasset_canton_crypto_v30_SigningKeysWithThreshold, com_digitalasset_canton_crypto_v30_SigningKeysWithThreshold, AUTO)
+
+
 
 
 

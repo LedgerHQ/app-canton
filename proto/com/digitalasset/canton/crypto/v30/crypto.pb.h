@@ -107,15 +107,12 @@ typedef enum _com_digitalasset_canton_crypto_v30_SigningKeyScheme {
 
 typedef enum _com_digitalasset_canton_crypto_v30_EncryptionAlgorithmSpec {
     com_digitalasset_canton_crypto_v30_EncryptionAlgorithmSpec_ENCRYPTION_ALGORITHM_SPEC_UNSPECIFIED = 0,
-    /* ECIES with ECDH, AES128 GCM, and HKDF and authentication (MAC) with HMAC-SHA256. This requires a P-256 key
-because we use SHA256 and we need to align the lengths of the curve and the hash function. */
-    com_digitalasset_canton_crypto_v30_EncryptionAlgorithmSpec_ENCRYPTION_ALGORITHM_SPEC_ECIES_HKDF_HMAC_SHA256_AES128GCM = 1,
     /* ECIES with ECDH, AES128 CBC, and HKDF and authentication (MAC) with HMAC-SHA256. This requires a P-256 key
-because we use SHA256 and we need to align the lengths of the curve the and hash function. */
-    com_digitalasset_canton_crypto_v30_EncryptionAlgorithmSpec_ENCRYPTION_ALGORITHM_SPEC_ECIES_HKDF_HMAC_SHA256_AES128CBC = 2,
+because we use SHA256 and we need to align the lengths of the curve and the hash function. */
+    com_digitalasset_canton_crypto_v30_EncryptionAlgorithmSpec_ENCRYPTION_ALGORITHM_SPEC_ECIES_HKDF_HMAC_SHA256_AES128CBC = 1,
     /* RSA with OAEP Padding,
 using SHA-256 for both the hash and in the MGF1 mask generation function along with an empty label. */
-    com_digitalasset_canton_crypto_v30_EncryptionAlgorithmSpec_ENCRYPTION_ALGORITHM_SPEC_RSA_OAEP_SHA256 = 3
+    com_digitalasset_canton_crypto_v30_EncryptionAlgorithmSpec_ENCRYPTION_ALGORITHM_SPEC_RSA_OAEP_SHA256 = 2
 } com_digitalasset_canton_crypto_v30_EncryptionAlgorithmSpec;
 
 /* @deprecated */
@@ -241,8 +238,6 @@ typedef struct _com_digitalasset_canton_crypto_v30_SigningPrivateKey {
 } com_digitalasset_canton_crypto_v30_SigningPrivateKey;
 
 typedef struct _com_digitalasset_canton_crypto_v30_SigningKeyPair {
-    bool has_public_key;
-    com_digitalasset_canton_crypto_v30_SigningPublicKey public_key;
     bool has_private_key;
     com_digitalasset_canton_crypto_v30_SigningPrivateKey private_key;
 } com_digitalasset_canton_crypto_v30_SigningKeyPair;
@@ -300,8 +295,6 @@ typedef struct _com_digitalasset_canton_crypto_v30_PrivateKey {
 } com_digitalasset_canton_crypto_v30_PrivateKey;
 
 typedef struct _com_digitalasset_canton_crypto_v30_EncryptionKeyPair {
-    bool has_public_key;
-    com_digitalasset_canton_crypto_v30_EncryptionPublicKey public_key;
     bool has_private_key;
     com_digitalasset_canton_crypto_v30_EncryptionPrivateKey private_key;
 } com_digitalasset_canton_crypto_v30_EncryptionKeyPair;
@@ -349,6 +342,13 @@ typedef struct _com_digitalasset_canton_crypto_v30_AsymmetricEncrypted {
     /* The fingerprint of the public key that was used for the encryption */
     char fingerprint[1024];
 } com_digitalasset_canton_crypto_v30_AsymmetricEncrypted;
+
+typedef struct _com_digitalasset_canton_crypto_v30_SigningKeysWithThreshold {
+    /* the designated signing keys */
+    pb_callback_t keys;
+    /* the authorization threshold */
+    uint32_t threshold;
+} com_digitalasset_canton_crypto_v30_SigningKeysWithThreshold;
 
 
 #ifdef __cplusplus
@@ -462,6 +462,7 @@ extern "C" {
 #define com_digitalasset_canton_crypto_v30_AsymmetricEncrypted_encryption_algorithm_spec_ENUMTYPE com_digitalasset_canton_crypto_v30_EncryptionAlgorithmSpec
 
 
+
 /* Initializer values for message structs */
 #define com_digitalasset_canton_crypto_v30_Hmac_init_default {_com_digitalasset_canton_crypto_v30_HmacAlgorithm_MIN, {0, {0}}}
 #define com_digitalasset_canton_crypto_v30_Salt_init_default {0, {_com_digitalasset_canton_crypto_v30_HmacAlgorithm_MIN}, {0, {0}}}
@@ -472,16 +473,17 @@ extern "C" {
 #define com_digitalasset_canton_crypto_v30_PrivateKey_init_default {0, {com_digitalasset_canton_crypto_v30_SigningPrivateKey_init_default}}
 #define com_digitalasset_canton_crypto_v30_SigningPublicKey_init_default {_com_digitalasset_canton_crypto_v30_CryptoKeyFormat_MIN, {0, {0}}, _com_digitalasset_canton_crypto_v30_SigningKeyScheme_MIN, {{NULL}, NULL}, _com_digitalasset_canton_crypto_v30_SigningKeySpec_MIN}
 #define com_digitalasset_canton_crypto_v30_SigningPrivateKey_init_default {"", _com_digitalasset_canton_crypto_v30_CryptoKeyFormat_MIN, {0, {0}}, _com_digitalasset_canton_crypto_v30_SigningKeyScheme_MIN, {{NULL}, NULL}, _com_digitalasset_canton_crypto_v30_SigningKeySpec_MIN}
-#define com_digitalasset_canton_crypto_v30_SigningKeyPair_init_default {false, com_digitalasset_canton_crypto_v30_SigningPublicKey_init_default, false, com_digitalasset_canton_crypto_v30_SigningPrivateKey_init_default}
+#define com_digitalasset_canton_crypto_v30_SigningKeyPair_init_default {false, com_digitalasset_canton_crypto_v30_SigningPrivateKey_init_default}
 #define com_digitalasset_canton_crypto_v30_RequiredSigningSpecs_init_default {{{NULL}, NULL}, {{NULL}, NULL}}
 #define com_digitalasset_canton_crypto_v30_EncryptionPublicKey_init_default {_com_digitalasset_canton_crypto_v30_CryptoKeyFormat_MIN, {0, {0}}, _com_digitalasset_canton_crypto_v30_EncryptionKeyScheme_MIN, _com_digitalasset_canton_crypto_v30_EncryptionKeySpec_MIN}
 #define com_digitalasset_canton_crypto_v30_EncryptionPrivateKey_init_default {"", _com_digitalasset_canton_crypto_v30_CryptoKeyFormat_MIN, {0, {0}}, _com_digitalasset_canton_crypto_v30_EncryptionKeyScheme_MIN, _com_digitalasset_canton_crypto_v30_EncryptionKeySpec_MIN}
-#define com_digitalasset_canton_crypto_v30_EncryptionKeyPair_init_default {false, com_digitalasset_canton_crypto_v30_EncryptionPublicKey_init_default, false, com_digitalasset_canton_crypto_v30_EncryptionPrivateKey_init_default}
+#define com_digitalasset_canton_crypto_v30_EncryptionKeyPair_init_default {false, com_digitalasset_canton_crypto_v30_EncryptionPrivateKey_init_default}
 #define com_digitalasset_canton_crypto_v30_RequiredEncryptionSpecs_init_default {{{NULL}, NULL}, {{NULL}, NULL}}
 #define com_digitalasset_canton_crypto_v30_CryptoKeyPair_init_default {0, {com_digitalasset_canton_crypto_v30_SigningKeyPair_init_default}}
 #define com_digitalasset_canton_crypto_v30_SymmetricKey_init_default {_com_digitalasset_canton_crypto_v30_CryptoKeyFormat_MIN, {0, {0}}, _com_digitalasset_canton_crypto_v30_SymmetricKeyScheme_MIN}
 #define com_digitalasset_canton_crypto_v30_PasswordBasedEncrypted_init_default {{0, {0}}, _com_digitalasset_canton_crypto_v30_SymmetricKeyScheme_MIN, _com_digitalasset_canton_crypto_v30_PbkdfScheme_MIN, {0, {0}}}
 #define com_digitalasset_canton_crypto_v30_AsymmetricEncrypted_init_default {{0, {0}}, _com_digitalasset_canton_crypto_v30_EncryptionAlgorithmSpec_MIN, ""}
+#define com_digitalasset_canton_crypto_v30_SigningKeysWithThreshold_init_default {{{NULL}, NULL}, 0}
 #define com_digitalasset_canton_crypto_v30_Hmac_init_zero {_com_digitalasset_canton_crypto_v30_HmacAlgorithm_MIN, {0, {0}}}
 #define com_digitalasset_canton_crypto_v30_Salt_init_zero {0, {_com_digitalasset_canton_crypto_v30_HmacAlgorithm_MIN}, {0, {0}}}
 #define com_digitalasset_canton_crypto_v30_Signature_init_zero {_com_digitalasset_canton_crypto_v30_SignatureFormat_MIN, {0, {0}}, "", _com_digitalasset_canton_crypto_v30_SigningAlgorithmSpec_MIN, false, com_digitalasset_canton_crypto_v30_SignatureDelegation_init_zero}
@@ -491,16 +493,17 @@ extern "C" {
 #define com_digitalasset_canton_crypto_v30_PrivateKey_init_zero {0, {com_digitalasset_canton_crypto_v30_SigningPrivateKey_init_zero}}
 #define com_digitalasset_canton_crypto_v30_SigningPublicKey_init_zero {_com_digitalasset_canton_crypto_v30_CryptoKeyFormat_MIN, {0, {0}}, _com_digitalasset_canton_crypto_v30_SigningKeyScheme_MIN, {{NULL}, NULL}, _com_digitalasset_canton_crypto_v30_SigningKeySpec_MIN}
 #define com_digitalasset_canton_crypto_v30_SigningPrivateKey_init_zero {"", _com_digitalasset_canton_crypto_v30_CryptoKeyFormat_MIN, {0, {0}}, _com_digitalasset_canton_crypto_v30_SigningKeyScheme_MIN, {{NULL}, NULL}, _com_digitalasset_canton_crypto_v30_SigningKeySpec_MIN}
-#define com_digitalasset_canton_crypto_v30_SigningKeyPair_init_zero {false, com_digitalasset_canton_crypto_v30_SigningPublicKey_init_zero, false, com_digitalasset_canton_crypto_v30_SigningPrivateKey_init_zero}
+#define com_digitalasset_canton_crypto_v30_SigningKeyPair_init_zero {false, com_digitalasset_canton_crypto_v30_SigningPrivateKey_init_zero}
 #define com_digitalasset_canton_crypto_v30_RequiredSigningSpecs_init_zero {{{NULL}, NULL}, {{NULL}, NULL}}
 #define com_digitalasset_canton_crypto_v30_EncryptionPublicKey_init_zero {_com_digitalasset_canton_crypto_v30_CryptoKeyFormat_MIN, {0, {0}}, _com_digitalasset_canton_crypto_v30_EncryptionKeyScheme_MIN, _com_digitalasset_canton_crypto_v30_EncryptionKeySpec_MIN}
 #define com_digitalasset_canton_crypto_v30_EncryptionPrivateKey_init_zero {"", _com_digitalasset_canton_crypto_v30_CryptoKeyFormat_MIN, {0, {0}}, _com_digitalasset_canton_crypto_v30_EncryptionKeyScheme_MIN, _com_digitalasset_canton_crypto_v30_EncryptionKeySpec_MIN}
-#define com_digitalasset_canton_crypto_v30_EncryptionKeyPair_init_zero {false, com_digitalasset_canton_crypto_v30_EncryptionPublicKey_init_zero, false, com_digitalasset_canton_crypto_v30_EncryptionPrivateKey_init_zero}
+#define com_digitalasset_canton_crypto_v30_EncryptionKeyPair_init_zero {false, com_digitalasset_canton_crypto_v30_EncryptionPrivateKey_init_zero}
 #define com_digitalasset_canton_crypto_v30_RequiredEncryptionSpecs_init_zero {{{NULL}, NULL}, {{NULL}, NULL}}
 #define com_digitalasset_canton_crypto_v30_CryptoKeyPair_init_zero {0, {com_digitalasset_canton_crypto_v30_SigningKeyPair_init_zero}}
 #define com_digitalasset_canton_crypto_v30_SymmetricKey_init_zero {_com_digitalasset_canton_crypto_v30_CryptoKeyFormat_MIN, {0, {0}}, _com_digitalasset_canton_crypto_v30_SymmetricKeyScheme_MIN}
 #define com_digitalasset_canton_crypto_v30_PasswordBasedEncrypted_init_zero {{0, {0}}, _com_digitalasset_canton_crypto_v30_SymmetricKeyScheme_MIN, _com_digitalasset_canton_crypto_v30_PbkdfScheme_MIN, {0, {0}}}
 #define com_digitalasset_canton_crypto_v30_AsymmetricEncrypted_init_zero {{0, {0}}, _com_digitalasset_canton_crypto_v30_EncryptionAlgorithmSpec_MIN, ""}
+#define com_digitalasset_canton_crypto_v30_SigningKeysWithThreshold_init_zero {{{NULL}, NULL}, 0}
 
 /* Field tags (for use in manual encoding/decoding) */
 #define com_digitalasset_canton_crypto_v30_Hmac_algorithm_tag 1
@@ -530,7 +533,6 @@ extern "C" {
 #define com_digitalasset_canton_crypto_v30_SigningPrivateKey_scheme_tag 4
 #define com_digitalasset_canton_crypto_v30_SigningPrivateKey_usage_tag 5
 #define com_digitalasset_canton_crypto_v30_SigningPrivateKey_key_spec_tag 6
-#define com_digitalasset_canton_crypto_v30_SigningKeyPair_public_key_tag 1
 #define com_digitalasset_canton_crypto_v30_SigningKeyPair_private_key_tag 2
 #define com_digitalasset_canton_crypto_v30_RequiredSigningSpecs_algorithms_tag 1
 #define com_digitalasset_canton_crypto_v30_RequiredSigningSpecs_keys_tag 2
@@ -549,7 +551,6 @@ extern "C" {
 #define com_digitalasset_canton_crypto_v30_EncryptionPrivateKey_key_spec_tag 5
 #define com_digitalasset_canton_crypto_v30_PrivateKey_signing_private_key_tag 1
 #define com_digitalasset_canton_crypto_v30_PrivateKey_encryption_private_key_tag 2
-#define com_digitalasset_canton_crypto_v30_EncryptionKeyPair_public_key_tag 1
 #define com_digitalasset_canton_crypto_v30_EncryptionKeyPair_private_key_tag 2
 #define com_digitalasset_canton_crypto_v30_RequiredEncryptionSpecs_algorithms_tag 1
 #define com_digitalasset_canton_crypto_v30_RequiredEncryptionSpecs_keys_tag 2
@@ -565,6 +566,8 @@ extern "C" {
 #define com_digitalasset_canton_crypto_v30_AsymmetricEncrypted_ciphertext_tag 1
 #define com_digitalasset_canton_crypto_v30_AsymmetricEncrypted_encryption_algorithm_spec_tag 2
 #define com_digitalasset_canton_crypto_v30_AsymmetricEncrypted_fingerprint_tag 3
+#define com_digitalasset_canton_crypto_v30_SigningKeysWithThreshold_keys_tag 1
+#define com_digitalasset_canton_crypto_v30_SigningKeysWithThreshold_threshold_tag 2
 
 /* Struct field encoding specification for nanopb */
 #define com_digitalasset_canton_crypto_v30_Hmac_FIELDLIST(X, a) \
@@ -643,11 +646,9 @@ X(a, STATIC,   SINGULAR, UENUM,    key_spec,          6)
 #define com_digitalasset_canton_crypto_v30_SigningPrivateKey_DEFAULT NULL
 
 #define com_digitalasset_canton_crypto_v30_SigningKeyPair_FIELDLIST(X, a) \
-X(a, STATIC,   OPTIONAL, MESSAGE,  public_key,        1) \
 X(a, STATIC,   OPTIONAL, MESSAGE,  private_key,       2)
 #define com_digitalasset_canton_crypto_v30_SigningKeyPair_CALLBACK NULL
 #define com_digitalasset_canton_crypto_v30_SigningKeyPair_DEFAULT NULL
-#define com_digitalasset_canton_crypto_v30_SigningKeyPair_public_key_MSGTYPE com_digitalasset_canton_crypto_v30_SigningPublicKey
 #define com_digitalasset_canton_crypto_v30_SigningKeyPair_private_key_MSGTYPE com_digitalasset_canton_crypto_v30_SigningPrivateKey
 
 #define com_digitalasset_canton_crypto_v30_RequiredSigningSpecs_FIELDLIST(X, a) \
@@ -674,11 +675,9 @@ X(a, STATIC,   SINGULAR, UENUM,    key_spec,          5)
 #define com_digitalasset_canton_crypto_v30_EncryptionPrivateKey_DEFAULT NULL
 
 #define com_digitalasset_canton_crypto_v30_EncryptionKeyPair_FIELDLIST(X, a) \
-X(a, STATIC,   OPTIONAL, MESSAGE,  public_key,        1) \
 X(a, STATIC,   OPTIONAL, MESSAGE,  private_key,       2)
 #define com_digitalasset_canton_crypto_v30_EncryptionKeyPair_CALLBACK NULL
 #define com_digitalasset_canton_crypto_v30_EncryptionKeyPair_DEFAULT NULL
-#define com_digitalasset_canton_crypto_v30_EncryptionKeyPair_public_key_MSGTYPE com_digitalasset_canton_crypto_v30_EncryptionPublicKey
 #define com_digitalasset_canton_crypto_v30_EncryptionKeyPair_private_key_MSGTYPE com_digitalasset_canton_crypto_v30_EncryptionPrivateKey
 
 #define com_digitalasset_canton_crypto_v30_RequiredEncryptionSpecs_FIELDLIST(X, a) \
@@ -717,6 +716,13 @@ X(a, STATIC,   SINGULAR, STRING,   fingerprint,       3)
 #define com_digitalasset_canton_crypto_v30_AsymmetricEncrypted_CALLBACK NULL
 #define com_digitalasset_canton_crypto_v30_AsymmetricEncrypted_DEFAULT NULL
 
+#define com_digitalasset_canton_crypto_v30_SigningKeysWithThreshold_FIELDLIST(X, a) \
+X(a, CALLBACK, REPEATED, MESSAGE,  keys,              1) \
+X(a, STATIC,   SINGULAR, UINT32,   threshold,         2)
+#define com_digitalasset_canton_crypto_v30_SigningKeysWithThreshold_CALLBACK pb_default_field_callback
+#define com_digitalasset_canton_crypto_v30_SigningKeysWithThreshold_DEFAULT NULL
+#define com_digitalasset_canton_crypto_v30_SigningKeysWithThreshold_keys_MSGTYPE com_digitalasset_canton_crypto_v30_SigningPublicKey
+
 extern const pb_msgdesc_t com_digitalasset_canton_crypto_v30_Hmac_msg;
 extern const pb_msgdesc_t com_digitalasset_canton_crypto_v30_Salt_msg;
 extern const pb_msgdesc_t com_digitalasset_canton_crypto_v30_Signature_msg;
@@ -736,6 +742,7 @@ extern const pb_msgdesc_t com_digitalasset_canton_crypto_v30_CryptoKeyPair_msg;
 extern const pb_msgdesc_t com_digitalasset_canton_crypto_v30_SymmetricKey_msg;
 extern const pb_msgdesc_t com_digitalasset_canton_crypto_v30_PasswordBasedEncrypted_msg;
 extern const pb_msgdesc_t com_digitalasset_canton_crypto_v30_AsymmetricEncrypted_msg;
+extern const pb_msgdesc_t com_digitalasset_canton_crypto_v30_SigningKeysWithThreshold_msg;
 
 /* Defines for backwards compatibility with code written before nanopb-0.4.0 */
 #define com_digitalasset_canton_crypto_v30_Hmac_fields &com_digitalasset_canton_crypto_v30_Hmac_msg
@@ -757,6 +764,7 @@ extern const pb_msgdesc_t com_digitalasset_canton_crypto_v30_AsymmetricEncrypted
 #define com_digitalasset_canton_crypto_v30_SymmetricKey_fields &com_digitalasset_canton_crypto_v30_SymmetricKey_msg
 #define com_digitalasset_canton_crypto_v30_PasswordBasedEncrypted_fields &com_digitalasset_canton_crypto_v30_PasswordBasedEncrypted_msg
 #define com_digitalasset_canton_crypto_v30_AsymmetricEncrypted_fields &com_digitalasset_canton_crypto_v30_AsymmetricEncrypted_msg
+#define com_digitalasset_canton_crypto_v30_SigningKeysWithThreshold_fields &com_digitalasset_canton_crypto_v30_SigningKeysWithThreshold_msg
 
 /* Maximum encoded size of messages (where known) */
 /* com_digitalasset_canton_crypto_v30_PublicKey_size depends on runtime parameters */
@@ -768,9 +776,10 @@ extern const pb_msgdesc_t com_digitalasset_canton_crypto_v30_AsymmetricEncrypted
 /* com_digitalasset_canton_crypto_v30_RequiredSigningSpecs_size depends on runtime parameters */
 /* com_digitalasset_canton_crypto_v30_RequiredEncryptionSpecs_size depends on runtime parameters */
 /* com_digitalasset_canton_crypto_v30_CryptoKeyPair_size depends on runtime parameters */
+/* com_digitalasset_canton_crypto_v30_SigningKeysWithThreshold_size depends on runtime parameters */
 #define COM_DIGITALASSET_CANTON_CRYPTO_V30_COM_DIGITALASSET_CANTON_CRYPTO_V30_CRYPTO_PB_H_MAX_SIZE com_digitalasset_canton_crypto_v30_Signature_size
 #define com_digitalasset_canton_crypto_v30_AsymmetricEncrypted_size 2055
-#define com_digitalasset_canton_crypto_v30_EncryptionKeyPair_size 3100
+#define com_digitalasset_canton_crypto_v30_EncryptionKeyPair_size 2063
 #define com_digitalasset_canton_crypto_v30_EncryptionPrivateKey_size 2060
 #define com_digitalasset_canton_crypto_v30_EncryptionPublicKey_size 1034
 #define com_digitalasset_canton_crypto_v30_Hmac_size 1029

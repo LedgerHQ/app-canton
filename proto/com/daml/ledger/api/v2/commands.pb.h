@@ -116,11 +116,14 @@ typedef struct _com_daml_ledger_api_v2_DisclosedContract {
     /* The template id of the contract.
  The identifier uses the package-id reference format.
 
- Required */
+ If provided, used to validate the template id of the contract serialized in the created_event_blob.
+ Optional */
     bool has_template_id;
     com_daml_ledger_api_v2_Identifier template_id;
     /* The contract id
- Required */
+
+ If provided, used to validate the contract id of the contract serialized in the created_event_blob.
+ Optional */
     char contract_id[1024];
     /* Opaque byte string containing the complete payload required by the Daml engine
  to reconstruct a contract not known to the receiving participant.

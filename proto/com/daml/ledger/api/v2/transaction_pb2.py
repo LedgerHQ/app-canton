@@ -17,7 +17,7 @@ from com.daml.ledger.api.v2 import trace_context_pb2 as com_dot_daml_dot_ledger_
 from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n(com/daml/ledger/api/v2/transaction.proto\x12\x16\x63om.daml.ledger.api.v2\x1a\"com/daml/ledger/api/v2/event.proto\x1a*com/daml/ledger/api/v2/trace_context.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x8d\x01\n\tTreeEvent\x12\x37\n\x07\x63reated\x18\x01 \x01(\x0b\x32$.com.daml.ledger.api.v2.CreatedEventH\x00\x12;\n\texercised\x18\x02 \x01(\x0b\x32&.com.daml.ledger.api.v2.ExercisedEventH\x00:\x02\x18\x01\x42\x06\n\x04kind\"\xbf\x03\n\x0fTransactionTree\x12\x11\n\tupdate_id\x18\x01 \x01(\t\x12\x12\n\ncommand_id\x18\x02 \x01(\t\x12\x13\n\x0bworkflow_id\x18\x03 \x01(\t\x12\x30\n\x0c\x65\x66\x66\x65\x63tive_at\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x0e\n\x06offset\x18\x05 \x01(\x03\x12M\n\x0c\x65vents_by_id\x18\x06 \x03(\x0b\x32\x37.com.daml.ledger.api.v2.TransactionTree.EventsByIdEntry\x12\x17\n\x0fsynchronizer_id\x18\x07 \x01(\t\x12;\n\rtrace_context\x18\x08 \x01(\x0b\x32$.com.daml.ledger.api.v2.TraceContext\x12/\n\x0brecord_time\x18\t \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x1aT\n\x0f\x45ventsByIdEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\x30\n\x05value\x18\x02 \x01(\x0b\x32!.com.daml.ledger.api.v2.TreeEvent:\x02\x38\x01:\x02\x18\x01\"\x87\x03\n\x0bTransaction\x12\x11\n\tupdate_id\x18\x01 \x01(\t\x12\x12\n\ncommand_id\x18\x02 \x01(\t\x12\x13\n\x0bworkflow_id\x18\x03 \x01(\t\x12\x30\n\x0c\x65\x66\x66\x65\x63tive_at\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12-\n\x06\x65vents\x18\x05 \x03(\x0b\x32\x1d.com.daml.ledger.api.v2.Event\x12\x0e\n\x06offset\x18\x06 \x01(\x03\x12\x17\n\x0fsynchronizer_id\x18\x07 \x01(\t\x12;\n\rtrace_context\x18\x08 \x01(\x0b\x32$.com.daml.ledger.api.v2.TraceContext\x12/\n\x0brecord_time\x18\t \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12&\n\x19\x65xternal_transaction_hash\x18\n \x01(\x0cH\x00\x88\x01\x01\x42\x1c\n\x1a_external_transaction_hashBH\n\x16\x63om.daml.ledger.api.v2B\x15TransactionOuterClass\xaa\x02\x16\x43om.Daml.Ledger.Api.V2b\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n(com/daml/ledger/api/v2/transaction.proto\x12\x16\x63om.daml.ledger.api.v2\x1a\"com/daml/ledger/api/v2/event.proto\x1a*com/daml/ledger/api/v2/trace_context.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x87\x03\n\x0bTransaction\x12\x11\n\tupdate_id\x18\x01 \x01(\t\x12\x12\n\ncommand_id\x18\x02 \x01(\t\x12\x13\n\x0bworkflow_id\x18\x03 \x01(\t\x12\x30\n\x0c\x65\x66\x66\x65\x63tive_at\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12-\n\x06\x65vents\x18\x05 \x03(\x0b\x32\x1d.com.daml.ledger.api.v2.Event\x12\x0e\n\x06offset\x18\x06 \x01(\x03\x12\x17\n\x0fsynchronizer_id\x18\x07 \x01(\t\x12;\n\rtrace_context\x18\x08 \x01(\x0b\x32$.com.daml.ledger.api.v2.TraceContext\x12/\n\x0brecord_time\x18\t \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12&\n\x19\x65xternal_transaction_hash\x18\n \x01(\x0cH\x00\x88\x01\x01\x42\x1c\n\x1a_external_transaction_hashBH\n\x16\x63om.daml.ledger.api.v2B\x15TransactionOuterClass\xaa\x02\x16\x43om.Daml.Ledger.Api.V2b\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -25,18 +25,6 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'com.daml.ledger.api.v2.tran
 if _descriptor._USE_C_DESCRIPTORS == False:
   _globals['DESCRIPTOR']._options = None
   _globals['DESCRIPTOR']._serialized_options = b'\n\026com.daml.ledger.api.v2B\025TransactionOuterClass\252\002\026Com.Daml.Ledger.Api.V2'
-  _globals['_TREEEVENT']._options = None
-  _globals['_TREEEVENT']._serialized_options = b'\030\001'
-  _globals['_TRANSACTIONTREE_EVENTSBYIDENTRY']._options = None
-  _globals['_TRANSACTIONTREE_EVENTSBYIDENTRY']._serialized_options = b'8\001'
-  _globals['_TRANSACTIONTREE']._options = None
-  _globals['_TRANSACTIONTREE']._serialized_options = b'\030\001'
-  _globals['_TREEEVENT']._serialized_start=182
-  _globals['_TREEEVENT']._serialized_end=323
-  _globals['_TRANSACTIONTREE']._serialized_start=326
-  _globals['_TRANSACTIONTREE']._serialized_end=773
-  _globals['_TRANSACTIONTREE_EVENTSBYIDENTRY']._serialized_start=685
-  _globals['_TRANSACTIONTREE_EVENTSBYIDENTRY']._serialized_end=769
-  _globals['_TRANSACTION']._serialized_start=776
-  _globals['_TRANSACTION']._serialized_end=1167
+  _globals['_TRANSACTION']._serialized_start=182
+  _globals['_TRANSACTION']._serialized_end=573
 # @@protoc_insertion_point(module_scope)

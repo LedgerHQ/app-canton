@@ -111,35 +111,6 @@ typedef struct _com_daml_ledger_api_v2_CumulativeFilter {
     } identifier_filter;
 } com_daml_ledger_api_v2_CumulativeFilter;
 
-/* Provided for backwards compatibility, it will be removed in the Canton version 3.4.0.
- Used both for filtering create and archive events as well as for filtering transaction trees. */
-typedef struct _com_daml_ledger_api_v2_TransactionFilter {
-    /* Each key must be a valid PartyIdString (as described in ``value.proto``).
- The interpretation of the filter depends on the transaction-shape being filtered:
-
- 1. For **transaction trees** (used in GetUpdateTreesResponse for backwards compatibility) all party keys used as
-    wildcard filters, and all subtrees whose root has one of the listed parties as an informee are returned.
-    If there are ``CumulativeFilter``s, those will control returned ``CreatedEvent`` fields where applicable, but will
-    not be used for template/interface filtering.
- 2. For **ledger-effects** create and exercise events are returned, for which the witnesses include at least one of
-    the listed parties and match the per-party filter.
- 3. For **transaction and active-contract-set streams** create and archive events are returned for all contracts whose
-    stakeholders include at least one of the listed parties and match the per-party filter.
-
- Required */
-    pb_callback_t filters_by_party;
-    /* Wildcard filters that apply to all the parties existing on the participant. The interpretation of the filters is the same
- with the per-party filter as described above. */
-    bool has_filters_for_any_party;
-    com_daml_ledger_api_v2_Filters filters_for_any_party;
-} com_daml_ledger_api_v2_TransactionFilter;
-
-typedef struct _com_daml_ledger_api_v2_TransactionFilter_FiltersByPartyEntry {
-    char key[1024];
-    bool has_value;
-    com_daml_ledger_api_v2_Filters value;
-} com_daml_ledger_api_v2_TransactionFilter_FiltersByPartyEntry;
-
 /* A format for events which defines both which events should be included
  and what data should be computed and included for them.
 
@@ -233,8 +204,6 @@ extern "C" {
 
 
 
-
-
 #define com_daml_ledger_api_v2_TransactionFormat_transaction_shape_ENUMTYPE com_daml_ledger_api_v2_TransactionShape
 
 
@@ -247,8 +216,6 @@ extern "C" {
 #define com_daml_ledger_api_v2_WildcardFilter_init_default {0}
 #define com_daml_ledger_api_v2_InterfaceFilter_init_default {false, com_daml_ledger_api_v2_Identifier_init_default, 0, 0}
 #define com_daml_ledger_api_v2_TemplateFilter_init_default {false, com_daml_ledger_api_v2_Identifier_init_default, 0}
-#define com_daml_ledger_api_v2_TransactionFilter_init_default {{{NULL}, NULL}, false, com_daml_ledger_api_v2_Filters_init_default}
-#define com_daml_ledger_api_v2_TransactionFilter_FiltersByPartyEntry_init_default {"", false, com_daml_ledger_api_v2_Filters_init_default}
 #define com_daml_ledger_api_v2_EventFormat_init_default {{{NULL}, NULL}, false, com_daml_ledger_api_v2_Filters_init_default, 0}
 #define com_daml_ledger_api_v2_EventFormat_FiltersByPartyEntry_init_default {"", false, com_daml_ledger_api_v2_Filters_init_default}
 #define com_daml_ledger_api_v2_TransactionFormat_init_default {false, com_daml_ledger_api_v2_EventFormat_init_default, _com_daml_ledger_api_v2_TransactionShape_MIN}
@@ -260,8 +227,6 @@ extern "C" {
 #define com_daml_ledger_api_v2_WildcardFilter_init_zero {0}
 #define com_daml_ledger_api_v2_InterfaceFilter_init_zero {false, com_daml_ledger_api_v2_Identifier_init_zero, 0, 0}
 #define com_daml_ledger_api_v2_TemplateFilter_init_zero {false, com_daml_ledger_api_v2_Identifier_init_zero, 0}
-#define com_daml_ledger_api_v2_TransactionFilter_init_zero {{{NULL}, NULL}, false, com_daml_ledger_api_v2_Filters_init_zero}
-#define com_daml_ledger_api_v2_TransactionFilter_FiltersByPartyEntry_init_zero {"", false, com_daml_ledger_api_v2_Filters_init_zero}
 #define com_daml_ledger_api_v2_EventFormat_init_zero {{{NULL}, NULL}, false, com_daml_ledger_api_v2_Filters_init_zero, 0}
 #define com_daml_ledger_api_v2_EventFormat_FiltersByPartyEntry_init_zero {"", false, com_daml_ledger_api_v2_Filters_init_zero}
 #define com_daml_ledger_api_v2_TransactionFormat_init_zero {false, com_daml_ledger_api_v2_EventFormat_init_zero, _com_daml_ledger_api_v2_TransactionShape_MIN}
@@ -280,10 +245,6 @@ extern "C" {
 #define com_daml_ledger_api_v2_CumulativeFilter_wildcard_filter_tag 1
 #define com_daml_ledger_api_v2_CumulativeFilter_interface_filter_tag 2
 #define com_daml_ledger_api_v2_CumulativeFilter_template_filter_tag 3
-#define com_daml_ledger_api_v2_TransactionFilter_filters_by_party_tag 1
-#define com_daml_ledger_api_v2_TransactionFilter_filters_for_any_party_tag 2
-#define com_daml_ledger_api_v2_TransactionFilter_FiltersByPartyEntry_key_tag 1
-#define com_daml_ledger_api_v2_TransactionFilter_FiltersByPartyEntry_value_tag 2
 #define com_daml_ledger_api_v2_EventFormat_filters_by_party_tag 1
 #define com_daml_ledger_api_v2_EventFormat_filters_for_any_party_tag 2
 #define com_daml_ledger_api_v2_EventFormat_verbose_tag 3
@@ -334,21 +295,6 @@ X(a, STATIC,   SINGULAR, BOOL,     include_created_event_blob,   2)
 #define com_daml_ledger_api_v2_TemplateFilter_DEFAULT NULL
 #define com_daml_ledger_api_v2_TemplateFilter_template_id_MSGTYPE com_daml_ledger_api_v2_Identifier
 
-#define com_daml_ledger_api_v2_TransactionFilter_FIELDLIST(X, a) \
-X(a, CALLBACK, REPEATED, MESSAGE,  filters_by_party,   1) \
-X(a, STATIC,   OPTIONAL, MESSAGE,  filters_for_any_party,   2)
-#define com_daml_ledger_api_v2_TransactionFilter_CALLBACK pb_default_field_callback
-#define com_daml_ledger_api_v2_TransactionFilter_DEFAULT NULL
-#define com_daml_ledger_api_v2_TransactionFilter_filters_by_party_MSGTYPE com_daml_ledger_api_v2_TransactionFilter_FiltersByPartyEntry
-#define com_daml_ledger_api_v2_TransactionFilter_filters_for_any_party_MSGTYPE com_daml_ledger_api_v2_Filters
-
-#define com_daml_ledger_api_v2_TransactionFilter_FiltersByPartyEntry_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, STRING,   key,               1) \
-X(a, STATIC,   OPTIONAL, MESSAGE,  value,             2)
-#define com_daml_ledger_api_v2_TransactionFilter_FiltersByPartyEntry_CALLBACK NULL
-#define com_daml_ledger_api_v2_TransactionFilter_FiltersByPartyEntry_DEFAULT NULL
-#define com_daml_ledger_api_v2_TransactionFilter_FiltersByPartyEntry_value_MSGTYPE com_daml_ledger_api_v2_Filters
-
 #define com_daml_ledger_api_v2_EventFormat_FIELDLIST(X, a) \
 X(a, CALLBACK, REPEATED, MESSAGE,  filters_by_party,   1) \
 X(a, STATIC,   OPTIONAL, MESSAGE,  filters_for_any_party,   2) \
@@ -398,8 +344,6 @@ extern const pb_msgdesc_t com_daml_ledger_api_v2_CumulativeFilter_msg;
 extern const pb_msgdesc_t com_daml_ledger_api_v2_WildcardFilter_msg;
 extern const pb_msgdesc_t com_daml_ledger_api_v2_InterfaceFilter_msg;
 extern const pb_msgdesc_t com_daml_ledger_api_v2_TemplateFilter_msg;
-extern const pb_msgdesc_t com_daml_ledger_api_v2_TransactionFilter_msg;
-extern const pb_msgdesc_t com_daml_ledger_api_v2_TransactionFilter_FiltersByPartyEntry_msg;
 extern const pb_msgdesc_t com_daml_ledger_api_v2_EventFormat_msg;
 extern const pb_msgdesc_t com_daml_ledger_api_v2_EventFormat_FiltersByPartyEntry_msg;
 extern const pb_msgdesc_t com_daml_ledger_api_v2_TransactionFormat_msg;
@@ -413,8 +357,6 @@ extern const pb_msgdesc_t com_daml_ledger_api_v2_UpdateFormat_msg;
 #define com_daml_ledger_api_v2_WildcardFilter_fields &com_daml_ledger_api_v2_WildcardFilter_msg
 #define com_daml_ledger_api_v2_InterfaceFilter_fields &com_daml_ledger_api_v2_InterfaceFilter_msg
 #define com_daml_ledger_api_v2_TemplateFilter_fields &com_daml_ledger_api_v2_TemplateFilter_msg
-#define com_daml_ledger_api_v2_TransactionFilter_fields &com_daml_ledger_api_v2_TransactionFilter_msg
-#define com_daml_ledger_api_v2_TransactionFilter_FiltersByPartyEntry_fields &com_daml_ledger_api_v2_TransactionFilter_FiltersByPartyEntry_msg
 #define com_daml_ledger_api_v2_EventFormat_fields &com_daml_ledger_api_v2_EventFormat_msg
 #define com_daml_ledger_api_v2_EventFormat_FiltersByPartyEntry_fields &com_daml_ledger_api_v2_EventFormat_FiltersByPartyEntry_msg
 #define com_daml_ledger_api_v2_TransactionFormat_fields &com_daml_ledger_api_v2_TransactionFormat_msg
@@ -424,8 +366,6 @@ extern const pb_msgdesc_t com_daml_ledger_api_v2_UpdateFormat_msg;
 
 /* Maximum encoded size of messages (where known) */
 /* com_daml_ledger_api_v2_Filters_size depends on runtime parameters */
-/* com_daml_ledger_api_v2_TransactionFilter_size depends on runtime parameters */
-/* com_daml_ledger_api_v2_TransactionFilter_FiltersByPartyEntry_size depends on runtime parameters */
 /* com_daml_ledger_api_v2_EventFormat_size depends on runtime parameters */
 /* com_daml_ledger_api_v2_EventFormat_FiltersByPartyEntry_size depends on runtime parameters */
 /* com_daml_ledger_api_v2_TransactionFormat_size depends on runtime parameters */

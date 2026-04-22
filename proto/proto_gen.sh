@@ -20,7 +20,7 @@ OUTPUT_DIR="./"
 NANOPB_GENERATOR="../vendor/nanopb/generator/protoc-gen-nanopb"
 PROTOC="../vendor/nanopb/generator/protoc"
 PROTO_SOURCE_REPO_URL="git@github.com:LedgerHQ/canton-protos-scala.git"
-PROTO_SOURCE_REPO_REF="v1.2.0"
+PROTO_SOURCE_REPO_REF="v1.4.0"
 
 # Download utility
 download_if_not_exists() {
@@ -398,5 +398,7 @@ generate_nanopb_code "$LEDGER_API_PROTO_PATH" "$LEDGER_API_V2_PATH/completion.pr
 generate_nanopb_code "$LEDGER_API_PROTO_PATH" "$LEDGER_API_V2_PATH/event.proto"
 generate_nanopb_code "$LEDGER_API_PROTO_PATH" "$LEDGER_API_V2_PATH/transaction.proto"
 generate_nanopb_code "$LEDGER_API_PROTO_PATH" "$LEDGER_API_V2_PATH/transaction_filter.proto"
+generate_nanopb_code "$LEDGER_API_PROTO_PATH" "$LEDGER_API_V2_PATH/crypto.proto"
+
 
 green "Done! Generated files are in: $OUTPUT_DIR"
