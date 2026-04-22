@@ -270,6 +270,16 @@ def test_sign_token_transfer(
         custom_screen_text="Sign transaction to",
     )
 
+def test_sign_token_transfer_cip107(
+    backend: BackendInterface, scenario_navigator: NavigateWithScenario
+) -> None:
+    _sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_cip107.json",
+        custom_screen_text="Sign transaction to",
+    )
+
 def test_sign_token_transfer_lower_case(
     backend: BackendInterface, scenario_navigator: NavigateWithScenario
 ) -> None:
