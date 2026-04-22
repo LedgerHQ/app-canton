@@ -455,8 +455,6 @@ MUST_CHECK static bool decode_record_field(pb_istream_t *stream,
 
     decode_value_primitive_variants(&rf.value);
 
-    PRINTF("/Decoded Record field with label: %s\n", rf.label);
-
     pb_release(com_daml_ledger_api_v2_cb_RecordField_fields, &rf);
 
     return true;
