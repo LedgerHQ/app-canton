@@ -797,6 +797,14 @@ MUST_CHECK static bool decode_create(pb_istream_t *stream, const pb_field_t *fie
             for (size_t i = 0; i < daml_tx->node_seeds_count; ++i) {
                 if (daml_tx->node_seeds[i].node_id == ctx.node_id) {
                     PRINTF("Found seed for node id %d\n", ctx.node_id);
+                    if (daml_tx->node_seeds[i].seed == NULL ||
+                        daml_tx->node_seeds[i].seed->size != SHA256_HASH_LEN) {
+                        PRINTF("Invalid node seed length\n");
+                        pb_release(
+                            com_daml_ledger_api_v2_interactive_transaction_v1_cb_Create_fields,
+                            &c_cb);
+                        return false;
+                    }
                     seed = daml_tx->node_seeds[i].seed->bytes;
                     break;
                 }
@@ -856,10 +864,23 @@ MUST_CHECK static bool decode_exercise(pb_istream_t *stream, const pb_field_t *f
         for (size_t i = 0; i < daml_tx->node_seeds_count; ++i) {
             if (daml_tx->node_seeds[i].node_id == ctx.node_id) {
                 PRINTF("Found seed for node id %d\n", ctx.node_id);
+                if (daml_tx->node_seeds[i].seed == NULL ||
+                    daml_tx->node_seeds[i].seed->size != SHA256_HASH_LEN) {
+                    PRINTF("Invalid node seed length\n");
+                    pb_release(com_daml_ledger_api_v2_interactive_transaction_v1_cb_Exercise_fields,
+                               &e);
+                    return false;
+                }
                 seed = daml_tx->node_seeds[i].seed->bytes;
                 break;
             }
         }
+    }
+
+    if (seed == NULL) {
+        PRINTF("Missing seed for node id %d\n", ctx.node_id);
+        pb_release(com_daml_ledger_api_v2_interactive_transaction_v1_cb_Exercise_fields, &e);
+        return false;
     }
 
     encode_exercise_start(&ctx.node_hw, &e, seed);
