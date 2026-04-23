@@ -21,12 +21,6 @@ PB_BIND(com_daml_ledger_api_v2_InterfaceFilter, com_daml_ledger_api_v2_Interface
 PB_BIND(com_daml_ledger_api_v2_TemplateFilter, com_daml_ledger_api_v2_TemplateFilter, 2)
 
 
-PB_BIND(com_daml_ledger_api_v2_TransactionFilter, com_daml_ledger_api_v2_TransactionFilter, AUTO)
-
-
-PB_BIND(com_daml_ledger_api_v2_TransactionFilter_FiltersByPartyEntry, com_daml_ledger_api_v2_TransactionFilter_FiltersByPartyEntry, 2)
-
-
 PB_BIND(com_daml_ledger_api_v2_EventFormat, com_daml_ledger_api_v2_EventFormat, AUTO)
 
 

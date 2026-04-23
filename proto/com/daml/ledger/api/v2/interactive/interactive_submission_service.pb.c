@@ -6,13 +6,16 @@
 #error Regenerate this file with the current version of nanopb generator.
 #endif
 
+PB_BIND(com_daml_ledger_api_v2_interactive_CostEstimationHints, com_daml_ledger_api_v2_interactive_CostEstimationHints, AUTO)
+
+
+PB_BIND(com_daml_ledger_api_v2_interactive_CostEstimation, com_daml_ledger_api_v2_interactive_CostEstimation, AUTO)
+
+
 PB_BIND(com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest, com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest, 2)
 
 
 PB_BIND(com_daml_ledger_api_v2_interactive_PrepareSubmissionResponse, com_daml_ledger_api_v2_interactive_PrepareSubmissionResponse, 4)
-
-
-PB_BIND(com_daml_ledger_api_v2_interactive_Signature, com_daml_ledger_api_v2_interactive_Signature, 2)
 
 
 PB_BIND(com_daml_ledger_api_v2_interactive_SinglePartySignatures, com_daml_ledger_api_v2_interactive_SinglePartySignatures, 2)
@@ -82,10 +85,6 @@ PB_BIND(com_daml_ledger_api_v2_interactive_GetPreferredPackagesRequest, com_daml
 
 
 PB_BIND(com_daml_ledger_api_v2_interactive_GetPreferredPackagesResponse, com_daml_ledger_api_v2_interactive_GetPreferredPackagesResponse, 2)
-
-
-
-
 
 
 

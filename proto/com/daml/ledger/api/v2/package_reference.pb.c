@@ -9,4 +9,13 @@
 PB_BIND(com_daml_ledger_api_v2_PackageReference, com_daml_ledger_api_v2_PackageReference, 2)
 
 
+PB_BIND(com_daml_ledger_api_v2_VettedPackage, com_daml_ledger_api_v2_VettedPackage, 2)
+
+
+PB_BIND(com_daml_ledger_api_v2_VettedPackages, com_daml_ledger_api_v2_VettedPackages, 2)
+
+
+PB_BIND(com_daml_ledger_api_v2_PriorTopologySerial, com_daml_ledger_api_v2_PriorTopologySerial, AUTO)
+
+
 

@@ -95,7 +95,7 @@ typedef struct _com_digitalasset_canton_protocol_v30_SetTrafficPurchasedMessage 
     uint32_t serial;
     /* New total traffic purchased entry */
     uint64_t total_traffic_purchased;
-    char synchronizer_id[1024];
+    char physical_synchronizer_id[1024];
 } com_digitalasset_canton_protocol_v30_SetTrafficPurchasedMessage;
 
 
@@ -145,7 +145,7 @@ extern "C" {
 #define com_digitalasset_canton_protocol_v30_SetTrafficPurchasedMessage_member_tag 1
 #define com_digitalasset_canton_protocol_v30_SetTrafficPurchasedMessage_serial_tag 2
 #define com_digitalasset_canton_protocol_v30_SetTrafficPurchasedMessage_total_traffic_purchased_tag 4
-#define com_digitalasset_canton_protocol_v30_SetTrafficPurchasedMessage_synchronizer_id_tag 5
+#define com_digitalasset_canton_protocol_v30_SetTrafficPurchasedMessage_physical_synchronizer_id_tag 5
 
 /* Struct field encoding specification for nanopb */
 #define com_digitalasset_canton_protocol_v30_TrafficControlParameters_FIELDLIST(X, a) \
@@ -198,7 +198,7 @@ X(a, STATIC,   OPTIONAL, UINT32,   serial,            6)
 X(a, STATIC,   SINGULAR, STRING,   member,            1) \
 X(a, STATIC,   SINGULAR, UINT32,   serial,            2) \
 X(a, STATIC,   SINGULAR, UINT64,   total_traffic_purchased,   4) \
-X(a, STATIC,   SINGULAR, STRING,   synchronizer_id,   5)
+X(a, STATIC,   SINGULAR, STRING,   physical_synchronizer_id,   5)
 #define com_digitalasset_canton_protocol_v30_SetTrafficPurchasedMessage_CALLBACK NULL
 #define com_digitalasset_canton_protocol_v30_SetTrafficPurchasedMessage_DEFAULT NULL
 

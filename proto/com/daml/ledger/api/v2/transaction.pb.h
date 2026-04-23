@@ -13,78 +13,6 @@
 #endif
 
 /* Struct definitions */
-/* Provided for backwards compatibility, it will be removed in the Canton version 3.4.0.
- Each tree event message type below contains a ``witness_parties`` field which
- indicates the subset of the requested parties that can see the event
- in question.
-
- Note that transaction trees might contain events with
- _no_ witness parties, which were included simply because they were
- children of events which have witnesses. */
-typedef struct _com_daml_ledger_api_v2_TreeEvent {
-    pb_size_t which_kind;
-    union {
-        /* The event as it appeared in the context of its original daml transaction on this participant node.
-     In particular, the offset, node_id pair of the daml transaction are preserved. */
-        com_daml_ledger_api_v2_CreatedEvent created;
-        com_daml_ledger_api_v2_ExercisedEvent exercised;
-    } kind;
-} com_daml_ledger_api_v2_TreeEvent;
-
-/* Provided for backwards compatibility, it will be removed in the Canton version 3.4.0.
- Complete view of an on-ledger transaction. */
-typedef struct _com_daml_ledger_api_v2_TransactionTree {
-    /* Assigned by the server. Useful for correlating logs.
- Must be a valid LedgerString (as described in ``value.proto``).
- Required */
-    char update_id[1024];
-    /* The ID of the command which resulted in this transaction. Missing for everyone except the submitting party.
- Must be a valid LedgerString (as described in ``value.proto``).
- Optional */
-    char command_id[1024];
-    /* The workflow ID used in command submission. Only set if the ``workflow_id`` for the command was set.
- Must be a valid LedgerString (as described in ``value.proto``).
- Optional */
-    char workflow_id[1024];
-    /* Ledger effective time.
- Required */
-    bool has_effective_at;
-    google_protobuf_Timestamp effective_at;
-    /* The absolute offset. The details of this field are described in ``community/ledger-api/README.md``.
- Required, it is a valid absolute offset (positive integer). */
-    int64_t offset;
-    /* Changes to the ledger that were caused by this transaction. Nodes of the transaction tree.
- Each key must be a valid node ID (non-negative integer).
- Required */
-    pb_callback_t events_by_id;
-    /* A valid synchronizer id.
- Identifies the synchronizer that synchronized the transaction.
- Required */
-    char synchronizer_id[1024];
-    /* Optional; ledger API trace context
-
- The trace context transported in this message corresponds to the trace context supplied
- by the client application in a HTTP2 header of the original command submission.
- We typically use a header to transfer this type of information. Here we use message
- body, because it is used in gRPC streams which do not support per message headers.
- This field will be populated with the trace context contained in the original submission.
- If that was not provided, a unique ledger-api-server generated trace context will be used
- instead. */
-    bool has_trace_context;
-    com_daml_ledger_api_v2_TraceContext trace_context;
-    /* The time at which the transaction was recorded. The record time refers to the synchronizer
- which synchronized the transaction.
- Required */
-    bool has_record_time;
-    google_protobuf_Timestamp record_time;
-} com_daml_ledger_api_v2_TransactionTree;
-
-typedef struct _com_daml_ledger_api_v2_TransactionTree_EventsByIdEntry {
-    int32_t key;
-    bool has_value;
-    com_daml_ledger_api_v2_TreeEvent value;
-} com_daml_ledger_api_v2_TransactionTree_EventsByIdEntry;
-
 typedef PB_BYTES_ARRAY_T(1024) com_daml_ledger_api_v2_Transaction_external_transaction_hash_t;
 /* Filtered view of an on-ledger transaction's create and archive events. */
 typedef struct _com_daml_ledger_api_v2_Transaction {
@@ -148,29 +76,10 @@ extern "C" {
 #endif
 
 /* Initializer values for message structs */
-#define com_daml_ledger_api_v2_TreeEvent_init_default {0, {com_daml_ledger_api_v2_CreatedEvent_init_default}}
-#define com_daml_ledger_api_v2_TransactionTree_init_default {"", "", "", false, google_protobuf_Timestamp_init_default, 0, {{NULL}, NULL}, "", false, com_daml_ledger_api_v2_TraceContext_init_default, false, google_protobuf_Timestamp_init_default}
-#define com_daml_ledger_api_v2_TransactionTree_EventsByIdEntry_init_default {0, false, com_daml_ledger_api_v2_TreeEvent_init_default}
 #define com_daml_ledger_api_v2_Transaction_init_default {"", "", "", false, google_protobuf_Timestamp_init_default, {{NULL}, NULL}, 0, "", false, com_daml_ledger_api_v2_TraceContext_init_default, false, google_protobuf_Timestamp_init_default, false, {0, {0}}}
-#define com_daml_ledger_api_v2_TreeEvent_init_zero {0, {com_daml_ledger_api_v2_CreatedEvent_init_zero}}
-#define com_daml_ledger_api_v2_TransactionTree_init_zero {"", "", "", false, google_protobuf_Timestamp_init_zero, 0, {{NULL}, NULL}, "", false, com_daml_ledger_api_v2_TraceContext_init_zero, false, google_protobuf_Timestamp_init_zero}
-#define com_daml_ledger_api_v2_TransactionTree_EventsByIdEntry_init_zero {0, false, com_daml_ledger_api_v2_TreeEvent_init_zero}
 #define com_daml_ledger_api_v2_Transaction_init_zero {"", "", "", false, google_protobuf_Timestamp_init_zero, {{NULL}, NULL}, 0, "", false, com_daml_ledger_api_v2_TraceContext_init_zero, false, google_protobuf_Timestamp_init_zero, false, {0, {0}}}
 
 /* Field tags (for use in manual encoding/decoding) */
-#define com_daml_ledger_api_v2_TreeEvent_created_tag 1
-#define com_daml_ledger_api_v2_TreeEvent_exercised_tag 2
-#define com_daml_ledger_api_v2_TransactionTree_update_id_tag 1
-#define com_daml_ledger_api_v2_TransactionTree_command_id_tag 2
-#define com_daml_ledger_api_v2_TransactionTree_workflow_id_tag 3
-#define com_daml_ledger_api_v2_TransactionTree_effective_at_tag 4
-#define com_daml_ledger_api_v2_TransactionTree_offset_tag 5
-#define com_daml_ledger_api_v2_TransactionTree_events_by_id_tag 6
-#define com_daml_ledger_api_v2_TransactionTree_synchronizer_id_tag 7
-#define com_daml_ledger_api_v2_TransactionTree_trace_context_tag 8
-#define com_daml_ledger_api_v2_TransactionTree_record_time_tag 9
-#define com_daml_ledger_api_v2_TransactionTree_EventsByIdEntry_key_tag 1
-#define com_daml_ledger_api_v2_TransactionTree_EventsByIdEntry_value_tag 2
 #define com_daml_ledger_api_v2_Transaction_update_id_tag 1
 #define com_daml_ledger_api_v2_Transaction_command_id_tag 2
 #define com_daml_ledger_api_v2_Transaction_workflow_id_tag 3
@@ -183,38 +92,6 @@ extern "C" {
 #define com_daml_ledger_api_v2_Transaction_external_transaction_hash_tag 10
 
 /* Struct field encoding specification for nanopb */
-#define com_daml_ledger_api_v2_TreeEvent_FIELDLIST(X, a) \
-X(a, STATIC,   ONEOF,    MESSAGE,  (kind,created,kind.created),   1) \
-X(a, STATIC,   ONEOF,    MESSAGE,  (kind,exercised,kind.exercised),   2)
-#define com_daml_ledger_api_v2_TreeEvent_CALLBACK NULL
-#define com_daml_ledger_api_v2_TreeEvent_DEFAULT NULL
-#define com_daml_ledger_api_v2_TreeEvent_kind_created_MSGTYPE com_daml_ledger_api_v2_CreatedEvent
-#define com_daml_ledger_api_v2_TreeEvent_kind_exercised_MSGTYPE com_daml_ledger_api_v2_ExercisedEvent
-
-#define com_daml_ledger_api_v2_TransactionTree_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, STRING,   update_id,         1) \
-X(a, STATIC,   SINGULAR, STRING,   command_id,        2) \
-X(a, STATIC,   SINGULAR, STRING,   workflow_id,       3) \
-X(a, STATIC,   OPTIONAL, MESSAGE,  effective_at,      4) \
-X(a, STATIC,   SINGULAR, INT64,    offset,            5) \
-X(a, CALLBACK, REPEATED, MESSAGE,  events_by_id,      6) \
-X(a, STATIC,   SINGULAR, STRING,   synchronizer_id,   7) \
-X(a, STATIC,   OPTIONAL, MESSAGE,  trace_context,     8) \
-X(a, STATIC,   OPTIONAL, MESSAGE,  record_time,       9)
-#define com_daml_ledger_api_v2_TransactionTree_CALLBACK pb_default_field_callback
-#define com_daml_ledger_api_v2_TransactionTree_DEFAULT NULL
-#define com_daml_ledger_api_v2_TransactionTree_effective_at_MSGTYPE google_protobuf_Timestamp
-#define com_daml_ledger_api_v2_TransactionTree_events_by_id_MSGTYPE com_daml_ledger_api_v2_TransactionTree_EventsByIdEntry
-#define com_daml_ledger_api_v2_TransactionTree_trace_context_MSGTYPE com_daml_ledger_api_v2_TraceContext
-#define com_daml_ledger_api_v2_TransactionTree_record_time_MSGTYPE google_protobuf_Timestamp
-
-#define com_daml_ledger_api_v2_TransactionTree_EventsByIdEntry_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, INT32,    key,               1) \
-X(a, STATIC,   OPTIONAL, MESSAGE,  value,             2)
-#define com_daml_ledger_api_v2_TransactionTree_EventsByIdEntry_CALLBACK NULL
-#define com_daml_ledger_api_v2_TransactionTree_EventsByIdEntry_DEFAULT NULL
-#define com_daml_ledger_api_v2_TransactionTree_EventsByIdEntry_value_MSGTYPE com_daml_ledger_api_v2_TreeEvent
-
 #define com_daml_ledger_api_v2_Transaction_FIELDLIST(X, a) \
 X(a, STATIC,   SINGULAR, STRING,   update_id,         1) \
 X(a, STATIC,   SINGULAR, STRING,   command_id,        2) \
@@ -233,28 +110,13 @@ X(a, STATIC,   OPTIONAL, BYTES,    external_transaction_hash,  10)
 #define com_daml_ledger_api_v2_Transaction_trace_context_MSGTYPE com_daml_ledger_api_v2_TraceContext
 #define com_daml_ledger_api_v2_Transaction_record_time_MSGTYPE google_protobuf_Timestamp
 
-extern const pb_msgdesc_t com_daml_ledger_api_v2_TreeEvent_msg;
-extern const pb_msgdesc_t com_daml_ledger_api_v2_TransactionTree_msg;
-extern const pb_msgdesc_t com_daml_ledger_api_v2_TransactionTree_EventsByIdEntry_msg;
 extern const pb_msgdesc_t com_daml_ledger_api_v2_Transaction_msg;
 
 /* Defines for backwards compatibility with code written before nanopb-0.4.0 */
-#define com_daml_ledger_api_v2_TreeEvent_fields &com_daml_ledger_api_v2_TreeEvent_msg
-#define com_daml_ledger_api_v2_TransactionTree_fields &com_daml_ledger_api_v2_TransactionTree_msg
-#define com_daml_ledger_api_v2_TransactionTree_EventsByIdEntry_fields &com_daml_ledger_api_v2_TransactionTree_EventsByIdEntry_msg
 #define com_daml_ledger_api_v2_Transaction_fields &com_daml_ledger_api_v2_Transaction_msg
 
 /* Maximum encoded size of messages (where known) */
-#if defined(com_daml_ledger_api_v2_CreatedEvent_size) && defined(com_daml_ledger_api_v2_ExercisedEvent_size)
-union com_daml_ledger_api_v2_TreeEvent_kind_size_union {char f1[(6 + com_daml_ledger_api_v2_CreatedEvent_size)]; char f2[(6 + com_daml_ledger_api_v2_ExercisedEvent_size)];};
-#endif
-/* com_daml_ledger_api_v2_TransactionTree_size depends on runtime parameters */
 /* com_daml_ledger_api_v2_Transaction_size depends on runtime parameters */
-#if defined(com_daml_ledger_api_v2_CreatedEvent_size) && defined(com_daml_ledger_api_v2_ExercisedEvent_size)
-#define COM_DAML_LEDGER_API_V2_COM_DAML_LEDGER_API_V2_TRANSACTION_PB_H_MAX_SIZE com_daml_ledger_api_v2_TransactionTree_EventsByIdEntry_size
-#define com_daml_ledger_api_v2_TransactionTree_EventsByIdEntry_size (17 + sizeof(union com_daml_ledger_api_v2_TreeEvent_kind_size_union))
-#define com_daml_ledger_api_v2_TreeEvent_size    (0 + sizeof(union com_daml_ledger_api_v2_TreeEvent_kind_size_union))
-#endif
 
 #ifdef __cplusplus
 } /* extern "C" */
