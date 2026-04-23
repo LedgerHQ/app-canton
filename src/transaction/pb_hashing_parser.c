@@ -867,9 +867,8 @@ MUST_CHECK static bool decode_exercise(pb_istream_t *stream, const pb_field_t *f
                 if (daml_tx->node_seeds[i].seed == NULL ||
                     daml_tx->node_seeds[i].seed->size != SHA256_HASH_LEN) {
                     PRINTF("Invalid node seed length\n");
-                    pb_release(
-                        com_daml_ledger_api_v2_interactive_transaction_v1_cb_Exercise_fields,
-                        &e);
+                    pb_release(com_daml_ledger_api_v2_interactive_transaction_v1_cb_Exercise_fields,
+                               &e);
                     return false;
                 }
                 seed = daml_tx->node_seeds[i].seed->bytes;
