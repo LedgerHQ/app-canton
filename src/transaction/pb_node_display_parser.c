@@ -849,12 +849,16 @@ MUST_CHECK int format_and_populate_display_items(pb_callback_context_t *ctx) {
         tx_field_t *state = &ctx->tx_fields[i];
         if (state->found && state->display && state->value_len > 0) {
             ctx->tx_info->pairs[idx].value = app_mem_alloc(state->value_len);
-            if (ctx->tx_info->pairs[idx].value != NULL) {
-                memcpy((void *) ctx->tx_info->pairs[idx].value, state->value, state->value_len);
-                ctx->tx_info->pairs[idx].item = (char *) PIC(state->config->item_name);
-                ctx->tx_info->pairs_count++;
-                idx++;
+            if (ctx->tx_info->pairs[idx].value == NULL) {
+                G_context.tx_info.clear_signing_available = false;
+                cleanup_display_items();
+                ret = -1;
+                goto cleanup;
             }
+            memcpy((void *) ctx->tx_info->pairs[idx].value, state->value, state->value_len);
+            ctx->tx_info->pairs[idx].item = (char *) PIC(state->config->item_name);
+            ctx->tx_info->pairs_count++;
+            idx++;
         }
     }
 
