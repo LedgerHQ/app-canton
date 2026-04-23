@@ -80,6 +80,14 @@ MUST_CHECK parser_status_e proto_deserialize_topology_transaction(buffer_t *buf,
 
     PRINTF("Decoded Untyped Versioned Message.\n");
 
+    if (tx_ctx->tx_parts_ctx.untyped_versioned_msg.which_wrapper !=
+            com_digitalasset_canton_version_v1_UntypedVersionedMessage_data_tag ||
+        tx_ctx->tx_parts_ctx.untyped_versioned_msg.data == NULL ||
+        tx_ctx->tx_parts_ctx.untyped_versioned_msg.data->size == 0) {
+        PRINTF("Missing topology wrapper data\n");
+        return VALUE_PARSING_ERROR;
+    }
+
     PRINTF("Untyped versioned message transaction wrapper type: %d\n",
            tx_ctx->tx_parts_ctx.untyped_versioned_msg.which_wrapper);
     PRINTF("Topology Transaction data size: %d\n",
