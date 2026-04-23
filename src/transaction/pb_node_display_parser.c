@@ -964,9 +964,8 @@ MUST_CHECK int parse_node_for_display(buffer_t *buf) {
         global_tx_metadata_contract_identifiers != NULL) {
         return 0;
     }
-    global_tx_metadata_contract_identifiers = NULL;
-    global_tx_metadata_contract_identifiers_count = 0;
-    global_tx_metadata_display_conf = NULL;
+
+    reset_display_parser_state();
 
     return process_display_parsing(
         buf,
