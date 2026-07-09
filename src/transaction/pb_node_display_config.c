@@ -6,10 +6,8 @@
 /* -------------------------------------------------------------------------- */
 
 // Use distinct argument names (_p, _n) to avoid any potential macro expansion conflicts
-#define FLD(_p, _n, _f, _m) \
-    { .path = _p, .item_name = _n, .format_callback = _f, .mandatory = _m }
-#define ID(_mod, _ent) \
-    { .module_name = _mod, .entity_name = _ent }
+#define FLD(_p, _n, _f, _m) {.path = _p, .item_name = _n, .format_callback = _f, .mandatory = _m}
+#define ID(_mod, _ent)      {.module_name = _mod, .entity_name = _ent}
 
 /* -------------------------------------------------------------------------- */
 /* Global Constants / Mappings                                                */
@@ -162,13 +160,14 @@ static const identifier_config_t *META_EMPTY[] = {};
 /* Main Display Configuration                                                 */
 /* -------------------------------------------------------------------------- */
 
-#define CFG_ENTRY(_id, _fields, _title, _finish, _meta)                               \
-    {                                                                                 \
-        .identifier = _id, .fields = _fields,                                         \
-        .fields_count = sizeof(_fields) / sizeof(_fields[0]), .review_title = _title, \
-        .review_finish = _finish, .metadata_contract_identifiers = _meta,             \
-        .metadata_contract_identifiers_count = sizeof(_meta) / sizeof(_meta[0])       \
-    }
+#define CFG_ENTRY(_id, _fields, _title, _finish, _meta)    \
+    {.identifier = _id,                                    \
+     .fields = _fields,                                    \
+     .fields_count = sizeof(_fields) / sizeof(_fields[0]), \
+     .review_title = _title,                               \
+     .review_finish = _finish,                             \
+     .metadata_contract_identifiers = _meta,               \
+     .metadata_contract_identifiers_count = sizeof(_meta) / sizeof(_meta[0])}
 
 const display_config_t DISPLAY_CONFIGS[] = {
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV1", "TransferFactory_Transfer"),

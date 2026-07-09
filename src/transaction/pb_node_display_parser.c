@@ -311,7 +311,7 @@ static void set_field_value(tx_field_t *field_state, const void *value, pb_size_
     if (value_type == VALUE_TIMESTAMP_TAG) {
         ByteWriter bw;
         bw_init(&bw, ts_buf, sizeof(ts_buf));
-        bw_put_u64_be(&bw, (uint64_t) * ((int64_t *) PIC(value)));
+        bw_put_u64_be(&bw, (uint64_t) *((int64_t *) PIC(value)));
         src = ts_buf;
         len = sizeof(ts_buf);
     } else {

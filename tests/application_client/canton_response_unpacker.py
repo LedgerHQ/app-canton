@@ -70,7 +70,9 @@ def unpack_get_public_key_response(response: bytes) -> Tuple[int, bytes, int, by
 #            v (1)
 #            challenge_sig_len (1) - optional, only if challenge was provided
 #            challenge_sig (var) - optional, only if challenge was provided
-def unpack_sign_tx_response(response: bytes) -> Tuple[int, bytes, int, Optional[int], Optional[bytes]]:
+def unpack_sign_tx_response(
+    response: bytes,
+) -> Tuple[int, bytes, int, Optional[int], Optional[bytes]]:
     response, der_sig_len, der_sig = pop_size_prefixed_buf_from_buf(response)
     print(f"DER sig len: {der_sig_len}, DER sig: {der_sig.hex()}")
     response, v = pop_sized_buf_from_buffer(response, 1)
@@ -84,4 +86,10 @@ def unpack_sign_tx_response(response: bytes) -> Tuple[int, bytes, int, Optional[
     # There should be nothing left in the response
     assert len(response) == 0
 
-    return der_sig_len, der_sig, int.from_bytes(v, byteorder="big"), challenge_sig_len, challenge_sig
+    return (
+        der_sig_len,
+        der_sig,
+        int.from_bytes(v, byteorder="big"),
+        challenge_sig_len,
+        challenge_sig,
+    )

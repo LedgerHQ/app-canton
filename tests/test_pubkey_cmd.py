@@ -43,6 +43,7 @@ def test_get_public_key_confirm_accepted(backend: BackendInterface, scenario_nav
     assert public_key.hex() == ref_public_key[2:]
     assert chain_code.hex() == ref_chain_code
 
+
 # In this test we check that the GET_PUBLIC_KEY in confirmation mode replies an error if the user refuses
 def test_get_public_key_confirm_refused(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
     client = CantonCommandSender(backend)

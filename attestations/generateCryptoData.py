@@ -63,7 +63,7 @@ def main() -> None:
     # Extract KEY parameters
     logger.debug(f"Extracting {key_file} parameters...")
     cmd = f"openssl pkey -inform pem -in {key_file} -noout -text"
-    stdout = check_exec(cmd)
+    check_exec(cmd)
 
     # Get key bytes
     private_key, public_key = get_keys_bytes(key_file)
