@@ -27,20 +27,25 @@ from generateCryptoData import get_keys_bytes
 
 ROOT_SCREENSHOT_PATH = Path(__file__).parent.resolve()
 
-MAINNET_VALIDATOR_PARTY_ID_1 = \
+MAINNET_VALIDATOR_PARTY_ID_1 = (
     "ledger-ledgerops-2::12207a4859ad414f4f47c2d773ddf4ea88de8c3a1aab19abaa197e504acdbf679d3c"
-MAINNET_VALIDATOR_PARTY_ID_2 = \
-    "Ledger-Kiln-1::12200386019c89269f5541595286cf5ebf24fe7884d8c6b05ce042c999f9161cb9d0"
+)
+MAINNET_VALIDATOR_PARTY_ID_2 = "Ledger-Kiln-1::12200386019c89269f5541595286cf5ebf24fe7884d8c6b05ce042c999f9161cb9d0"
 
-TESTNET_VALIDATOR_PARTY_ID_1 = \
+TESTNET_VALIDATOR_PARTY_ID_1 = (
     "ledger-ledgeropstestnet-0::122095f38f5c73cc18fbeb3290f8c17f7a1ff190f66fe159c671cf1fb0dc634eedaf"
-TESTNET_VALIDATOR_PARTY_ID_2 = \
-    "kiln-testnetValidator-1::12209e8bea40fab859b041eaa8d247b98e44fcaa0b041b9136e8ce62574d493202d3"
+)
+TESTNET_VALIDATOR_PARTY_ID_2 = (
+    "Ledger-KilnTestnet-2::1220fa9df3caa84092023bf7edf28de1d28f96caf9b7d130385bfe6e284be6e0fbd7"
+)
 
-DEVNET_VALIDATOR_PARTY_ID_1 = \
+DEVNET_VALIDATOR_PARTY_ID_1 = (
     "ledger-ledgeropsdevnet-0::12208f74f551f8c28b68414fc3bb4b8466178055845485878a1af8ac1fe96f88fad2"
-DEVNET_VALIDATOR_PARTY_ID_2 = \
-    "kiln-devnetValidator-1::122030d0afac1b1d797fcef6095ca7c60a38ce644295c730389e0276d213d23f1a10"
+)
+DEVNET_VALIDATOR_PARTY_ID_2 = (
+    "Ledger-KilnDevnet-2::12203b77e5d74eb787ff0251fd76949379a625368646302a203fea7f7db1dd5402bf"
+)
+
 
 def _nano_enable_blind_signing() -> list[NavInsID]:
     # initial: go to settings

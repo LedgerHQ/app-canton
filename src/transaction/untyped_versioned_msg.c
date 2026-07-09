@@ -83,7 +83,12 @@ typedef struct {
 #define MAX_PARTICIPANTS_NB     2
 #define THRESHOLD_FIELD_IDX     3
 
-const participant_id_to_name_mapping_t MAINNET_VALIDATORS[] = {
+const participant_id_to_name_mapping_t MAINNET_SINGLE_VALIDATOR[] = {
+    {"ledger-ledgerops-2::12207a4859ad414f4f47c2d773ddf4ea88de8c3a1aab19abaa197e504acdbf679d3c",
+     "Ledger Validator"},
+};
+
+const participant_id_to_name_mapping_t MAINNET_DUAL_VALIDATORS[] = {
     {"ledger-ledgerops-2::12207a4859ad414f4f47c2d773ddf4ea88de8c3a1aab19abaa197e504acdbf679d3c",
      "Ledger Validator"},
     {"Ledger-Kiln-1::12200386019c89269f5541595286cf5ebf24fe7884d8c6b05ce042c999f9161cb9d0",
@@ -100,8 +105,8 @@ const participant_id_to_name_mapping_t TESTNET_DUAL_VALIDATORS[] = {
     {"ledger-ledgeropstestnet-0::"
      "122095f38f5c73cc18fbeb3290f8c17f7a1ff190f66fe159c671cf1fb0dc634eedaf",
      "Ledger Testnet\nValidator"},
-    {"kiln-testnetValidator-1::"
-     "12209e8bea40fab859b041eaa8d247b98e44fcaa0b041b9136e8ce62574d493202d3",
+    {"Ledger-KilnTestnet-2::"
+     "1220fa9df3caa84092023bf7edf28de1d28f96caf9b7d130385bfe6e284be6e0fbd7",
      "Kiln Testnet\nValidator"},
 };
 
@@ -115,12 +120,14 @@ const participant_id_to_name_mapping_t DEVNET_DUAL_VALIDATORS[] = {
     {"ledger-ledgeropsdevnet-0::"
      "12208f74f551f8c28b68414fc3bb4b8466178055845485878a1af8ac1fe96f88fad2",
      "Ledger Devnet\nValidator"},
-    {"kiln-devnetValidator-1::122030d0afac1b1d797fcef6095ca7c60a38ce644295c730389e0276d213d23f1a10",
+    {"Ledger-KilnDevnet-2::12203b77e5d74eb787ff0251fd76949379a625368646302a203fea7f7db1dd5402bf",
      "Kiln Devnet\nValidator"},
 };
 
 const valid_participants_config_t VALID_PARTICIPANTS_CONFIGS[] = {
-    {MAINNET_VALIDATORS, sizeof(MAINNET_VALIDATORS) / sizeof(MAINNET_VALIDATORS[0])},
+    {MAINNET_SINGLE_VALIDATOR,
+     sizeof(MAINNET_SINGLE_VALIDATOR) / sizeof(MAINNET_SINGLE_VALIDATOR[0])},
+    {MAINNET_DUAL_VALIDATORS, sizeof(MAINNET_DUAL_VALIDATORS) / sizeof(MAINNET_DUAL_VALIDATORS[0])},
     {TESTNET_SINGLE_VALIDATOR,
      sizeof(TESTNET_SINGLE_VALIDATOR) / sizeof(TESTNET_SINGLE_VALIDATOR[0])},
     {TESTNET_DUAL_VALIDATORS, sizeof(TESTNET_DUAL_VALIDATORS) / sizeof(TESTNET_DUAL_VALIDATORS[0])},
