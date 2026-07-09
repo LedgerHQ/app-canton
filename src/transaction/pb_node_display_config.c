@@ -149,17 +149,6 @@ static const field_config_t PREAPPROVAL_PROPOSAL_FIELDS[] = {
     FLD("asset", "For asset", NULL, true),
     FLD("provider", "By validator", NULL, true)};
 
-static const field_config_t PROXY_TRANSFER_FIELDS[] = {
-    FLD("proxyArg.choiceArg.transfer.sender", "From", NULL, true),
-    FLD("proxyArg.choiceArg.transfer.amount", "Amount", format_token_amount_field, true),
-    FLD("proxyArg.choiceArg.transfer.receiver", "To", NULL, true),
-    FLD("proxyArg.choiceArg.transfer.instrumentId.id", "Token", NULL, true),
-    FLD("proxyArg.choiceArg.transfer.instrumentId.admin", NULL, NULL, true),
-    FLD("proxyArg.choiceArg.transfer.meta.values.splice\\.lfdecentralizedtrust\\.org/reason",
-        "Memo",
-        NULL,
-        false)};
-
 /* -------------------------------------------------------------------------- */
 /* Metadata identifiers lists                                                 */
 /* -------------------------------------------------------------------------- */
@@ -201,25 +190,11 @@ const display_config_t DISPLAY_CONFIGS[] = {
               PREAPPROVAL_PROPOSAL_REVIEW_FINISH,
               META_EMPTY),
 
-    CFG_ENTRY(
-        ID("Splice.Util.FeaturedApp.WalletUserProxy", "WalletUserProxy_TransferFactory_Transfer"),
-        PROXY_TRANSFER_FIELDS,
-        TOKEN_TRANSFER_REVIEW_TITLE,
-        TOKEN_TRANSFER_REVIEW_FINISH,
-        META_EMPTY),
-
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV1", "TransferInstruction_Accept"),
               TOKEN_TRANSFER_ACCEPT_FIELDS,
               TOKEN_TRANSFER_ACCEPT_REVIEW_TITLE,
               TOKEN_TRANSFER_ACCEPT_REVIEW_FINISH,
               TRANSFER_OFFER_META_ID_LIST),
-
-    CFG_ENTRY(
-        ID("Splice.Util.FeaturedApp.WalletUserProxy", "WalletUserProxy_TransferInstruction_Accept"),
-        TOKEN_TRANSFER_ACCEPT_FIELDS,
-        TOKEN_TRANSFER_ACCEPT_REVIEW_TITLE,
-        TOKEN_TRANSFER_ACCEPT_REVIEW_FINISH,
-        TRANSFER_OFFER_META_ID_LIST),
 
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV1", "TransferInstruction_Reject"),
               TOKEN_TRANSFER_ACCEPT_FIELDS,
@@ -227,21 +202,7 @@ const display_config_t DISPLAY_CONFIGS[] = {
               TOKEN_TRANSFER_REJECT_REVIEW_FINISH,
               TRANSFER_OFFER_META_ID_LIST),
 
-    CFG_ENTRY(
-        ID("Splice.Util.FeaturedApp.WalletUserProxy", "WalletUserProxy_TransferInstruction_Reject"),
-        TOKEN_TRANSFER_ACCEPT_FIELDS,
-        TOKEN_TRANSFER_REJECT_REVIEW_TITLE,
-        TOKEN_TRANSFER_REJECT_REVIEW_FINISH,
-        TRANSFER_OFFER_META_ID_LIST),
-
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV1", "TransferInstruction_Withdraw"),
-              TOKEN_TRANSFER_WITHDRAW_FIELDS,
-              TOKEN_TRANSFER_WITHDRAW_REVIEW_TITLE,
-              TOKEN_TRANSFER_WITHDRAW_REVIEW_FINISH,
-              TRANSFER_OFFER_META_ID_LIST),
-
-    CFG_ENTRY(ID("Splice.Util.FeaturedApp.WalletUserProxy",
-                 "WalletUserProxy_TransferInstruction_Withdraw"),
               TOKEN_TRANSFER_WITHDRAW_FIELDS,
               TOKEN_TRANSFER_WITHDRAW_REVIEW_TITLE,
               TOKEN_TRANSFER_WITHDRAW_REVIEW_FINISH,
