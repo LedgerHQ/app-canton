@@ -27,7 +27,7 @@
 
 MUST_CHECK parser_status_e proto_deserialize_daml_tx(buffer_t *buf, transaction_ctx_t *tx_ctx) {
     LEDGER_ASSERT(buf != NULL, "Null buffer passed to proto_deserialize_daml_tx");
-    LEDGER_ASSERT(tx_ctx != NULL, "Null transaction context passed to proto_deserialize_daml_tx");
+    LEDGER_ASSERT(tx_ctx != NULL, "Null tx_ctx in proto_deserialize_daml_tx");
 
     pb_istream_t stream = pb_istream_from_buffer(buf->ptr, buf->size);
 
@@ -45,7 +45,7 @@ MUST_CHECK parser_status_e proto_deserialize_daml_tx(buffer_t *buf, transaction_
 
 MUST_CHECK parser_status_e proto_deserialize_metadata(buffer_t *buf, transaction_ctx_t *tx_ctx) {
     LEDGER_ASSERT(buf != NULL, "Null buffer passed to proto_deserialize_metadata");
-    LEDGER_ASSERT(tx_ctx != NULL, "Null transaction context passed to proto_deserialize_metadata");
+    LEDGER_ASSERT(tx_ctx != NULL, "Null tx_ctx in proto_deserialize_metadata");
 
     pb_istream_t stream = pb_istream_from_buffer(buf->ptr, buf->size);
 
@@ -63,9 +63,8 @@ MUST_CHECK parser_status_e proto_deserialize_metadata(buffer_t *buf, transaction
 
 MUST_CHECK parser_status_e proto_deserialize_topology_transaction(buffer_t *buf,
                                                                   transaction_ctx_t *tx_ctx) {
-    LEDGER_ASSERT(buf != NULL, "Null buffer passed to proto_deserialize_topology_transaction");
-    LEDGER_ASSERT(tx_ctx != NULL,
-                  "Null transaction context passed to proto_deserialize_topology_transaction");
+    LEDGER_ASSERT(buf != NULL, "Null buf in proto_deserialize_topology_tx");
+    LEDGER_ASSERT(tx_ctx != NULL, "Null tx_ctx in proto_deserialize_topology_tx");
 
     pb_istream_t stream = pb_istream_from_buffer(buf->ptr, buf->size);
 
@@ -113,22 +112,21 @@ MUST_CHECK parser_status_e proto_deserialize_topology_transaction(buffer_t *buf,
 }
 
 void release_daml_tx(transaction_ctx_t *tx_ctx) {
-    LEDGER_ASSERT(tx_ctx != NULL, "Null transaction context passed to release_daml_tx");
+    LEDGER_ASSERT(tx_ctx != NULL, "Null tx_ctx in release_daml_tx");
 
     pb_release(com_daml_ledger_api_v2_interactive_DeviceDamlTransaction_fields,
                &tx_ctx->tx_parts_ctx.daml_transaction);
 }
 
 void release_metadata(transaction_ctx_t *tx_ctx) {
-    LEDGER_ASSERT(tx_ctx != NULL, "Null transaction context passed to release_metadata");
+    LEDGER_ASSERT(tx_ctx != NULL, "Null tx_ctx in release_metadata");
 
     pb_release(com_daml_ledger_api_v2_interactive_DeviceMetadata_fields,
                &tx_ctx->tx_parts_ctx.metadata);
 }
 
 void release_topology_transaction(transaction_ctx_t *tx_ctx) {
-    LEDGER_ASSERT(tx_ctx != NULL,
-                  "Null transaction context passed to release_topology_transaction");
+    LEDGER_ASSERT(tx_ctx != NULL, "Null tx_ctx in release_topology_transaction");
 
     pb_release(com_digitalasset_canton_version_v1_UntypedVersionedMessage_fields,
                &tx_ctx->tx_parts_ctx.untyped_versioned_msg);

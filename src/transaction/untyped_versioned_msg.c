@@ -227,7 +227,7 @@ MUST_CHECK static bool read_challenge_and_deadline(buffer_t *cdata) {
 }
 
 MUST_CHECK bool process_untyped_versioned_msg_tx_init(buffer_t *cdata) {
-    LEDGER_ASSERT(cdata != NULL, "Null buffer passed to process_untyped_versioned_msg_tx_init");
+    LEDGER_ASSERT(cdata != NULL, "Null buf in process_untyped_versioned_msg_tx_init");
 
     uint8_t chain_code[MAX_CHAINCODE_LEN] = {0};
     init_hash_storage();
@@ -371,7 +371,7 @@ MUST_CHECK int process_untyped_versioned_msg_tx(buffer_t *buf) {
 MUST_CHECK static bool set_field_value(transaction_ctx_t *tx_info,
                                        size_t field_idx,
                                        const char *value) {
-    LEDGER_ASSERT(tx_info != NULL, "Null transaction context passed to set_field_value");
+    LEDGER_ASSERT(tx_info != NULL, "Null tx_ctx in set_field_value");
     LEDGER_ASSERT(value != NULL, "Null value passed to set_field_value");
 
     uint8_t idx = tx_info->pairs_count;
@@ -512,8 +512,7 @@ static int process_party_to_key_mapping(const PartyToKeyMapping *mapping,
 static int process_party_to_participant(const PartyToParticipant *mapping,
                                         transaction_ctx_t *tx_info) {
     LEDGER_ASSERT(!has_parsed_party_to_participant, "Multiple party to participant mappings found");
-    LEDGER_ASSERT(tx_info != NULL,
-                  "NULL transaction context passed to process_party_to_participant");
+    LEDGER_ASSERT(tx_info != NULL, "NULL tx_ctx in process_party_to_participant");
 
     // Pre-checks and mandatory count checks
     if (mapping->party == NULL) {
@@ -617,7 +616,7 @@ static int process_party_to_participant(const PartyToParticipant *mapping,
 }
 
 static int parse_topology_transaction_for_display(buffer_t *buf) {
-    LEDGER_ASSERT(buf != NULL, "NULL buffer passed to parse_topology_transaction_for_display");
+    LEDGER_ASSERT(buf != NULL, "NULL buf in parse_topology_tx_for_display");
 
     int32_t ret = 0;
     parser_status_e status = proto_deserialize_topology_transaction(buf, &G_context.tx_info);

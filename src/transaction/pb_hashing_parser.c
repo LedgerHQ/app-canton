@@ -268,7 +268,7 @@ MUST_CHECK static bool count_record_field_helper(pb_istream_t *stream) {
 /* -------------------------------------------------------------------------- */
 
 static void decode_value_primitive_variants(cbValue *v) {
-    LEDGER_ASSERT(v != NULL, "NULL cbValue pointer passed to decode_value_primitive_variants");
+    LEDGER_ASSERT(v != NULL, "NULL cbValue in decode_value_primitive_variants");
 
     switch (v->which_sum) {
         case com_daml_ledger_api_v2_cb_Value_unit_tag: {
@@ -1000,7 +1000,7 @@ MUST_CHECK static bool versioned_node_decode_callback(pb_istream_t *stream,
                                                       void **arg) {
     (void) stream;
     (void) arg;
-    LEDGER_ASSERT(field != NULL, "NULL field passed to versioned_node_decode_callback");
+    LEDGER_ASSERT(field != NULL, "NULL field in versioned_node_decode_callback");
 
     com_daml_ledger_api_v2_interactive_DeviceDamlTransaction_Node *node = field->message;
 
@@ -1017,7 +1017,7 @@ MUST_CHECK static bool versioned_node_decode_callback(pb_istream_t *stream,
 
 parser_status_e proto_deserialize_node(buffer_t *buf, transaction_ctx_t *tx_ctx) {
     LEDGER_ASSERT(buf != NULL, "NULL buffer passed to proto_deserialize_node");
-    LEDGER_ASSERT(tx_ctx != NULL, "NULL transaction context passed to proto_deserialize_node");
+    LEDGER_ASSERT(tx_ctx != NULL, "NULL tx_ctx in proto_deserialize_node");
 
     pb_istream_t stream = pb_istream_from_buffer(buf->ptr, buf->size);
 
@@ -1059,9 +1059,8 @@ parser_status_e proto_deserialize_node(buffer_t *buf, transaction_ctx_t *tx_ctx)
 }
 
 parser_status_e proto_deserialize_input_contract(buffer_t *buf, transaction_ctx_t *tx_ctx) {
-    LEDGER_ASSERT(buf != NULL, "NULL buffer passed to proto_deserialize_input_contract");
-    LEDGER_ASSERT(tx_ctx != NULL,
-                  "NULL transaction context passed to proto_deserialize_input_contract");
+    LEDGER_ASSERT(buf != NULL, "NULL buf in proto_deserialize_input_contract");
+    LEDGER_ASSERT(tx_ctx != NULL, "NULL tx_ctx in proto_deserialize_input_contract");
 
     pb_istream_t stream = pb_istream_from_buffer(buf->ptr, buf->size);
 

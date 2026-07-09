@@ -45,7 +45,7 @@ MUST_CHECK int helper_send_response_sig() {
     size_t offset = 0;
 
     LEDGER_ASSERT(G_context.tx_info.signature_len == ED25519_SIG_LEN,
-                  "Invalid signature length in helper_send_response_sig");
+                  "Invalid sig length in send_response_sig");
 
     resp[offset++] = G_context.tx_info.signature_len;
     memmove(resp + offset, G_context.tx_info.signature, G_context.tx_info.signature_len);
@@ -55,7 +55,7 @@ MUST_CHECK int helper_send_response_sig() {
         PRINTF("Also sending challenge signature\n");
         resp[offset++] = G_context.tx_info.challenge_signature_len;
         LEDGER_ASSERT(G_context.tx_info.challenge_signature_len == ED25519_SIG_LEN,
-                      "Invalid challenge signature length in helper_send_response_sig");
+                      "Invalid challenge sig length in send_response");
         memmove(resp + offset,
                 G_context.tx_info.challenge_signature,
                 G_context.tx_info.challenge_signature_len);

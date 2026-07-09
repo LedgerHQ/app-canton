@@ -784,7 +784,7 @@ MUST_CHECK static bool versioned_node_decode_callback(pb_istream_t *stream,
                                                       const pb_field_t *field,
                                                       void **arg) {
     UNUSED(stream);
-    LEDGER_ASSERT(field != NULL, "NULL field passed to versioned_node_decode_callback");
+    LEDGER_ASSERT(field != NULL, "NULL field in versioned_node_decode_callback");
     LEDGER_ASSERT(arg != NULL, "NULL arg passed to versioned_node_decode_callback");
 
     pb_callback_context_t *ctx = (pb_callback_context_t *) (*arg);
@@ -804,7 +804,7 @@ MUST_CHECK static bool versioned_node_decode_callback(pb_istream_t *stream,
 /* -------------------------------------------------------------------------- */
 
 MUST_CHECK int format_and_populate_display_items(pb_callback_context_t *ctx) {
-    LEDGER_ASSERT(ctx != NULL, "NULL context passed to format_and_populate_display_items");
+    LEDGER_ASSERT(ctx != NULL, "NULL ctx in format_and_populate_display_items");
 
     int ret = 0;
 
@@ -979,7 +979,7 @@ MUST_CHECK int parse_node_for_display(buffer_t *buf) {
 }
 
 MUST_CHECK int parse_input_contract_for_display(buffer_t *buf) {
-    LEDGER_ASSERT(buf != NULL, "NULL buffer passed to parse_input_contract_for_display");
+    LEDGER_ASSERT(buf != NULL, "NULL buf in parse_input_contract_for_display");
 
     if (G_context.tx_info.clear_signing_available ||
         global_tx_metadata_contract_identifiers == NULL) {
