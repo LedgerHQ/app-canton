@@ -388,6 +388,7 @@ def test_sign_proxy_token_transfer_blind_signing_disabled(
         blind_sign=True,
     )
 
+
 def test_sign_token_transfer_accept(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
     _sign_and_verify_prepared_transaction(
         backend,
@@ -395,6 +396,7 @@ def test_sign_token_transfer_accept(backend: BackendInterface, scenario_navigato
         tx_json="tests/tx_examples/token_transfer_accept.json",
         custom_screen_text="Sign transaction to",
     )
+
 
 def test_sign_transfer_accept_with_empty_strings(
     backend: BackendInterface,

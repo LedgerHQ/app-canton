@@ -47,11 +47,11 @@
 #define MAX_HASHES                                   3  // Adjust as needed
 #define PURPOSE_TOPOLOGY_TRANSACTION_SIGNATURE       ((uint8_t) 11)
 #define PURPOSE_MULTI_TOPOLOGY_TRANSACTION_SIGNATURE ((uint8_t) 55)
-#define ONBOARDING_FLOW_DISPLAY_FIELDS_NB 4   // Max number of display fields for onboarding flow
-#define CHALLENGE_AND_DEADLINE_LEN        24  // 16 bytes challenge + 8 bytes deadline
-#define ED25519_RAW_KEY_LEN               32
-#define ED25519_DER_KEY_LEN               44
-#define ED25519_DER_PREFIX_LEN            12
+#define ONBOARDING_FLOW_DISPLAY_FIELDS_NB            4  // Max number of display fields for onboarding flow
+#define CHALLENGE_AND_DEADLINE_LEN                   24  // 16 bytes challenge + 8 bytes deadline
+#define ED25519_RAW_KEY_LEN                          32
+#define ED25519_DER_KEY_LEN                          44
+#define ED25519_DER_PREFIX_LEN                       12
 
 static const uint8_t ED25519_DER_PREFIX[ED25519_DER_PREFIX_LEN] =
     {0x30, 0x2A, 0x30, 0x05, 0x06, 0x03, 0x2B, 0x65, 0x70, 0x03, 0x21, 0x00};

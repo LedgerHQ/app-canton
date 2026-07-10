@@ -35,7 +35,7 @@ typedef com_daml_ledger_api_v2_interactive_DeviceMetadata_InputContract InputCon
 
 // Node version and kind oneofs
 #define NODE_VERSION_ONEOF_FIELD which_versioned_node
-#define NODE_V1_TAG com_daml_ledger_api_v2_interactive_DeviceDamlTransaction_Node_v1_tag
+#define NODE_V1_TAG              com_daml_ledger_api_v2_interactive_DeviceDamlTransaction_Node_v1_tag
 #define NODE_V1_KIND_ONEOF_FIELD which_node_type
 #define NODE_V1_CREATE_TAG       com_daml_ledger_api_v2_interactive_transaction_v1_Node_create_tag
 #define NODE_V1_EXERCISE_TAG     com_daml_ledger_api_v2_interactive_transaction_v1_Node_exercise_tag
