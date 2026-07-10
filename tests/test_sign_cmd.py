@@ -371,23 +371,22 @@ def test_sign_token_transfer_32_node_children(
     )
 
 
-def test_sign_proxy_token_transfer(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
+def test_sign_proxy_token_transfer_blind_signing_disabled(
+    backend: BackendInterface,
+    scenario_navigator: NavigateWithScenario,
+    device: Device,
+    test_name: str,
+    navigator: Navigator,
+) -> None:
     _sign_and_verify_prepared_transaction(
         backend,
         scenario_navigator,
+        navigator=navigator,
+        device=device,
+        test_name=test_name,
         tx_json="tests/tx_examples/token_transfer_proxy.json",
-        custom_screen_text="Sign transaction to",
+        blind_sign=True,
     )
-
-
-def test_sign_proxy_cbtc_token_transfer(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
-    _sign_and_verify_prepared_transaction(
-        backend,
-        scenario_navigator,
-        tx_json="tests/tx_examples/token_transfer_cbtc_proxy.json",
-        custom_screen_text="Sign transaction to",
-    )
-
 
 def test_sign_token_transfer_accept(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
     _sign_and_verify_prepared_transaction(
@@ -396,16 +395,6 @@ def test_sign_token_transfer_accept(backend: BackendInterface, scenario_navigato
         tx_json="tests/tx_examples/token_transfer_accept.json",
         custom_screen_text="Sign transaction to",
     )
-
-
-def test_sign_proxy_token_transfer_accept(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
-    _sign_and_verify_prepared_transaction(
-        backend,
-        scenario_navigator,
-        tx_json="tests/tx_examples/token_transfer_accept_proxy.json",
-        custom_screen_text="Sign transaction to",
-    )
-
 
 def test_sign_transfer_accept_with_empty_strings(
     backend: BackendInterface,
@@ -448,31 +437,11 @@ def test_sign_token_transfer_reject(backend: BackendInterface, scenario_navigato
     )
 
 
-def test_sign_token_transfer_reject_proxy(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
-    _sign_and_verify_prepared_transaction(
-        backend,
-        scenario_navigator,
-        tx_json="tests/tx_examples/token_transfer_reject_proxy.json",
-        custom_screen_text="Sign transaction to",
-    )
-
-
 def test_sign_token_transfer_withdraw(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
     _sign_and_verify_prepared_transaction(
         backend,
         scenario_navigator,
         tx_json="tests/tx_examples/token_transfer_withdraw.json",
-        custom_screen_text="Sign transaction to",
-    )
-
-
-def test_sign_token_transfer_withdraw_proxy(
-    backend: BackendInterface, scenario_navigator: NavigateWithScenario
-) -> None:
-    _sign_and_verify_prepared_transaction(
-        backend,
-        scenario_navigator,
-        tx_json="tests/tx_examples/token_transfer_withdraw_proxy.json",
         custom_screen_text="Sign transaction to",
     )
 
