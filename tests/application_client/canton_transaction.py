@@ -40,6 +40,7 @@ PURPOSE_MULTI_TOPOLOGY_TRANSACTION = 55
 
 DEFAULT_PARTY_NAME = "ldg"
 
+
 class TransactionError(Exception):
     pass
 
@@ -170,7 +171,6 @@ class Transaction:
 
         return Transaction.compute_sha256_canton_hash(PURPOSE_MULTI_TOPOLOGY_TRANSACTION, combined_hashes)
 
-
     @classmethod
     def _build_topology_transaction(
         cls,
@@ -205,14 +205,12 @@ class Transaction:
         # Check if key is raw or DER format
         if len(public_key) == 32:
             raw_key = public_key
-        elif len(public_key) == 44 and public_key.startswith(b"\x30\x2A\x30\x05\x06\x03\x2B\x65\x70\x03\x21\x00"):
+        elif len(public_key) == 44 and public_key.startswith(b"\x30\x2a\x30\x05\x06\x03\x2b\x65\x70\x03\x21\x00"):
             raw_key = public_key[12:]
         else:
             raise ValueError("Public key must be in raw (32 bytes) or DER (44 bytes) format")
 
-        return cls.compute_sha256_canton_hash(
-            PURPOSE_PUBLIC_KEY_FINGERPRINT, raw_key
-        ).hex()
+        return cls.compute_sha256_canton_hash(PURPOSE_PUBLIC_KEY_FINGERPRINT, raw_key).hex()
 
     @classmethod
     def namespace_delegation(cls, public_key: bytes, der_format: bool) -> bytes:
@@ -230,7 +228,10 @@ class Transaction:
             public_key=public_key,
             scheme=key_scheme,
             key_spec=key_spec,
-            usage=[SigningKeyUsage.SIGNING_KEY_USAGE_NAMESPACE, SigningKeyUsage.SIGNING_KEY_USAGE_PROTOCOL],
+            usage=[
+                SigningKeyUsage.SIGNING_KEY_USAGE_NAMESPACE,
+                SigningKeyUsage.SIGNING_KEY_USAGE_PROTOCOL,
+            ],
         )
 
         # Generate random namespace private ED25519 key for the party
@@ -266,7 +267,10 @@ class Transaction:
             public_key=public_key,
             scheme=key_scheme,
             key_spec=key_spec,
-            usage=[SigningKeyUsage.SIGNING_KEY_USAGE_NAMESPACE, SigningKeyUsage.SIGNING_KEY_USAGE_PROTOCOL],
+            usage=[
+                SigningKeyUsage.SIGNING_KEY_USAGE_NAMESPACE,
+                SigningKeyUsage.SIGNING_KEY_USAGE_PROTOCOL,
+            ],
         )
 
         if party_id is None:
@@ -287,7 +291,7 @@ class Transaction:
         )
 
     @classmethod
-    def party_to_participant(cls, public_key: bytes, validators_seeds : list[bytes]) -> bytes:
+    def party_to_participant(cls, public_key: bytes, validators_seeds: list[bytes]) -> bytes:
         party_fingerprint = cls._compute_party_fingerprint(public_key)
         party_id = DEFAULT_PARTY_NAME + "::" + party_fingerprint
 
@@ -325,11 +329,13 @@ class Transaction:
         )
 
     @classmethod
-    def party_to_participant_from_uid(cls,
-                                      public_key: bytes,
-                                      participant_uid: list[str],
-                                      threshold: Optional[int] = None,
-                                      party_id: Optional[str] = None) -> bytes:
+    def party_to_participant_from_uid(
+        cls,
+        public_key: bytes,
+        participant_uid: list[str],
+        threshold: Optional[int] = None,
+        party_id: Optional[str] = None,
+    ) -> bytes:
         if party_id is None:
             party_fingerprint = cls._compute_party_fingerprint(public_key)
             party_id = DEFAULT_PARTY_NAME + "::" + party_fingerprint

@@ -74,11 +74,11 @@ typedef struct {
     bool has_challenge_signature;                  /// whether challenge signature is present
 
     uint8_t v;                      /// parity of y-coordinate of R in ECDSA signature
-    nbgl_contentTagValue_t* pairs;  // dynamically allocated array for display
+    nbgl_contentTagValue_t *pairs;  // dynamically allocated array for display
     size_t pairs_count;
     bool clear_signing_available;  /// whether clearing signing data is allowed
-    const char* review_title;      /// dynamically allocated review title
-    const char* review_finish;
+    const char *review_title;      /// dynamically allocated review title
+    const char *review_finish;
 
 } transaction_ctx_t;
 

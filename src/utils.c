@@ -35,8 +35,7 @@ void canton_hash(uint8_t purpose,
                  size_t data_len,
                  uint8_t out[CANTON_HASH_LEN]) {
     LEDGER_ASSERT(out != NULL, "NULL out pointer passed to canton_hash");
-    LEDGER_ASSERT(data != NULL || data_len == 0,
-                  "NULL data with non-zero length passed to canton_hash");
+    LEDGER_ASSERT(data != NULL || data_len == 0, "NULL data with non-zero length in canton_hash");
     cx_sha256_t ctx;
     uint8_t purpose_be[UINT32_T_LEN] = {0, 0, 0, purpose};
     uint8_t tmp[SHA256_HASH_LEN] = {0};

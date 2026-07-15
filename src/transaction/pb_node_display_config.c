@@ -6,10 +6,8 @@
 /* -------------------------------------------------------------------------- */
 
 // Use distinct argument names (_p, _n) to avoid any potential macro expansion conflicts
-#define FLD(_p, _n, _f, _m) \
-    { .path = _p, .item_name = _n, .format_callback = _f, .mandatory = _m }
-#define ID(_mod, _ent) \
-    { .module_name = _mod, .entity_name = _ent }
+#define FLD(_p, _n, _f, _m) {.path = _p, .item_name = _n, .format_callback = _f, .mandatory = _m}
+#define ID(_mod, _ent)      {.module_name = _mod, .entity_name = _ent}
 
 /* -------------------------------------------------------------------------- */
 /* Global Constants / Mappings                                                */
@@ -149,17 +147,6 @@ static const field_config_t PREAPPROVAL_PROPOSAL_FIELDS[] = {
     FLD("asset", "For asset", NULL, true),
     FLD("provider", "By validator", NULL, true)};
 
-static const field_config_t PROXY_TRANSFER_FIELDS[] = {
-    FLD("proxyArg.choiceArg.transfer.sender", "From", NULL, true),
-    FLD("proxyArg.choiceArg.transfer.amount", "Amount", format_token_amount_field, true),
-    FLD("proxyArg.choiceArg.transfer.receiver", "To", NULL, true),
-    FLD("proxyArg.choiceArg.transfer.instrumentId.id", "Token", NULL, true),
-    FLD("proxyArg.choiceArg.transfer.instrumentId.admin", NULL, NULL, true),
-    FLD("proxyArg.choiceArg.transfer.meta.values.splice\\.lfdecentralizedtrust\\.org/reason",
-        "Memo",
-        NULL,
-        false)};
-
 /* -------------------------------------------------------------------------- */
 /* Metadata identifiers lists                                                 */
 /* -------------------------------------------------------------------------- */
@@ -173,13 +160,14 @@ static const identifier_config_t *META_EMPTY[] = {};
 /* Main Display Configuration                                                 */
 /* -------------------------------------------------------------------------- */
 
-#define CFG_ENTRY(_id, _fields, _title, _finish, _meta)                               \
-    {                                                                                 \
-        .identifier = _id, .fields = _fields,                                         \
-        .fields_count = sizeof(_fields) / sizeof(_fields[0]), .review_title = _title, \
-        .review_finish = _finish, .metadata_contract_identifiers = _meta,             \
-        .metadata_contract_identifiers_count = sizeof(_meta) / sizeof(_meta[0])       \
-    }
+#define CFG_ENTRY(_id, _fields, _title, _finish, _meta)    \
+    {.identifier = _id,                                    \
+     .fields = _fields,                                    \
+     .fields_count = sizeof(_fields) / sizeof(_fields[0]), \
+     .review_title = _title,                               \
+     .review_finish = _finish,                             \
+     .metadata_contract_identifiers = _meta,               \
+     .metadata_contract_identifiers_count = sizeof(_meta) / sizeof(_meta[0])}
 
 const display_config_t DISPLAY_CONFIGS[] = {
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV1", "TransferFactory_Transfer"),
@@ -201,25 +189,11 @@ const display_config_t DISPLAY_CONFIGS[] = {
               PREAPPROVAL_PROPOSAL_REVIEW_FINISH,
               META_EMPTY),
 
-    CFG_ENTRY(
-        ID("Splice.Util.FeaturedApp.WalletUserProxy", "WalletUserProxy_TransferFactory_Transfer"),
-        PROXY_TRANSFER_FIELDS,
-        TOKEN_TRANSFER_REVIEW_TITLE,
-        TOKEN_TRANSFER_REVIEW_FINISH,
-        META_EMPTY),
-
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV1", "TransferInstruction_Accept"),
               TOKEN_TRANSFER_ACCEPT_FIELDS,
               TOKEN_TRANSFER_ACCEPT_REVIEW_TITLE,
               TOKEN_TRANSFER_ACCEPT_REVIEW_FINISH,
               TRANSFER_OFFER_META_ID_LIST),
-
-    CFG_ENTRY(
-        ID("Splice.Util.FeaturedApp.WalletUserProxy", "WalletUserProxy_TransferInstruction_Accept"),
-        TOKEN_TRANSFER_ACCEPT_FIELDS,
-        TOKEN_TRANSFER_ACCEPT_REVIEW_TITLE,
-        TOKEN_TRANSFER_ACCEPT_REVIEW_FINISH,
-        TRANSFER_OFFER_META_ID_LIST),
 
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV1", "TransferInstruction_Reject"),
               TOKEN_TRANSFER_ACCEPT_FIELDS,
@@ -227,21 +201,7 @@ const display_config_t DISPLAY_CONFIGS[] = {
               TOKEN_TRANSFER_REJECT_REVIEW_FINISH,
               TRANSFER_OFFER_META_ID_LIST),
 
-    CFG_ENTRY(
-        ID("Splice.Util.FeaturedApp.WalletUserProxy", "WalletUserProxy_TransferInstruction_Reject"),
-        TOKEN_TRANSFER_ACCEPT_FIELDS,
-        TOKEN_TRANSFER_REJECT_REVIEW_TITLE,
-        TOKEN_TRANSFER_REJECT_REVIEW_FINISH,
-        TRANSFER_OFFER_META_ID_LIST),
-
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV1", "TransferInstruction_Withdraw"),
-              TOKEN_TRANSFER_WITHDRAW_FIELDS,
-              TOKEN_TRANSFER_WITHDRAW_REVIEW_TITLE,
-              TOKEN_TRANSFER_WITHDRAW_REVIEW_FINISH,
-              TRANSFER_OFFER_META_ID_LIST),
-
-    CFG_ENTRY(ID("Splice.Util.FeaturedApp.WalletUserProxy",
-                 "WalletUserProxy_TransferInstruction_Withdraw"),
               TOKEN_TRANSFER_WITHDRAW_FIELDS,
               TOKEN_TRANSFER_WITHDRAW_REVIEW_TITLE,
               TOKEN_TRANSFER_WITHDRAW_REVIEW_FINISH,

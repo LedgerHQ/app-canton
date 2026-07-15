@@ -59,7 +59,7 @@ static void pb_release_single_field(pb_field_iter_t *field);
 #endif
 
 typedef struct {
-    uint32_t bitfield[(PB_MAX_REQUIRED_FIELDS + 31) / 32];
+    uint32_t bitfield[(PB_MAX_REQUIRED_FIELDS + 31) / 32 + 1];
 } pb_fields_seen_t;
 
 /*******************************
@@ -1001,7 +1001,7 @@ static bool checkreturn pb_decode_inner(pb_istream_t *stream, const pb_msgdesc_t
     pb_size_t fixed_count_size = 0;
     pb_size_t fixed_count_total_size = 0;
 
-    pb_fields_seen_t fields_seen = {{0, 0}};
+    pb_fields_seen_t fields_seen = {0};
     const uint32_t allbits = ~(uint32_t)0;
     pb_field_iter_t iter;
 

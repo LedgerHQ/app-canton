@@ -126,7 +126,7 @@ void hw_init(HashWriter *hw) {
 
 void hw_put(HashWriter *hw, const void *p, size_t n) {
     LEDGER_ASSERT(hw != NULL, "Null HashWriter passed to hw_put");
-    LEDGER_ASSERT(p == NULL ? n == 0 : true, "Null pointer with non-zero length passed to hw_put");
+    LEDGER_ASSERT(p == NULL ? n == 0 : true, "Null ptr with non-zero length in hw_put");
     CX_ASSERT(cx_hash_update((cx_hash_t *) &hw->ctx, p, n));
 }
 
@@ -300,7 +300,7 @@ void encode_create_end(HashWriter *hw, const Node_CreateCb *c) {
 
 void encode_exercise_start(HashWriter *hw, const Node_ExerciseCb *e, const uint8_t *seed) {
     LEDGER_ASSERT(hw != NULL, "Null HashWriter passed to encode_exercise_start");
-    LEDGER_ASSERT(e != NULL, "Null exercise node passed to encode_exercise_start");
+    LEDGER_ASSERT(e != NULL, "Null exercise node in encode_exercise_start");
 
     hw_put_byte(hw, NODE_ENCODING_VERSION);
     encode_string(hw, e->lf_version);
@@ -326,7 +326,7 @@ void encode_exercise_start(HashWriter *hw, const Node_ExerciseCb *e, const uint8
 
 void encode_exercise_middle(HashWriter *hw, const Node_ExerciseCb *e) {
     LEDGER_ASSERT(hw != NULL, "Null HashWriter passed to encode_exercise_middle");
-    LEDGER_ASSERT(e != NULL, "Null exercise node passed to encode_exercise_middle");
+    LEDGER_ASSERT(e != NULL, "Null exercise node in encode_exercise_middle");
 
     encode_bool(hw, e->consuming);
 }
@@ -425,8 +425,8 @@ void hash_transaction(HashWriter *hw, const DamlTransaction *tx) {
 }
 
 void finalize_hash_transaction(HashWriter *hw, uint8_t out[SHA256_HASH_LEN]) {
-    LEDGER_ASSERT(hw != NULL, "Null HashWriter passed to finalize_hash_transaction");
-    LEDGER_ASSERT(out != NULL, "Null output buffer passed to finalize_hash_transaction");
+    LEDGER_ASSERT(hw != NULL, "Null HashWriter in finalize_hash_transaction");
+    LEDGER_ASSERT(out != NULL, "Null out buffer in finalize_hash_transaction");
 
     hw_finalize(hw, out);
 
