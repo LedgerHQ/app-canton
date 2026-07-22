@@ -91,7 +91,7 @@ const participant_id_to_name_mapping_t MAINNET_SINGLE_VALIDATOR[] = {
 const participant_id_to_name_mapping_t MAINNET_DUAL_VALIDATORS[] = {
     {"ledger-ledgerops-2::12207a4859ad414f4f47c2d773ddf4ea88de8c3a1aab19abaa197e504acdbf679d3c",
      "Ledger Validator"},
-    {"Ledger-Kiln-1::12200386019c89269f5541595286cf5ebf24fe7884d8c6b05ce042c999f9161cb9d0",
+    {"Ledger-Kiln-2::1220e2225d5a297fae4000be2e3ca560ce802461da04c8e3e40c9fbbf0547f4fe8e3",
      "Kiln Validator"},
 };
 
