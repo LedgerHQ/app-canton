@@ -30,7 +30,7 @@ APPNAME = "Canton"
 # Application version
 APPVERSION_M = 3
 APPVERSION_N = 3
-APPVERSION_P = 3
+APPVERSION_P = 4
 APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
 # Application source files
