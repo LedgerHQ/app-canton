@@ -88,6 +88,12 @@ const participant_id_to_name_mapping_t MAINNET_SINGLE_VALIDATOR[] = {
      "Ledger Validator"},
 };
 
+const participant_id_to_name_mapping_t MAINNET_ARQITECH_SINGLE_VALIDATOR[] = {
+    {"validator-MPCH-ARQI-1::"
+     "1220a9be0f658dfc64deb70a2818b460315dc1815f8f9b4ec1017c4432910dd375fe",
+     "Arqitech Validator"},
+};
+
 const participant_id_to_name_mapping_t MAINNET_DUAL_VALIDATORS[] = {
     {"ledger-ledgerops-2::12207a4859ad414f4f47c2d773ddf4ea88de8c3a1aab19abaa197e504acdbf679d3c",
      "Ledger Validator"},
@@ -99,6 +105,12 @@ const participant_id_to_name_mapping_t TESTNET_SINGLE_VALIDATOR[] = {
     {"ledger-ledgeropstestnet-0::"
      "122095f38f5c73cc18fbeb3290f8c17f7a1ff190f66fe159c671cf1fb0dc634eedaf",
      "Ledger Testnet\nValidator"},
+};
+
+const participant_id_to_name_mapping_t TESTNET_ARQITECH_SINGLE_VALIDATOR[] = {
+    {"validator-MPCH-ARQI-1::"
+     "122012c83fd018b14f91b426181fb2171e5a896eadffbbe0993d440613ccf23baf45",
+     "Arqitech Testnet\nValidator"},
 };
 
 const participant_id_to_name_mapping_t TESTNET_DUAL_VALIDATORS[] = {
@@ -116,6 +128,12 @@ const participant_id_to_name_mapping_t DEVNET_SINGLE_VALIDATOR[] = {
      "Ledger Devnet\nValidator"},
 };
 
+const participant_id_to_name_mapping_t DEVNET_ARQITECH_SINGLE_VALIDATOR[] = {
+    {"validator-MPCH-ARQI-2::"
+     "1220625b353913e8b722ca74a6675bb8a19f12c5aa713e51e3090730fce8e2dcbaae",
+     "Arqitech Devnet\nValidator"},
+};
+
 const participant_id_to_name_mapping_t DEVNET_DUAL_VALIDATORS[] = {
     {"ledger-ledgeropsdevnet-0::"
      "12208f74f551f8c28b68414fc3bb4b8466178055845485878a1af8ac1fe96f88fad2",
@@ -127,11 +145,17 @@ const participant_id_to_name_mapping_t DEVNET_DUAL_VALIDATORS[] = {
 const valid_participants_config_t VALID_PARTICIPANTS_CONFIGS[] = {
     {MAINNET_SINGLE_VALIDATOR,
      sizeof(MAINNET_SINGLE_VALIDATOR) / sizeof(MAINNET_SINGLE_VALIDATOR[0])},
+    {MAINNET_ARQITECH_SINGLE_VALIDATOR,
+     sizeof(MAINNET_ARQITECH_SINGLE_VALIDATOR) / sizeof(MAINNET_ARQITECH_SINGLE_VALIDATOR[0])},
     {MAINNET_DUAL_VALIDATORS, sizeof(MAINNET_DUAL_VALIDATORS) / sizeof(MAINNET_DUAL_VALIDATORS[0])},
     {TESTNET_SINGLE_VALIDATOR,
      sizeof(TESTNET_SINGLE_VALIDATOR) / sizeof(TESTNET_SINGLE_VALIDATOR[0])},
+    {TESTNET_ARQITECH_SINGLE_VALIDATOR,
+     sizeof(TESTNET_ARQITECH_SINGLE_VALIDATOR) / sizeof(TESTNET_ARQITECH_SINGLE_VALIDATOR[0])},
     {TESTNET_DUAL_VALIDATORS, sizeof(TESTNET_DUAL_VALIDATORS) / sizeof(TESTNET_DUAL_VALIDATORS[0])},
     {DEVNET_SINGLE_VALIDATOR, sizeof(DEVNET_SINGLE_VALIDATOR) / sizeof(DEVNET_SINGLE_VALIDATOR[0])},
+    {DEVNET_ARQITECH_SINGLE_VALIDATOR,
+     sizeof(DEVNET_ARQITECH_SINGLE_VALIDATOR) / sizeof(DEVNET_ARQITECH_SINGLE_VALIDATOR[0])},
     {DEVNET_DUAL_VALIDATORS, sizeof(DEVNET_DUAL_VALIDATORS) / sizeof(DEVNET_DUAL_VALIDATORS[0])},
 };
 

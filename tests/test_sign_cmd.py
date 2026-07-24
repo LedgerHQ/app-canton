@@ -46,6 +46,12 @@ DEVNET_VALIDATOR_PARTY_ID_2 = (
     "Ledger-KilnDevnet-2::12203b77e5d74eb787ff0251fd76949379a625368646302a203fea7f7db1dd5402bf"
 )
 
+ARQITECH_VALIDATOR_PARTY_IDS = (
+    "validator-MPCH-ARQI-1::1220a9be0f658dfc64deb70a2818b460315dc1815f8f9b4ec1017c4432910dd375fe",
+    "validator-MPCH-ARQI-1::122012c83fd018b14f91b426181fb2171e5a896eadffbbe0993d440613ccf23baf45",
+    "validator-MPCH-ARQI-2::1220625b353913e8b722ca74a6675bb8a19f12c5aa713e51e3090730fce8e2dcbaae",
+)
+
 
 def _nano_enable_blind_signing() -> list[NavInsID]:
     # initial: go to settings
@@ -738,6 +744,16 @@ def test_sign_onboarding_attested_testnet_multi(
         attestation_keys=(attest_key, attest_pub_key),
         validator_uids=[TESTNET_VALIDATOR_PARTY_ID_1, TESTNET_VALIDATOR_PARTY_ID_2],
     )
+
+
+def test_sign_onboarding_arqitech_single(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
+    for validator_uid in ARQITECH_VALIDATOR_PARTY_IDS:
+        _onboard_party(
+            backend,
+            scenario_navigator,
+            validator_uids=[validator_uid],
+            snapshot_check=False,
+        )
 
 
 def test_sign_onboarding_raw_format_key(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
