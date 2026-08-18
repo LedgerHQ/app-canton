@@ -77,31 +77,20 @@ typedef struct {
     size_t count;
 } valid_participants_config_t;
 
-#define PARTY_FIELD_IDX         0
-#define PARTICIPANT_1_FIELD_IDX 1
-#define PARTICIPANT_2_FIELD_IDX 2
-#define MAX_PARTICIPANTS_NB     2
-#define THRESHOLD_FIELD_IDX     3
+#define PARTY_FIELD_IDX          0
+#define PARTICIPANT_1_FIELD_IDX  1
+#define PARTICIPANT_2_FIELD_IDX  2
+#define EXPECTED_PARTICIPANTS_NB 2
+#define THRESHOLD_FIELD_IDX      3
 
-const participant_id_to_name_mapping_t MAINNET_SINGLE_VALIDATOR[] = {
-    {"ledger-ledgerops-2::12207a4859ad414f4f47c2d773ddf4ea88de8c3a1aab19abaa197e504acdbf679d3c",
-     "Ledger Validator"},
-};
-
-const participant_id_to_name_mapping_t MAINNET_DUAL_VALIDATORS[] = {
+static const participant_id_to_name_mapping_t MAINNET_DUAL_VALIDATORS[] = {
     {"ledger-ledgerops-2::12207a4859ad414f4f47c2d773ddf4ea88de8c3a1aab19abaa197e504acdbf679d3c",
      "Ledger Validator"},
     {"Ledger-Kiln-2::1220e2225d5a297fae4000be2e3ca560ce802461da04c8e3e40c9fbbf0547f4fe8e3",
      "Kiln Validator"},
 };
 
-const participant_id_to_name_mapping_t TESTNET_SINGLE_VALIDATOR[] = {
-    {"ledger-ledgeropstestnet-0::"
-     "122095f38f5c73cc18fbeb3290f8c17f7a1ff190f66fe159c671cf1fb0dc634eedaf",
-     "Ledger Testnet\nValidator"},
-};
-
-const participant_id_to_name_mapping_t TESTNET_DUAL_VALIDATORS[] = {
+static const participant_id_to_name_mapping_t TESTNET_DUAL_VALIDATORS[] = {
     {"ledger-ledgeropstestnet-0::"
      "122095f38f5c73cc18fbeb3290f8c17f7a1ff190f66fe159c671cf1fb0dc634eedaf",
      "Ledger Testnet\nValidator"},
@@ -110,13 +99,7 @@ const participant_id_to_name_mapping_t TESTNET_DUAL_VALIDATORS[] = {
      "Kiln Testnet\nValidator"},
 };
 
-const participant_id_to_name_mapping_t DEVNET_SINGLE_VALIDATOR[] = {
-    {"ledger-ledgeropsdevnet-0::"
-     "12208f74f551f8c28b68414fc3bb4b8466178055845485878a1af8ac1fe96f88fad2",
-     "Ledger Devnet\nValidator"},
-};
-
-const participant_id_to_name_mapping_t DEVNET_DUAL_VALIDATORS[] = {
+static const participant_id_to_name_mapping_t DEVNET_DUAL_VALIDATORS[] = {
     {"ledger-ledgeropsdevnet-0::"
      "12208f74f551f8c28b68414fc3bb4b8466178055845485878a1af8ac1fe96f88fad2",
      "Ledger Devnet\nValidator"},
@@ -124,23 +107,17 @@ const participant_id_to_name_mapping_t DEVNET_DUAL_VALIDATORS[] = {
      "Kiln Devnet\nValidator"},
 };
 
-const valid_participants_config_t VALID_PARTICIPANTS_CONFIGS[] = {
-    {MAINNET_SINGLE_VALIDATOR,
-     sizeof(MAINNET_SINGLE_VALIDATOR) / sizeof(MAINNET_SINGLE_VALIDATOR[0])},
+static const valid_participants_config_t VALID_PARTICIPANTS_CONFIGS[] = {
     {MAINNET_DUAL_VALIDATORS, sizeof(MAINNET_DUAL_VALIDATORS) / sizeof(MAINNET_DUAL_VALIDATORS[0])},
-    {TESTNET_SINGLE_VALIDATOR,
-     sizeof(TESTNET_SINGLE_VALIDATOR) / sizeof(TESTNET_SINGLE_VALIDATOR[0])},
     {TESTNET_DUAL_VALIDATORS, sizeof(TESTNET_DUAL_VALIDATORS) / sizeof(TESTNET_DUAL_VALIDATORS[0])},
-    {DEVNET_SINGLE_VALIDATOR, sizeof(DEVNET_SINGLE_VALIDATOR) / sizeof(DEVNET_SINGLE_VALIDATOR[0])},
     {DEVNET_DUAL_VALIDATORS, sizeof(DEVNET_DUAL_VALIDATORS) / sizeof(DEVNET_DUAL_VALIDATORS[0])},
 };
 
 // Const configurations (stored in flash)
-const field_config_t PARTY_FIELD_CONFIG = {"Add account", true};
-static const char *SINGLE_VALIDATOR_LABEL = "Associate to validator";
-const field_config_t PARTICIPANT_1_UID_FIELD_CONFIG = {"Associate to validator 1", true};
-const field_config_t PARTICIPANT_2_UID_FIELD_CONFIG = {"Associate to validator 2", false};
-const field_config_t THRESHOLD_FIELD_CONFIG = {"Validators threshold", false};
+static const field_config_t PARTY_FIELD_CONFIG = {"Add account", true};
+static const field_config_t PARTICIPANT_1_UID_FIELD_CONFIG = {"Associate to validator 1", true};
+static const field_config_t PARTICIPANT_2_UID_FIELD_CONFIG = {"Associate to validator 2", false};
+static const field_config_t THRESHOLD_FIELD_CONFIG = {"Validators threshold", false};
 
 static const field_config_t *const
     ONBOARDING_FLOW_DISPLAY_CONFIGS[ONBOARDING_FLOW_DISPLAY_FIELDS_NB] = {
@@ -523,7 +500,7 @@ static int process_party_to_participant(const PartyToParticipant *mapping,
         return SW_TOPOLOGY_PARTY_ID_MISMATCH;
     }
 
-    if (mapping->participants_count > MAX_PARTICIPANTS_NB) {
+    if (mapping->participants_count != EXPECTED_PARTICIPANTS_NB) {
         return SW_TOPOLOGY_UNEXPECTED_NUMBER_OF_PARTICIPANTS;
     }
 
@@ -531,7 +508,7 @@ static int process_party_to_participant(const PartyToParticipant *mapping,
         return SW_TOPOLOGY_UNEXPECTED_THRESHOLD_VALUE;
     }
 
-    if (mapping->participants_count > 0 && mapping->participants == NULL) {
+    if (mapping->participants == NULL) {
         return SW_TOPOLOGY_MISSING_PARTICIPANT_DATA;
     }
 
@@ -543,8 +520,8 @@ static int process_party_to_participant(const PartyToParticipant *mapping,
         sizeof(VALID_PARTICIPANTS_CONFIGS) / sizeof(VALID_PARTICIPANTS_CONFIGS[0]);
     size_t pc = mapping->participants_count;
     uint8_t found_valid = 0;
-    bool matched_valid[MAX_PARTICIPANTS_NB] = {false};
-    char *participant_names[MAX_PARTICIPANTS_NB] = {NULL};
+    bool matched_valid[EXPECTED_PARTICIPANTS_NB] = {false};
+    char *participant_names[EXPECTED_PARTICIPANTS_NB] = {NULL};
 
     for (size_t i = 0; i < configs_count; i++) {
         found_valid = 0;
@@ -591,11 +568,6 @@ static int process_party_to_participant(const PartyToParticipant *mapping,
         size_t field_idx = (j == 0) ? PARTICIPANT_1_FIELD_IDX : PARTICIPANT_2_FIELD_IDX;
         LEDGER_ASSERT(set_field_value(tx_info, field_idx, participant_names[j]) == true,
                       "Failed to set participant name field");
-    }
-
-    // When only one participant, use singular label instead of "Associate to validator 1"
-    if (pc == 1) {
-        tx_info->pairs[tx_info->pairs_count - 1].item = (char *) PIC(SINGLE_VALIDATOR_LABEL);
     }
 
     // Set threshold field

@@ -607,13 +607,13 @@ def test_sign_onboarding_expect_error_unexpected_participant_id(
     )
 
 
-def test_sign_onboarding_expect_error_unexpected_participant_id_single(
+def test_sign_onboarding_expect_error_unexpected_number_of_participants_single(
     backend: BackendInterface,
 ) -> None:
     _onboard_party_expect_error(
         backend,
-        validator_uids=[DEVNET_VALIDATOR_PARTY_ID_2],
-        expected_error=Errors.SW_TOPOLOGY_UNEXPECTED_PARTICIPANT_ID,
+        validator_uids=[MAINNET_VALIDATOR_PARTY_ID_1],
+        expected_error=Errors.SW_TOPOLOGY_UNEXPECTED_NUMBER_OF_PARTICIPANTS,
     )
 
 
@@ -627,7 +627,7 @@ def test_sign_onboarding_expect_error_unexpected_threshold(
     )
 
 
-def test_sign_onboarding_expect_error_unexpected_number_of_participants(
+def test_sign_onboarding_expect_error_unexpected_number_of_participants_three(
     backend: BackendInterface,
 ) -> None:
     _onboard_party_expect_error(
@@ -692,18 +692,6 @@ def test_sign_onboarding_attested(backend: BackendInterface, scenario_navigator:
     _onboard_party(backend, scenario_navigator, attestation_keys=(attest_key, attest_pub_key))
 
 
-def test_sign_onboarding_attested_devnet_single(
-    backend: BackendInterface, scenario_navigator: NavigateWithScenario
-) -> None:
-    attest_key, attest_pub_key = get_keys_bytes("attestations/data/test/priv-key.pem")
-    _onboard_party(
-        backend,
-        scenario_navigator,
-        attestation_keys=(attest_key, attest_pub_key),
-        validator_uids=[DEVNET_VALIDATOR_PARTY_ID_1],
-    )
-
-
 def test_sign_onboarding_attested_devnet_multi(
     backend: BackendInterface, scenario_navigator: NavigateWithScenario
 ) -> None:
@@ -713,18 +701,6 @@ def test_sign_onboarding_attested_devnet_multi(
         scenario_navigator,
         attestation_keys=(attest_key, attest_pub_key),
         validator_uids=[DEVNET_VALIDATOR_PARTY_ID_1, DEVNET_VALIDATOR_PARTY_ID_2],
-    )
-
-
-def test_sign_onboarding_attested_testnet_single(
-    backend: BackendInterface, scenario_navigator: NavigateWithScenario
-) -> None:
-    attest_key, attest_pub_key = get_keys_bytes("attestations/data/test/priv-key.pem")
-    _onboard_party(
-        backend,
-        scenario_navigator,
-        attestation_keys=(attest_key, attest_pub_key),
-        validator_uids=[TESTNET_VALIDATOR_PARTY_ID_1],
     )
 
 
