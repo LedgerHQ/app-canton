@@ -77,11 +77,11 @@ typedef struct {
     size_t count;
 } valid_participants_config_t;
 
-#define PARTY_FIELD_IDX         0
-#define PARTICIPANT_1_FIELD_IDX 1
-#define PARTICIPANT_2_FIELD_IDX 2
-#define MAX_PARTICIPANTS_NB     2
-#define THRESHOLD_FIELD_IDX     3
+#define PARTY_FIELD_IDX          0
+#define PARTICIPANT_1_FIELD_IDX  1
+#define PARTICIPANT_2_FIELD_IDX  2
+#define EXPECTED_PARTICIPANTS_NB 2
+#define THRESHOLD_FIELD_IDX      3
 
 const participant_id_to_name_mapping_t MAINNET_DUAL_VALIDATORS[] = {
     {"ledger-ledgerops-2::12207a4859ad414f4f47c2d773ddf4ea88de8c3a1aab19abaa197e504acdbf679d3c",
@@ -501,7 +501,7 @@ static int process_party_to_participant(const PartyToParticipant *mapping,
         return SW_TOPOLOGY_PARTY_ID_MISMATCH;
     }
 
-    if (mapping->participants_count > MAX_PARTICIPANTS_NB) {
+    if (mapping->participants_count != EXPECTED_PARTICIPANTS_NB) {
         return SW_TOPOLOGY_UNEXPECTED_NUMBER_OF_PARTICIPANTS;
     }
 
@@ -509,7 +509,7 @@ static int process_party_to_participant(const PartyToParticipant *mapping,
         return SW_TOPOLOGY_UNEXPECTED_THRESHOLD_VALUE;
     }
 
-    if (mapping->participants_count > 0 && mapping->participants == NULL) {
+    if (mapping->participants == NULL) {
         return SW_TOPOLOGY_MISSING_PARTICIPANT_DATA;
     }
 
@@ -521,8 +521,8 @@ static int process_party_to_participant(const PartyToParticipant *mapping,
         sizeof(VALID_PARTICIPANTS_CONFIGS) / sizeof(VALID_PARTICIPANTS_CONFIGS[0]);
     size_t pc = mapping->participants_count;
     uint8_t found_valid = 0;
-    bool matched_valid[MAX_PARTICIPANTS_NB] = {false};
-    char *participant_names[MAX_PARTICIPANTS_NB] = {NULL};
+    bool matched_valid[EXPECTED_PARTICIPANTS_NB] = {false};
+    char *participant_names[EXPECTED_PARTICIPANTS_NB] = {NULL};
 
     for (size_t i = 0; i < configs_count; i++) {
         found_valid = 0;
@@ -569,11 +569,6 @@ static int process_party_to_participant(const PartyToParticipant *mapping,
         size_t field_idx = (j == 0) ? PARTICIPANT_1_FIELD_IDX : PARTICIPANT_2_FIELD_IDX;
         LEDGER_ASSERT(set_field_value(tx_info, field_idx, participant_names[j]) == true,
                       "Failed to set participant name field");
-    }
-
-    // When only one participant, use singular label instead of "Associate to validator 1"
-    if (pc == 1) {
-        tx_info->pairs[tx_info->pairs_count - 1].item = (char *) PIC(SINGLE_VALIDATOR_LABEL);
     }
 
     // Set threshold field

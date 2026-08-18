@@ -607,13 +607,13 @@ def test_sign_onboarding_expect_error_unexpected_participant_id(
     )
 
 
-def test_sign_onboarding_expect_error_unexpected_participant_id_single(
+def test_sign_onboarding_expect_error_unexpected_number_of_participants_single(
     backend: BackendInterface,
 ) -> None:
     _onboard_party_expect_error(
         backend,
         validator_uids=[MAINNET_VALIDATOR_PARTY_ID_1],
-        expected_error=Errors.SW_TOPOLOGY_UNEXPECTED_PARTICIPANT_ID,
+        expected_error=Errors.SW_TOPOLOGY_UNEXPECTED_NUMBER_OF_PARTICIPANTS,
     )
 
 
@@ -627,7 +627,7 @@ def test_sign_onboarding_expect_error_unexpected_threshold(
     )
 
 
-def test_sign_onboarding_expect_error_unexpected_number_of_participants(
+def test_sign_onboarding_expect_error_unexpected_number_of_participants_three(
     backend: BackendInterface,
 ) -> None:
     _onboard_party_expect_error(
