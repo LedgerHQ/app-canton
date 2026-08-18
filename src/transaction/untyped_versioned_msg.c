@@ -83,14 +83,14 @@ typedef struct {
 #define EXPECTED_PARTICIPANTS_NB 2
 #define THRESHOLD_FIELD_IDX      3
 
-const participant_id_to_name_mapping_t MAINNET_DUAL_VALIDATORS[] = {
+static const participant_id_to_name_mapping_t MAINNET_DUAL_VALIDATORS[] = {
     {"ledger-ledgerops-2::12207a4859ad414f4f47c2d773ddf4ea88de8c3a1aab19abaa197e504acdbf679d3c",
      "Ledger Validator"},
     {"Ledger-Kiln-2::1220e2225d5a297fae4000be2e3ca560ce802461da04c8e3e40c9fbbf0547f4fe8e3",
      "Kiln Validator"},
 };
 
-const participant_id_to_name_mapping_t TESTNET_DUAL_VALIDATORS[] = {
+static const participant_id_to_name_mapping_t TESTNET_DUAL_VALIDATORS[] = {
     {"ledger-ledgeropstestnet-0::"
      "122095f38f5c73cc18fbeb3290f8c17f7a1ff190f66fe159c671cf1fb0dc634eedaf",
      "Ledger Testnet\nValidator"},
@@ -99,7 +99,7 @@ const participant_id_to_name_mapping_t TESTNET_DUAL_VALIDATORS[] = {
      "Kiln Testnet\nValidator"},
 };
 
-const participant_id_to_name_mapping_t DEVNET_DUAL_VALIDATORS[] = {
+static const participant_id_to_name_mapping_t DEVNET_DUAL_VALIDATORS[] = {
     {"ledger-ledgeropsdevnet-0::"
      "12208f74f551f8c28b68414fc3bb4b8466178055845485878a1af8ac1fe96f88fad2",
      "Ledger Devnet\nValidator"},
@@ -107,18 +107,17 @@ const participant_id_to_name_mapping_t DEVNET_DUAL_VALIDATORS[] = {
      "Kiln Devnet\nValidator"},
 };
 
-const valid_participants_config_t VALID_PARTICIPANTS_CONFIGS[] = {
+static const valid_participants_config_t VALID_PARTICIPANTS_CONFIGS[] = {
     {MAINNET_DUAL_VALIDATORS, sizeof(MAINNET_DUAL_VALIDATORS) / sizeof(MAINNET_DUAL_VALIDATORS[0])},
     {TESTNET_DUAL_VALIDATORS, sizeof(TESTNET_DUAL_VALIDATORS) / sizeof(TESTNET_DUAL_VALIDATORS[0])},
     {DEVNET_DUAL_VALIDATORS, sizeof(DEVNET_DUAL_VALIDATORS) / sizeof(DEVNET_DUAL_VALIDATORS[0])},
 };
 
 // Const configurations (stored in flash)
-const field_config_t PARTY_FIELD_CONFIG = {"Add account", true};
-static const char *SINGLE_VALIDATOR_LABEL = "Associate to validator";
-const field_config_t PARTICIPANT_1_UID_FIELD_CONFIG = {"Associate to validator 1", true};
-const field_config_t PARTICIPANT_2_UID_FIELD_CONFIG = {"Associate to validator 2", false};
-const field_config_t THRESHOLD_FIELD_CONFIG = {"Validators threshold", false};
+static const field_config_t PARTY_FIELD_CONFIG = {"Add account", true};
+static const field_config_t PARTICIPANT_1_UID_FIELD_CONFIG = {"Associate to validator 1", true};
+static const field_config_t PARTICIPANT_2_UID_FIELD_CONFIG = {"Associate to validator 2", false};
+static const field_config_t THRESHOLD_FIELD_CONFIG = {"Validators threshold", false};
 
 static const field_config_t *const
     ONBOARDING_FLOW_DISPLAY_CONFIGS[ONBOARDING_FLOW_DISPLAY_FIELDS_NB] = {
