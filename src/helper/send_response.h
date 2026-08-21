@@ -2,6 +2,7 @@
 
 #include "os.h"
 #include "macros.h"
+#include "utils.h"
 
 /**
  * Length of public key.
@@ -23,7 +24,7 @@
  * @return zero or positive integer if success, -1 otherwise.
  *
  */
-int helper_send_response_pubkey(void);
+MUST_CHECK int helper_send_response_pubkey(void);
 
 /**
  * Helper to send APDU response with signature and v (parity of
@@ -36,4 +37,4 @@ int helper_send_response_pubkey(void);
  * @return zero or positive integer if success, -1 otherwise.
  *
  */
-int helper_send_response_sig(void);
+MUST_CHECK int helper_send_response_sig(void);

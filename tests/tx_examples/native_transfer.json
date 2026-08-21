@@ -1,0 +1,273 @@
+{
+  "prepared_transaction": {
+    "transaction": {
+      "version": "2.1",
+      "roots": [
+        "0"
+      ],
+      "nodes": [
+        {
+          "nodeId": "1",
+          "v1": {
+            "create": {
+              "lfVersion": "2.1",
+              "contractId": "00eb8b5fb0e6992df5893b09b0cdea80fa1806ec37b24f945f3a144ef18c3e260e",
+              "packageName": "splice-amulet",
+              "templateId": {
+                "packageId": "95a88ff9ffd509e097802ecf3bbd58c83a5dff408e439cca4e2105ebd2cd0760",
+                "moduleName": "Splice.ExternalPartyAmuletRules",
+                "entityName": "TransferCommand"
+              },
+              "argument": {
+                "record": {
+                  "recordId": {
+                    "packageId": "95a88ff9ffd509e097802ecf3bbd58c83a5dff408e439cca4e2105ebd2cd0760",
+                    "moduleName": "Splice.ExternalPartyAmuletRules",
+                    "entityName": "TransferCommand"
+                  },
+                  "fields": [
+                    {
+                      "label": "dso",
+                      "value": {
+                        "party": "DSO::1220540f46fe214f533e81145d40b579d867b198b9b224483d7ad4d210df6052d885"
+                      }
+                    },
+                    {
+                      "label": "sender",
+                      "value": {
+                        "party": "alice::122017ec409e46d0a81929c8ad278c6bb16bdc59454498dd1f76fbff0306c5a8d3fa"
+                      }
+                    },
+                    {
+                      "label": "receiver",
+                      "value": {
+                        "party": "bob::12202f6b33ff2ccb9d8e9cd544d50f038e112677e8dead4e8f84c43c1fe3936618b1"
+                      }
+                    },
+                    {
+                      "label": "delegate",
+                      "value": {
+                        "party": "app_user_localnet-localparty-1::1220037d88e7bdf9e9e644fd20f52e86ca82419168e2849d6f2108886edb65aa14a1"
+                      }
+                    },
+                    {
+                      "label": "amount",
+                      "value": {
+                        "numeric": "50.0000000000"
+                      }
+                    },
+                    {
+                      "label": "expiresAt",
+                      "value": {
+                        "timestamp": "1758043317275121"
+                      }
+                    },
+                    {
+                      "label": "nonce",
+                      "value": {
+                        "int64": "0"
+                      }
+                    },
+                    {
+                      "label": "description",
+                      "value": {
+                        "optional": {
+                          "value": {
+                            "text": "I <3 u bob"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "signatories": [
+                "DSO::1220540f46fe214f533e81145d40b579d867b198b9b224483d7ad4d210df6052d885",
+                "alice::122017ec409e46d0a81929c8ad278c6bb16bdc59454498dd1f76fbff0306c5a8d3fa"
+              ],
+              "stakeholders": [
+                "DSO::1220540f46fe214f533e81145d40b579d867b198b9b224483d7ad4d210df6052d885",
+                "alice::122017ec409e46d0a81929c8ad278c6bb16bdc59454498dd1f76fbff0306c5a8d3fa",
+                "app_user_localnet-localparty-1::1220037d88e7bdf9e9e644fd20f52e86ca82419168e2849d6f2108886edb65aa14a1"
+              ]
+            }
+          }
+        },
+        {
+          "nodeId": "0",
+          "v1": {
+            "exercise": {
+              "lfVersion": "2.1",
+              "contractId": "007e48ed038098115e09de767f1d32ed2e45160dee31730f34c05efe97796952c2ca11122006f79af32d56d7fe8f8a6c219fdc2f79c7d0098a38509cb604824536aba37dee",
+              "packageName": "splice-amulet",
+              "templateId": {
+                "packageId": "95a88ff9ffd509e097802ecf3bbd58c83a5dff408e439cca4e2105ebd2cd0760",
+                "moduleName": "Splice.ExternalPartyAmuletRules",
+                "entityName": "ExternalPartyAmuletRules"
+              },
+              "signatories": [
+                "DSO::1220540f46fe214f533e81145d40b579d867b198b9b224483d7ad4d210df6052d885"
+              ],
+              "stakeholders": [
+                "DSO::1220540f46fe214f533e81145d40b579d867b198b9b224483d7ad4d210df6052d885"
+              ],
+              "actingParties": [
+                "alice::122017ec409e46d0a81929c8ad278c6bb16bdc59454498dd1f76fbff0306c5a8d3fa"
+              ],
+              "choiceId": "ExternalPartyAmuletRules_CreateTransferCommand",
+              "chosenValue": {
+                "record": {
+                  "recordId": {
+                    "packageId": "95a88ff9ffd509e097802ecf3bbd58c83a5dff408e439cca4e2105ebd2cd0760",
+                    "moduleName": "Splice.ExternalPartyAmuletRules",
+                    "entityName": "ExternalPartyAmuletRules_CreateTransferCommand"
+                  },
+                  "fields": [
+                    {
+                      "label": "sender",
+                      "value": {
+                        "party": "alice::122017ec409e46d0a81929c8ad278c6bb16bdc59454498dd1f76fbff0306c5a8d3fa"
+                      }
+                    },
+                    {
+                      "label": "receiver",
+                      "value": {
+                        "party": "bob::12202f6b33ff2ccb9d8e9cd544d50f038e112677e8dead4e8f84c43c1fe3936618b1"
+                      }
+                    },
+                    {
+                      "label": "delegate",
+                      "value": {
+                        "party": "app_user_localnet-localparty-1::1220037d88e7bdf9e9e644fd20f52e86ca82419168e2849d6f2108886edb65aa14a1"
+                      }
+                    },
+                    {
+                      "label": "amount",
+                      "value": {
+                        "numeric": "50.0000000000"
+                      }
+                    },
+                    {
+                      "label": "expiresAt",
+                      "value": {
+                        "timestamp": "1758043317275121"
+                      }
+                    },
+                    {
+                      "label": "nonce",
+                      "value": {
+                        "int64": "0"
+                      }
+                    },
+                    {
+                      "label": "description",
+                      "value": {
+                        "optional": {
+                          "value": {
+                            "text": "I <3 u bob"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "label": "expectedDso",
+                      "value": {
+                        "optional": {
+                          "value": {
+                            "party": "DSO::1220540f46fe214f533e81145d40b579d867b198b9b224483d7ad4d210df6052d885"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "children": [
+                "1"
+              ],
+              "exerciseResult": {
+                "record": {
+                  "recordId": {
+                    "packageId": "95a88ff9ffd509e097802ecf3bbd58c83a5dff408e439cca4e2105ebd2cd0760",
+                    "moduleName": "Splice.ExternalPartyAmuletRules",
+                    "entityName": "ExternalPartyAmuletRules_CreateTransferCommandResult"
+                  },
+                  "fields": [
+                    {
+                      "label": "transferCommandCid",
+                      "value": {
+                        "contractId": "00eb8b5fb0e6992df5893b09b0cdea80fa1806ec37b24f945f3a144ef18c3e260e"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ],
+      "nodeSeeds": [
+        {
+          "seed": "dAkcovh40g14C7of8PkcdrSO4vjrucU5j90UL6PoMJU="
+        },
+        {
+          "nodeId": 1,
+          "seed": "eXB07ysasYCMH8IOPqxi6qdcDBW2w23uYGSKIM9uyRo="
+        }
+      ]
+    },
+    "metadata": {
+      "submitterInfo": {
+        "actAs": [
+          "alice::122017ec409e46d0a81929c8ad278c6bb16bdc59454498dd1f76fbff0306c5a8d3fa"
+        ],
+        "commandId": "95caefe2-7373-451f-b50a-1a30771a2818"
+      },
+      "synchronizerId": "global-domain::1220540f46fe214f533e81145d40b579d867b198b9b224483d7ad4d210df6052d885",
+      "transactionUuid": "6d1c936b-5aab-40b5-b85d-4a2bbeadb66d",
+      "preparationTime": "1757956917286831",
+      "inputContracts": [
+        {
+          "v1": {
+            "lfVersion": "2.1",
+            "contractId": "007e48ed038098115e09de767f1d32ed2e45160dee31730f34c05efe97796952c2ca11122006f79af32d56d7fe8f8a6c219fdc2f79c7d0098a38509cb604824536aba37dee",
+            "packageName": "splice-amulet",
+            "templateId": {
+              "packageId": "95a88ff9ffd509e097802ecf3bbd58c83a5dff408e439cca4e2105ebd2cd0760",
+              "moduleName": "Splice.ExternalPartyAmuletRules",
+              "entityName": "ExternalPartyAmuletRules"
+            },
+            "argument": {
+              "record": {
+                "recordId": {
+                  "packageId": "95a88ff9ffd509e097802ecf3bbd58c83a5dff408e439cca4e2105ebd2cd0760",
+                  "moduleName": "Splice.ExternalPartyAmuletRules",
+                  "entityName": "ExternalPartyAmuletRules"
+                },
+                "fields": [
+                  {
+                    "label": "dso",
+                    "value": {
+                      "party": "DSO::1220540f46fe214f533e81145d40b579d867b198b9b224483d7ad4d210df6052d885"
+                    }
+                  }
+                ]
+              }
+            },
+            "signatories": [
+              "DSO::1220540f46fe214f533e81145d40b579d867b198b9b224483d7ad4d210df6052d885"
+            ],
+            "stakeholders": [
+              "DSO::1220540f46fe214f533e81145d40b579d867b198b9b224483d7ad4d210df6052d885"
+            ]
+          },
+          "createdAt": "1757954871521689",
+          "eventBlob": "CgMyLjESqQMKRQB+SO0DgJgRXgnedn8dMu0uRRYN7jFzDzTAXv6XeWlSwsoREiAG95rzLVbX/o+KbCGf3C95x9AJijhQnLYEgkU2q6N97hINc3BsaWNlLWFtdWxldBp+CkA5NWE4OGZmOWZmZDUwOWUwOTc4MDJlY2YzYmJkNThjODNhNWRmZjQwOGU0MzljY2E0ZTIxMDVlYmQyY2QwNzYwEgZTcGxpY2USGEV4dGVybmFsUGFydHlBbXVsZXRSdWxlcxoYRXh0ZXJuYWxQYXJ0eUFtdWxldFJ1bGVzIlFqTwpNCks6SURTTzo6MTIyMDU0MGY0NmZlMjE0ZjUzM2U4MTE0NWQ0MGI1NzlkODY3YjE5OGI5YjIyNDQ4M2Q3YWQ0ZDIxMGRmNjA1MmQ4ODUqSURTTzo6MTIyMDU0MGY0NmZlMjE0ZjUzM2U4MTE0NWQ0MGI1NzlkODY3YjE5OGI5YjIyNDQ4M2Q3YWQ0ZDIxMGRmNjA1MmQ4ODU5mfGlw9k+BgBCKgomCiQIARIgeJoxgp5m29gbVW/9K7rMKXzxg2wUj2XeBn7RJb9/SGsQHg=="
+        }
+      ],
+      "maxLedgerEffectiveTime": "1758043317275120"
+    }
+  },
+  "prepared_transaction_hash": "rZ7OYosiBuCs+nX69jJ4tMCW7LM8+xXu/zLbhrSE0HM=",
+  "hashing_scheme_version": "HASHING_SCHEME_VERSION_V2"
+}

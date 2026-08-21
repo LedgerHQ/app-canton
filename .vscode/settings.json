@@ -1,28 +1,42 @@
 {
     "files.associations": {
-        "*.h": "c"
+        "*.h": "c",
+        "optional": "c",
+        "istream": "c",
+        "ostream": "c",
+        "ratio": "c",
+        "array": "c",
+        "functional": "c",
+        "tuple": "c",
+        "type_traits": "c",
+        "utility": "c",
+        "system_error": "c",
+        "hash_map": "c",
+        "hash_set": "c",
+        "string_view": "c",
+        "initializer_list": "c",
+        "sstream": "c"
     },
     "ledgerDevTools.appSettings": {
-        "selectedUseCase": "release",
+        "selectedUseCase": "debug",
         "selectedDevice": "Nano X",
         "selectedVariant": "BOL",
         "testsList": [
             "test_app_mainmenu",
             "test_app_name",
-            "test_bad_cla",
-            "test_bad_ins",
-            "test_wrong_p1p2",
-            "test_wrong_data_length",
-            "test_invalid_state",
             "test_get_app_and_version",
             "test_get_public_key_no_confirm",
             "test_get_public_key_confirm_accepted",
             "test_get_public_key_confirm_refused",
-            "test_sign_tx_short_tx",
-            "test_sign_tx_short_tx_blind_sign",
-            "test_sign_tx_long_tx",
-            "test_sign_tx_refused",
+            "test_sign_tx_hash_32",
+            "test_sign_tx_hash_34",
+            "test_sign_tx_ping",
+            "test_sign_tx_token_transfer",
+            "test_sign_topology_tx",
             "test_version"
+        ],
+        "selectedTests": [
+            "test_sign_tx_token_transfer"
         ]
     }
 }

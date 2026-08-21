@@ -23,14 +23,54 @@
 /**
  * Maximum transaction length (bytes).
  */
-#define MAX_TRANSACTION_LEN 510
+#define MAX_TRANSACTION_LEN (1024 * 12)
 
 /**
- * Maximum signature length (bytes).
+ * Maximum number of child nodes per transaction node.
  */
-#define MAX_DER_SIG_LEN 72
+#define MAX_NODE_CHILDREN 32
+
+/**
+ * ED25519 signature length (bytes).
+ */
+#define ED25519_SIG_LEN 64
 
 /**
  * Exponent used to convert mBOL to BOL unit (N BOL = N * 10^3 mBOL).
  */
 #define EXPONENT_SMALLEST_UNIT 3
+
+/**
+ * ED25519 public key raw format length
+ */
+#define ED25519_RAW_PUBLIC_KEY_LEN 32
+
+/**
+ * Maximum code chain length (bytes).
+ */
+#define MAX_CHAINCODE_LEN 32
+
+/**
+ * Length of SHA-256 hash.
+ */
+#define SHA256_HASH_LEN 32
+
+/**
+ * Length of Canton hash (2 bytes prefix + SHA-256 hash).
+ */
+#define CANTON_HASH_LEN (SHA256_HASH_LEN + 2)
+
+/**
+ * Length of uint32_t when serialized in big-endian format.
+ */
+#define UINT32_T_LEN 4
+
+/**
+ * Length of uint64_t when serialized in big-endian format.
+ */
+#define UINT64_T_LEN 8
+
+/**
+ * Default buffer size for decoding strings.
+ */
+#define DEFAULT_DECODE_BUFFER_SIZE 64

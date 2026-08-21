@@ -6,6 +6,6 @@
 void ui_menu_main(void);
 
 /**
- * Show about submenu (copyright, date).
+ * Show settings menu.
  */
-void ui_menu_about(void);
+void ui_menu_settings(void);

@@ -1,28 +1,14 @@
 from pathlib import Path
 from typing import List
 import re
-from Crypto.Hash import keccak
-
-from ecdsa.curves import SECP256k1
-from ecdsa.keys import VerifyingKey
-from ecdsa.util import sigdecode_der
+from nacl.signing import VerifyKey
 
 
-# Check if a signature of a given message is valid
-def check_signature_validity(public_key: bytes, signature: bytes, message: bytes) -> bool:
-    pk: VerifyingKey = VerifyingKey.from_string(
-        public_key,
-        curve=SECP256k1,
-        hashfunc=None
-    )
-    # Compute message hash (keccak_256)
-    k = keccak.new(digest_bits=256)
-    k.update(message)
-    message_hash = k.digest()
-
-    return pk.verify_digest(signature=signature,
-                     digest=message_hash,
-                     sigdecode=sigdecode_der)
+def verify_signature(from_public_key: bytes, message: bytes, signature: bytes):
+    print("Sig len :", len(signature))
+    assert len(signature) == 64, "signature size incorrect"
+    verify_key = VerifyKey(from_public_key)
+    verify_key.verify(message, signature)
 
 
 def verify_name(name: str) -> None:
@@ -67,7 +53,7 @@ def verify_version(version: str) -> None:
 
 
 def _read_makefile() -> List[str]:
-    """Read lines from the parent Makefile """
+    """Read lines from the parent Makefile"""
 
     parent = Path(__file__).parent.parent.resolve()
     makefile = f"{parent}/Makefile"

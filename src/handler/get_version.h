@@ -1,5 +1,7 @@
 #pragma once
 
+#include "utils.h"
+
 /**
  * Handler gor GET_VERSION command. Send APDU response with version
  * of the application.
@@ -9,4 +11,4 @@
  * @return zero or positive integer if success, negative integer otherwise.
  *
  */
-int handler_get_version(void);
+MUST_CHECK int handler_get_version(void);

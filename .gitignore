@@ -6,7 +6,7 @@ bin/
 debug/
 
 # Nano NBGL reversed icon for Home Screen
-glyphs/home_boilerplate_14px.gif
+glyphs/home_canton_14px.gif
 
 # Temporary directory with snapshots taken during test runs
 tests/snapshots-tmp/
@@ -35,3 +35,11 @@ doc/latex
 
 # Virtual env for sideload (macOS and Windows)
 ledger/
+!src/com/daml/ledger/
+
+# Proto sources
+proto/canton/
+proto/daml/
+proto/canton-protos-scala/
+!proto/com/daml/*
+proto/*.options

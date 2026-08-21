@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.5] - 2026-08-18
+
+### Changed
+
+- Remove single validator topology setups for onboarding, for all networks.
+
+## [3.3.4] - 2026-07-22
+
+### Changed
+
+- Update Kiln main net validator party ID.
+
+## [3.3.3] - 2026-07-10
+
+### Fixed
+
+- Various minor fixes.
+
+### Changed
+
+- Update devnet and testnet validators.
+- Remove clear signing for Featured app proxy transactions.
+- Update tests and snapshots.
+
+## [3.3.1] - 2026-02-27
+
+### Fixed
+
+- Fixing non-standard types prior to clang-21 migration
+
 ## [2.1.0] - 2023-10-06
 
 ### Changed

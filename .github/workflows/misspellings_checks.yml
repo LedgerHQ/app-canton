@@ -26,3 +26,4 @@ jobs:
         with:
           builtin: clear,rare
           check_filenames: true
+          skip: "./proto/com/**/*,./proto/google/**/*,./vendor/**/*,./tests/tx_examples/*"

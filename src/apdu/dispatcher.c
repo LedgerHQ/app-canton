@@ -31,8 +31,9 @@
 #include "get_app_name.h"
 #include "get_public_key.h"
 #include "sign_tx.h"
+#include "params.h"
 
-int apdu_dispatcher(const command_t *cmd) {
+MUST_CHECK int apdu_dispatcher(const command_t *cmd) {
     LEDGER_ASSERT(cmd != NULL, "NULL cmd");
 
     if (cmd->cla != CLA) {
@@ -43,19 +44,24 @@ int apdu_dispatcher(const command_t *cmd) {
 
     switch (cmd->ins) {
         case GET_VERSION:
-            if (cmd->p1 != 0 || cmd->p2 != 0) {
+            if (cmd->p1 != P1_NONE || cmd->p2 != P2_NONE) {
                 return io_send_sw(SW_WRONG_P1P2);
             }
 
             return handler_get_version();
         case GET_APP_NAME:
-            if (cmd->p1 != 0 || cmd->p2 != 0) {
+            if (cmd->p1 != P1_NONE || cmd->p2 != P2_NONE) {
                 return io_send_sw(SW_WRONG_P1P2);
             }
 
             return handler_get_app_name();
         case GET_PUBLIC_KEY:
-            if (cmd->p1 > 1 || cmd->p2 > 0) {
+            if (!(cmd->p1 == P1_NON_CONFIRM || cmd->p1 == P1_CONFIRM) ||
+                cmd->p2 > P2_ADDR_FLAGS_MAX) {
+                return io_send_sw(SW_WRONG_P1P2);
+            }
+
+            if (cmd->p1 == P1_NON_CONFIRM && cmd->p2 != P2_NONE) {
                 return io_send_sw(SW_WRONG_P1P2);
             }
 
@@ -69,9 +75,11 @@ int apdu_dispatcher(const command_t *cmd) {
 
             return handler_get_public_key(&buf, (bool) cmd->p1);
         case SIGN_TX:
-            if ((cmd->p1 == P1_START && cmd->p2 != P2_MORE) ||  //
-                cmd->p1 > P1_MAX ||                             //
-                (cmd->p2 != P2_LAST && cmd->p2 != P2_MORE)) {
+            if (cmd->p2 & ~(P2_FIRST | P2_MORE | P2_MSG_END)) {
+                return io_send_sw(SW_WRONG_P1P2);
+            }
+
+            if ((cmd->p2 & P2_FIRST) && !(cmd->p2 & P2_MORE)) {
                 return io_send_sw(SW_WRONG_P1P2);
             }
 
@@ -83,7 +91,11 @@ int apdu_dispatcher(const command_t *cmd) {
             buf.size = cmd->lc;
             buf.offset = 0;
 
-            return handler_sign_tx(&buf, cmd->p1, (bool) (cmd->p2 & P2_MORE));
+            return handler_sign_tx(&buf,
+                                   (signing_type_e) cmd->p1,
+                                   (bool) (cmd->p2 & P2_FIRST),
+                                   (bool) (cmd->p2 & P2_MORE),
+                                   (bool) (cmd->p2 & P2_MSG_END));
         default:
             return io_send_sw(SW_INS_NOT_SUPPORTED);
     }

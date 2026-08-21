@@ -1,0 +1,747 @@
+{
+    "json": {
+        "transaction": {
+            "version": "2.1",
+            "roots": [
+                "0"
+            ],
+            "nodes": [
+                {
+                    "nodeId": "2",
+                    "v1": {
+                        "create": {
+                            "lfVersion": "2.1",
+                            "contractId": "008f7bc671fb321ba2a6180458124575a91f3ed8f1f1ceb77591b180832fd38b84",
+                            "packageName": "utility-registry-holding-v0",
+                            "templateId": {
+                                "packageId": "dd3a9f2d51cc4c52d9ec2e1d7ff235298dcfb3afd1d50ab44328b1aaa9a18587",
+                                "moduleName": "Utility.Registry.Holding.V0.Holding",
+                                "entityName": "Holding"
+                            },
+                            "argument": {
+                                "record": {
+                                    "recordId": {
+                                        "packageId": "dd3a9f2d51cc4c52d9ec2e1d7ff235298dcfb3afd1d50ab44328b1aaa9a18587",
+                                        "moduleName": "Utility.Registry.Holding.V0.Holding",
+                                        "entityName": "Holding"
+                                    },
+                                    "fields": [
+                                        {
+                                            "label": "operator",
+                                            "value": {
+                                                "party": "auth0_007c6643538f2eadd3e573dd05b9::12205bcc106efa0eaa7f18dc491e5c6f5fb9b0cc68dc110ae66f4ed6467475d7c78e"
+                                            }
+                                        },
+                                        {
+                                            "label": "provider",
+                                            "value": {
+                                                "party": "party-28dc4516-b5ca-44ff-86c7-2107e90a6807::1220b8301e18aa8a401d6e34e6c20f8b0243183c514373bca8f1b6b9270246341a9e"
+                                            }
+                                        },
+                                        {
+                                            "label": "registrar",
+                                            "value": {
+                                                "party": "party-28dc4516-b5ca-44ff-86c7-2107e90a6807::1220b8301e18aa8a401d6e34e6c20f8b0243183c514373bca8f1b6b9270246341a9e"
+                                            }
+                                        },
+                                        {
+                                            "label": "owner",
+                                            "value": {
+                                                "party": "ldg::1220a45062ce6db64e539f497780f8d08b3c25bbabacfd5af22025da6240f27eb623"
+                                            }
+                                        },
+                                        {
+                                            "label": "instrument",
+                                            "value": {
+                                                "record": {
+                                                    "recordId": {
+                                                        "packageId": "dd3a9f2d51cc4c52d9ec2e1d7ff235298dcfb3afd1d50ab44328b1aaa9a18587",
+                                                        "moduleName": "Utility.Registry.Holding.V0.Types",
+                                                        "entityName": "InstrumentIdentifier"
+                                                    },
+                                                    "fields": [
+                                                        {
+                                                            "label": "source",
+                                                            "value": {
+                                                                "party": "party-28dc4516-b5ca-44ff-86c7-2107e90a6807::1220b8301e18aa8a401d6e34e6c20f8b0243183c514373bca8f1b6b9270246341a9e"
+                                                            }
+                                                        },
+                                                        {
+                                                            "label": "id",
+                                                            "value": {
+                                                                "text": "f29bdd7a-1469-498a-ba2a-796bf5387b31"
+                                                            }
+                                                        },
+                                                        {
+                                                            "label": "scheme",
+                                                            "value": {
+                                                                "text": "RegistrarInternalScheme"
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "label": "label",
+                                            "value": {
+                                                "text": ""
+                                            }
+                                        },
+                                        {
+                                            "label": "amount",
+                                            "value": {
+                                                "numeric": "0.0000050000"
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "signatories": [
+                                "ldg::1220a45062ce6db64e539f497780f8d08b3c25bbabacfd5af22025da6240f27eb623",
+                                "party-28dc4516-b5ca-44ff-86c7-2107e90a6807::1220b8301e18aa8a401d6e34e6c20f8b0243183c514373bca8f1b6b9270246341a9e"
+                            ],
+                            "stakeholders": [
+                                "auth0_007c6643538f2eadd3e573dd05b9::12205bcc106efa0eaa7f18dc491e5c6f5fb9b0cc68dc110ae66f4ed6467475d7c78e",
+                                "ldg::1220a45062ce6db64e539f497780f8d08b3c25bbabacfd5af22025da6240f27eb623",
+                                "party-28dc4516-b5ca-44ff-86c7-2107e90a6807::1220b8301e18aa8a401d6e34e6c20f8b0243183c514373bca8f1b6b9270246341a9e"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "nodeId": "1",
+                    "v1": {
+                        "exercise": {
+                            "lfVersion": "2.1",
+                            "contractId": "003daff880537f1453d9e5df81c7cd9f62bebbc99301d89d95df97546295930691ca111220fc7eecfc5886a560faf890c2e2dac2160d6846be4d17d0007ed5bbb6049889bd",
+                            "packageName": "utility-registry-holding-v0",
+                            "templateId": {
+                                "packageId": "dd3a9f2d51cc4c52d9ec2e1d7ff235298dcfb3afd1d50ab44328b1aaa9a18587",
+                                "moduleName": "Utility.Registry.Holding.V0.Holding",
+                                "entityName": "Holding"
+                            },
+                            "signatories": [
+                                "ldg::1220a45062ce6db64e539f497780f8d08b3c25bbabacfd5af22025da6240f27eb623",
+                                "party-28dc4516-b5ca-44ff-86c7-2107e90a6807::1220b8301e18aa8a401d6e34e6c20f8b0243183c514373bca8f1b6b9270246341a9e"
+                            ],
+                            "stakeholders": [
+                                "auth0_007c6643538f2eadd3e573dd05b9::12205bcc106efa0eaa7f18dc491e5c6f5fb9b0cc68dc110ae66f4ed6467475d7c78e",
+                                "ldg::12209cbeb8188a5ebb8551c803a670a4a616fb38ba4e13f493b8063d3ae2836e8446",
+                                "ldg::1220a45062ce6db64e539f497780f8d08b3c25bbabacfd5af22025da6240f27eb623",
+                                "party-28dc4516-b5ca-44ff-86c7-2107e90a6807::1220b8301e18aa8a401d6e34e6c20f8b0243183c514373bca8f1b6b9270246341a9e"
+                            ],
+                            "actingParties": [
+                                "party-28dc4516-b5ca-44ff-86c7-2107e90a6807::1220b8301e18aa8a401d6e34e6c20f8b0243183c514373bca8f1b6b9270246341a9e"
+                            ],
+                            "choiceId": "Holding_Unlock",
+                            "chosenValue": {
+                                "record": {
+                                    "recordId": {
+                                        "packageId": "dd3a9f2d51cc4c52d9ec2e1d7ff235298dcfb3afd1d50ab44328b1aaa9a18587",
+                                        "moduleName": "Utility.Registry.Holding.V0.Holding",
+                                        "entityName": "Holding_Unlock"
+                                    }
+                                }
+                            },
+                            "consuming": true,
+                            "children": [
+                                "2"
+                            ],
+                            "exerciseResult": {
+                                "record": {
+                                    "recordId": {
+                                        "packageId": "dd3a9f2d51cc4c52d9ec2e1d7ff235298dcfb3afd1d50ab44328b1aaa9a18587",
+                                        "moduleName": "Utility.Registry.Holding.V0.Holding",
+                                        "entityName": "Holding_Unlock_Result"
+                                    },
+                                    "fields": [
+                                        {
+                                            "label": "holdingCid",
+                                            "value": {
+                                                "contractId": "008f7bc671fb321ba2a6180458124575a91f3ed8f1f1ceb77591b180832fd38b84"
+                                            }
+                                        },
+                                        {
+                                            "label": "meta",
+                                            "value": {
+                                                "optional": {
+                                                    "value": {
+                                                        "record": {
+                                                            "recordId": {
+                                                                "packageId": "4ded6b668cb3b64f7a88a30874cd41c75829f5e064b3fbbadf41ec7e8363354f",
+                                                                "moduleName": "Splice.Api.Token.MetadataV1",
+                                                                "entityName": "Metadata"
+                                                            },
+                                                            "fields": [
+                                                                {
+                                                                    "label": "values",
+                                                                    "value": {
+                                                                        "textMap": {
+                                                                            "entries": [
+                                                                                {
+                                                                                    "key": "splice.lfdecentralizedtrust.org/tx-kind",
+                                                                                    "value": {
+                                                                                        "text": "unlock"
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "nodeId": "0",
+                    "v1": {
+                        "exercise": {
+                            "lfVersion": "2.1",
+                            "contractId": "003321f39daa09ecd7707084fee927bebb852e2f01489f286580122c89e3243eb2ca1112206c4888a5789e6bfd5f8394a949659e7ed8b05d03a3f422081a1453e77de60f33",
+                            "packageName": "utility-registry-app-v0",
+                            "templateId": {
+                                "packageId": "2717412f011584c6001ef2229949661da69bbe49790c9fc2c2b7d35a479311ff",
+                                "moduleName": "Utility.Registry.App.V0.Model.Transfer",
+                                "entityName": "TransferOffer"
+                            },
+                            "signatories": [
+                                "ldg::1220a45062ce6db64e539f497780f8d08b3c25bbabacfd5af22025da6240f27eb623",
+                                "party-28dc4516-b5ca-44ff-86c7-2107e90a6807::1220b8301e18aa8a401d6e34e6c20f8b0243183c514373bca8f1b6b9270246341a9e"
+                            ],
+                            "stakeholders": [
+                                "auth0_007c6643538f2eadd3e573dd05b9::12205bcc106efa0eaa7f18dc491e5c6f5fb9b0cc68dc110ae66f4ed6467475d7c78e",
+                                "ldg::12209cbeb8188a5ebb8551c803a670a4a616fb38ba4e13f493b8063d3ae2836e8446",
+                                "ldg::1220a45062ce6db64e539f497780f8d08b3c25bbabacfd5af22025da6240f27eb623",
+                                "party-28dc4516-b5ca-44ff-86c7-2107e90a6807::1220b8301e18aa8a401d6e34e6c20f8b0243183c514373bca8f1b6b9270246341a9e"
+                            ],
+                            "actingParties": [
+                                "ldg::1220a45062ce6db64e539f497780f8d08b3c25bbabacfd5af22025da6240f27eb623"
+                            ],
+                            "interfaceId": {
+                                "packageId": "55ba4deb0ad4662c4168b39859738a0e91388d252286480c7331b3f71a517281",
+                                "moduleName": "Splice.Api.Token.TransferInstructionV1",
+                                "entityName": "TransferInstruction"
+                            },
+                            "choiceId": "TransferInstruction_Withdraw",
+                            "chosenValue": {
+                                "record": {
+                                    "recordId": {
+                                        "packageId": "55ba4deb0ad4662c4168b39859738a0e91388d252286480c7331b3f71a517281",
+                                        "moduleName": "Splice.Api.Token.TransferInstructionV1",
+                                        "entityName": "TransferInstruction_Withdraw"
+                                    },
+                                    "fields": [
+                                        {
+                                            "label": "extraArgs",
+                                            "value": {
+                                                "record": {
+                                                    "recordId": {
+                                                        "packageId": "4ded6b668cb3b64f7a88a30874cd41c75829f5e064b3fbbadf41ec7e8363354f",
+                                                        "moduleName": "Splice.Api.Token.MetadataV1",
+                                                        "entityName": "ExtraArgs"
+                                                    },
+                                                    "fields": [
+                                                        {
+                                                            "label": "context",
+                                                            "value": {
+                                                                "record": {
+                                                                    "recordId": {
+                                                                        "packageId": "4ded6b668cb3b64f7a88a30874cd41c75829f5e064b3fbbadf41ec7e8363354f",
+                                                                        "moduleName": "Splice.Api.Token.MetadataV1",
+                                                                        "entityName": "ChoiceContext"
+                                                                    },
+                                                                    "fields": [
+                                                                        {
+                                                                            "label": "values",
+                                                                            "value": {
+                                                                                "textMap": {}
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            }
+                                                        },
+                                                        {
+                                                            "label": "meta",
+                                                            "value": {
+                                                                "record": {
+                                                                    "recordId": {
+                                                                        "packageId": "4ded6b668cb3b64f7a88a30874cd41c75829f5e064b3fbbadf41ec7e8363354f",
+                                                                        "moduleName": "Splice.Api.Token.MetadataV1",
+                                                                        "entityName": "Metadata"
+                                                                    },
+                                                                    "fields": [
+                                                                        {
+                                                                            "label": "values",
+                                                                            "value": {
+                                                                                "textMap": {}
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            "consuming": true,
+                            "children": [
+                                "1"
+                            ],
+                            "exerciseResult": {
+                                "record": {
+                                    "recordId": {
+                                        "packageId": "55ba4deb0ad4662c4168b39859738a0e91388d252286480c7331b3f71a517281",
+                                        "moduleName": "Splice.Api.Token.TransferInstructionV1",
+                                        "entityName": "TransferInstructionResult"
+                                    },
+                                    "fields": [
+                                        {
+                                            "label": "output",
+                                            "value": {
+                                                "variant": {
+                                                    "variantId": {
+                                                        "packageId": "55ba4deb0ad4662c4168b39859738a0e91388d252286480c7331b3f71a517281",
+                                                        "moduleName": "Splice.Api.Token.TransferInstructionV1",
+                                                        "entityName": "TransferInstructionResult_Output"
+                                                    },
+                                                    "constructor": "TransferInstructionResult_Failed",
+                                                    "value": {
+                                                        "unit": {}
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "label": "senderChangeCids",
+                                            "value": {
+                                                "list": {
+                                                    "elements": [
+                                                        {
+                                                            "contractId": "008f7bc671fb321ba2a6180458124575a91f3ed8f1f1ceb77591b180832fd38b84"
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "label": "meta",
+                                            "value": {
+                                                "record": {
+                                                    "recordId": {
+                                                        "packageId": "4ded6b668cb3b64f7a88a30874cd41c75829f5e064b3fbbadf41ec7e8363354f",
+                                                        "moduleName": "Splice.Api.Token.MetadataV1",
+                                                        "entityName": "Metadata"
+                                                    },
+                                                    "fields": [
+                                                        {
+                                                            "label": "values",
+                                                            "value": {
+                                                                "textMap": {}
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            ],
+            "nodeSeeds": [
+                {
+                    "seed": "bW+SpcKQ7ZtRtL1HgIxwkx0gCbXAf4EeL3NA5FMXx24="
+                },
+                {
+                    "nodeId": 1,
+                    "seed": "b7MlpRKximAR16R1inUdPB0psCVd9ZY9stoaWGx2tuY="
+                },
+                {
+                    "nodeId": 2,
+                    "seed": "0ZfLS6yNc1FTYI0E7CPp7LAd0x11L2kBjagccYuwO/A="
+                }
+            ]
+        },
+        "metadata": {
+            "submitterInfo": {
+                "actAs": [
+                    "ldg::1220a45062ce6db64e539f497780f8d08b3c25bbabacfd5af22025da6240f27eb623"
+                ],
+                "commandId": "2efcc56f-180d-4f10-9cce-9ae3b5410d1d"
+            },
+            "synchronizerId": "global-domain::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc",
+            "transactionUuid": "214e00a5-4d31-46e7-814e-13419fe3e4d2",
+            "preparationTime": "1765451576986349",
+            "inputContracts": [
+                {
+                    "v1": {
+                        "lfVersion": "2.1",
+                        "contractId": "003321f39daa09ecd7707084fee927bebb852e2f01489f286580122c89e3243eb2ca1112206c4888a5789e6bfd5f8394a949659e7ed8b05d03a3f422081a1453e77de60f33",
+                        "packageName": "utility-registry-app-v0",
+                        "templateId": {
+                            "packageId": "2717412f011584c6001ef2229949661da69bbe49790c9fc2c2b7d35a479311ff",
+                            "moduleName": "Utility.Registry.App.V0.Model.Transfer",
+                            "entityName": "TransferOffer"
+                        },
+                        "argument": {
+                            "record": {
+                                "recordId": {
+                                    "packageId": "2717412f011584c6001ef2229949661da69bbe49790c9fc2c2b7d35a479311ff",
+                                    "moduleName": "Utility.Registry.App.V0.Model.Transfer",
+                                    "entityName": "TransferOffer"
+                                },
+                                "fields": [
+                                    {
+                                        "label": "operator",
+                                        "value": {
+                                            "party": "auth0_007c6643538f2eadd3e573dd05b9::12205bcc106efa0eaa7f18dc491e5c6f5fb9b0cc68dc110ae66f4ed6467475d7c78e"
+                                        }
+                                    },
+                                    {
+                                        "label": "provider",
+                                        "value": {
+                                            "party": "party-28dc4516-b5ca-44ff-86c7-2107e90a6807::1220b8301e18aa8a401d6e34e6c20f8b0243183c514373bca8f1b6b9270246341a9e"
+                                        }
+                                    },
+                                    {
+                                        "label": "transfer",
+                                        "value": {
+                                            "record": {
+                                                "recordId": {
+                                                    "packageId": "55ba4deb0ad4662c4168b39859738a0e91388d252286480c7331b3f71a517281",
+                                                    "moduleName": "Splice.Api.Token.TransferInstructionV1",
+                                                    "entityName": "Transfer"
+                                                },
+                                                "fields": [
+                                                    {
+                                                        "label": "sender",
+                                                        "value": {
+                                                            "party": "ldg::1220a45062ce6db64e539f497780f8d08b3c25bbabacfd5af22025da6240f27eb623"
+                                                        }
+                                                    },
+                                                    {
+                                                        "label": "receiver",
+                                                        "value": {
+                                                            "party": "ldg::12209cbeb8188a5ebb8551c803a670a4a616fb38ba4e13f493b8063d3ae2836e8446"
+                                                        }
+                                                    },
+                                                    {
+                                                        "label": "amount",
+                                                        "value": {
+                                                            "numeric": "0.0000050000"
+                                                        }
+                                                    },
+                                                    {
+                                                        "label": "instrumentId",
+                                                        "value": {
+                                                            "record": {
+                                                                "recordId": {
+                                                                    "packageId": "718a0f77e505a8de22f188bd4c87fe74101274e9d4cb1bfac7d09aec7158d35b",
+                                                                    "moduleName": "Splice.Api.Token.HoldingV1",
+                                                                    "entityName": "InstrumentId"
+                                                                },
+                                                                "fields": [
+                                                                    {
+                                                                        "label": "admin",
+                                                                        "value": {
+                                                                            "party": "party-28dc4516-b5ca-44ff-86c7-2107e90a6807::1220b8301e18aa8a401d6e34e6c20f8b0243183c514373bca8f1b6b9270246341a9e"
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        "label": "id",
+                                                                        "value": {
+                                                                            "text": "f29bdd7a-1469-498a-ba2a-796bf5387b31"
+                                                                        }
+                                                                    }
+                                                                ]
+                                                            }
+                                                        }
+                                                    },
+                                                    {
+                                                        "label": "requestedAt",
+                                                        "value": {
+                                                            "timestamp": "1765374527945830"
+                                                        }
+                                                    },
+                                                    {
+                                                        "label": "executeBefore",
+                                                        "value": {
+                                                            "timestamp": "1765378128782080"
+                                                        }
+                                                    },
+                                                    {
+                                                        "label": "inputHoldingCids",
+                                                        "value": {
+                                                            "list": {
+                                                                "elements": [
+                                                                    {
+                                                                        "contractId": "003daff880537f1453d9e5df81c7cd9f62bebbc99301d89d95df97546295930691ca111220fc7eecfc5886a560faf890c2e2dac2160d6846be4d17d0007ed5bbb6049889bd"
+                                                                    }
+                                                                ]
+                                                            }
+                                                        }
+                                                    },
+                                                    {
+                                                        "label": "meta",
+                                                        "value": {
+                                                            "record": {
+                                                                "recordId": {
+                                                                    "packageId": "4ded6b668cb3b64f7a88a30874cd41c75829f5e064b3fbbadf41ec7e8363354f",
+                                                                    "moduleName": "Splice.Api.Token.MetadataV1",
+                                                                    "entityName": "Metadata"
+                                                                },
+                                                                "fields": [
+                                                                    {
+                                                                        "label": "values",
+                                                                        "value": {
+                                                                            "textMap": {
+                                                                                "entries": [
+                                                                                    {
+                                                                                        "key": "splice.lfdecentralizedtrust.org/reason",
+                                                                                        "value": {
+                                                                                            "text": "test tokens sbc"
+                                                                                        }
+                                                                                    }
+                                                                                ]
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                ]
+                                                            }
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        "signatories": [
+                            "ldg::1220a45062ce6db64e539f497780f8d08b3c25bbabacfd5af22025da6240f27eb623",
+                            "party-28dc4516-b5ca-44ff-86c7-2107e90a6807::1220b8301e18aa8a401d6e34e6c20f8b0243183c514373bca8f1b6b9270246341a9e"
+                        ],
+                        "stakeholders": [
+                            "auth0_007c6643538f2eadd3e573dd05b9::12205bcc106efa0eaa7f18dc491e5c6f5fb9b0cc68dc110ae66f4ed6467475d7c78e",
+                            "ldg::12209cbeb8188a5ebb8551c803a670a4a616fb38ba4e13f493b8063d3ae2836e8446",
+                            "ldg::1220a45062ce6db64e539f497780f8d08b3c25bbabacfd5af22025da6240f27eb623",
+                            "party-28dc4516-b5ca-44ff-86c7-2107e90a6807::1220b8301e18aa8a401d6e34e6c20f8b0243183c514373bca8f1b6b9270246341a9e"
+                        ]
+                    },
+                    "createdAt": "1765374561388675",
+                    "eventBlob": "CgMyLjEShgsKRQAzIfOdqgns13BwhP7pJ767hS4vAUifKGWAEiyJ4yQ+ssoREiBsSIileJ5r/V+DlKlJZZ5+2LBdA6P0IggaFFPnfeYPMxIXdXRpbGl0eS1yZWdpc3RyeS1hcHAtdjAafgpAMjcxNzQxMmYwMTE1ODRjNjAwMWVmMjIyOTk0OTY2MWRhNjliYmU0OTc5MGM5ZmMyYzJiN2QzNWE0NzkzMTFmZhIHVXRpbGl0eRIIUmVnaXN0cnkSA0FwcBICVjASBU1vZGVsEghUcmFuc2ZlchoNVHJhbnNmZXJPZmZlciL8BWr5BQpsCmo6aGF1dGgwXzAwN2M2NjQzNTM4ZjJlYWRkM2U1NzNkZDA1Yjk6OjEyMjA1YmNjMTA2ZWZhMGVhYTdmMThkYzQ5MWU1YzZmNWZiOWIwY2M2OGRjMTEwYWU2NmY0ZWQ2NDY3NDc1ZDdjNzhlCnQKcjpwcGFydHktMjhkYzQ1MTYtYjVjYS00NGZmLTg2YzctMjEwN2U5MGE2ODA3OjoxMjIwYjgzMDFlMThhYThhNDAxZDZlMzRlNmMyMGY4YjAyNDMxODNjNTE0MzczYmNhOGYxYjZiOTI3MDI0NjM0MWE5ZQqSBAqPBGqMBApNCks6SWxkZzo6MTIyMGE0NTA2MmNlNmRiNjRlNTM5ZjQ5Nzc4MGY4ZDA4YjNjMjViYmFiYWNmZDVhZjIyMDI1ZGE2MjQwZjI3ZWI2MjMKTQpLOklsZGc6OjEyMjA5Y2JlYjgxODhhNWViYjg1NTFjODAzYTY3MGE0YTYxNmZiMzhiYTRlMTNmNDkzYjgwNjNkM2FlMjgzNmU4NDQ2ChAKDjIMMC4wMDAwMDUwMDAwCqYBCqMBaqABCnQKcjpwcGFydHktMjhkYzQ1MTYtYjVjYS00NGZmLTg2YzctMjEwN2U5MGE2ODA3OjoxMjIwYjgzMDFlMThhYThhNDAxZDZlMzRlNmMyMGY4YjAyNDMxODNjNTE0MzczYmNhOGYxYjZiOTI3MDI0NjM0MWE5ZQooCiZCJGYyOWJkZDdhLTE0NjktNDk4YS1iYTJhLTc5NmJmNTM4N2IzMQoLCgkpZjyiSZlFBgAKCwoJKQCjQiCaRQYACk0KS1pJCkdKRQA9r/iAU38UU9nl34HHzZ9ivrvJkwHYnZXfl1RilZMGkcoREiD8fuz8WIalYPr4kMLi2sIWDWhGvk0X0AB+1bu2BJiJvQpICkZqRApCCkCCAT0KOwomc3BsaWNlLmxmZGVjZW50cmFsaXplZHRydXN0Lm9yZy9yZWFzb24SEUIPdGVzdCB0b2tlbnMgc2JjKklsZGc6OjEyMjBhNDUwNjJjZTZkYjY0ZTUzOWY0OTc3ODBmOGQwOGIzYzI1YmJhYmFjZmQ1YWYyMjAyNWRhNjI0MGYyN2ViNjIzKnBwYXJ0eS0yOGRjNDUxNi1iNWNhLTQ0ZmYtODZjNy0yMTA3ZTkwYTY4MDc6OjEyMjBiODMwMWUxOGFhOGE0MDFkNmUzNGU2YzIwZjhiMDI0MzE4M2M1MTQzNzNiY2E4ZjFiNmI5MjcwMjQ2MzQxYTllMmhhdXRoMF8wMDdjNjY0MzUzOGYyZWFkZDNlNTczZGQwNWI5OjoxMjIwNWJjYzEwNmVmYTBlYWE3ZjE4ZGM0OTFlNWM2ZjVmYjliMGNjNjhkYzExMGFlNjZmNGVkNjQ2NzQ3NWQ3Yzc4ZTJJbGRnOjoxMjIwOWNiZWI4MTg4YTVlYmI4NTUxYzgwM2E2NzBhNGE2MTZmYjM4YmE0ZTEzZjQ5M2I4MDYzZDNhZTI4MzZlODQ0NjmDiKBLmUUGAEIqCiYKJAgBEiBZxdt7Wsjqqe/jlVc49saDYVG36oRdfNsy6hdOXArsZBAe"
+                },
+                {
+                    "v1": {
+                        "lfVersion": "2.1",
+                        "contractId": "003daff880537f1453d9e5df81c7cd9f62bebbc99301d89d95df97546295930691ca111220fc7eecfc5886a560faf890c2e2dac2160d6846be4d17d0007ed5bbb6049889bd",
+                        "packageName": "utility-registry-holding-v0",
+                        "templateId": {
+                            "packageId": "dd3a9f2d51cc4c52d9ec2e1d7ff235298dcfb3afd1d50ab44328b1aaa9a18587",
+                            "moduleName": "Utility.Registry.Holding.V0.Holding",
+                            "entityName": "Holding"
+                        },
+                        "argument": {
+                            "record": {
+                                "recordId": {
+                                    "packageId": "dd3a9f2d51cc4c52d9ec2e1d7ff235298dcfb3afd1d50ab44328b1aaa9a18587",
+                                    "moduleName": "Utility.Registry.Holding.V0.Holding",
+                                    "entityName": "Holding"
+                                },
+                                "fields": [
+                                    {
+                                        "label": "operator",
+                                        "value": {
+                                            "party": "auth0_007c6643538f2eadd3e573dd05b9::12205bcc106efa0eaa7f18dc491e5c6f5fb9b0cc68dc110ae66f4ed6467475d7c78e"
+                                        }
+                                    },
+                                    {
+                                        "label": "provider",
+                                        "value": {
+                                            "party": "party-28dc4516-b5ca-44ff-86c7-2107e90a6807::1220b8301e18aa8a401d6e34e6c20f8b0243183c514373bca8f1b6b9270246341a9e"
+                                        }
+                                    },
+                                    {
+                                        "label": "registrar",
+                                        "value": {
+                                            "party": "party-28dc4516-b5ca-44ff-86c7-2107e90a6807::1220b8301e18aa8a401d6e34e6c20f8b0243183c514373bca8f1b6b9270246341a9e"
+                                        }
+                                    },
+                                    {
+                                        "label": "owner",
+                                        "value": {
+                                            "party": "ldg::1220a45062ce6db64e539f497780f8d08b3c25bbabacfd5af22025da6240f27eb623"
+                                        }
+                                    },
+                                    {
+                                        "label": "instrument",
+                                        "value": {
+                                            "record": {
+                                                "recordId": {
+                                                    "packageId": "dd3a9f2d51cc4c52d9ec2e1d7ff235298dcfb3afd1d50ab44328b1aaa9a18587",
+                                                    "moduleName": "Utility.Registry.Holding.V0.Types",
+                                                    "entityName": "InstrumentIdentifier"
+                                                },
+                                                "fields": [
+                                                    {
+                                                        "label": "source",
+                                                        "value": {
+                                                            "party": "party-28dc4516-b5ca-44ff-86c7-2107e90a6807::1220b8301e18aa8a401d6e34e6c20f8b0243183c514373bca8f1b6b9270246341a9e"
+                                                        }
+                                                    },
+                                                    {
+                                                        "label": "id",
+                                                        "value": {
+                                                            "text": "f29bdd7a-1469-498a-ba2a-796bf5387b31"
+                                                        }
+                                                    },
+                                                    {
+                                                        "label": "scheme",
+                                                        "value": {
+                                                            "text": "RegistrarInternalScheme"
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "label": "label",
+                                        "value": {
+                                            "text": ""
+                                        }
+                                    },
+                                    {
+                                        "label": "amount",
+                                        "value": {
+                                            "numeric": "0.0000050000"
+                                        }
+                                    },
+                                    {
+                                        "label": "lock",
+                                        "value": {
+                                            "optional": {
+                                                "value": {
+                                                    "record": {
+                                                        "recordId": {
+                                                            "packageId": "dd3a9f2d51cc4c52d9ec2e1d7ff235298dcfb3afd1d50ab44328b1aaa9a18587",
+                                                            "moduleName": "Utility.Registry.Holding.V0.Holding",
+                                                            "entityName": "Lock"
+                                                        },
+                                                        "fields": [
+                                                            {
+                                                                "label": "lockers",
+                                                                "value": {
+                                                                    "record": {
+                                                                        "recordId": {
+                                                                            "packageId": "c3bb0c5d04799b3f11bad7c3c102963e115cf53da3e4afcbcfd9f06ebd82b4ff",
+                                                                            "moduleName": "DA.Set.Types",
+                                                                            "entityName": "Set"
+                                                                        },
+                                                                        "fields": [
+                                                                            {
+                                                                                "label": "map",
+                                                                                "value": {
+                                                                                    "genMap": {
+                                                                                        "entries": [
+                                                                                            {
+                                                                                                "key": {
+                                                                                                    "party": "party-28dc4516-b5ca-44ff-86c7-2107e90a6807::1220b8301e18aa8a401d6e34e6c20f8b0243183c514373bca8f1b6b9270246341a9e"
+                                                                                                },
+                                                                                                "value": {
+                                                                                                    "unit": {}
+                                                                                                }
+                                                                                            }
+                                                                                        ]
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                }
+                                                            },
+                                                            {
+                                                                "label": "context",
+                                                                "value": {
+                                                                    "text": "test tokens sbc"
+                                                                }
+                                                            },
+                                                            {
+                                                                "label": "observers",
+                                                                "value": {
+                                                                    "optional": {
+                                                                        "value": {
+                                                                            "record": {
+                                                                                "recordId": {
+                                                                                    "packageId": "c3bb0c5d04799b3f11bad7c3c102963e115cf53da3e4afcbcfd9f06ebd82b4ff",
+                                                                                    "moduleName": "DA.Set.Types",
+                                                                                    "entityName": "Set"
+                                                                                },
+                                                                                "fields": [
+                                                                                    {
+                                                                                        "label": "map",
+                                                                                        "value": {
+                                                                                            "genMap": {
+                                                                                                "entries": [
+                                                                                                    {
+                                                                                                        "key": {
+                                                                                                            "party": "ldg::12209cbeb8188a5ebb8551c803a670a4a616fb38ba4e13f493b8063d3ae2836e8446"
+                                                                                                        },
+                                                                                                        "value": {
+                                                                                                            "unit": {}
+                                                                                                        }
+                                                                                                    }
+                                                                                                ]
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                ]
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        ]
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        "signatories": [
+                            "ldg::1220a45062ce6db64e539f497780f8d08b3c25bbabacfd5af22025da6240f27eb623",
+                            "party-28dc4516-b5ca-44ff-86c7-2107e90a6807::1220b8301e18aa8a401d6e34e6c20f8b0243183c514373bca8f1b6b9270246341a9e"
+                        ],
+                        "stakeholders": [
+                            "auth0_007c6643538f2eadd3e573dd05b9::12205bcc106efa0eaa7f18dc491e5c6f5fb9b0cc68dc110ae66f4ed6467475d7c78e",
+                            "ldg::12209cbeb8188a5ebb8551c803a670a4a616fb38ba4e13f493b8063d3ae2836e8446",
+                            "ldg::1220a45062ce6db64e539f497780f8d08b3c25bbabacfd5af22025da6240f27eb623",
+                            "party-28dc4516-b5ca-44ff-86c7-2107e90a6807::1220b8301e18aa8a401d6e34e6c20f8b0243183c514373bca8f1b6b9270246341a9e"
+                        ]
+                    },
+                    "createdAt": "1765374561388675",
+                    "eventBlob": "CgMyLjESngwKRQA9r/iAU38UU9nl34HHzZ9ivrvJkwHYnZXfl1RilZMGkcoREiD8fuz8WIalYPr4kMLi2sIWDWhGvk0X0AB+1bu2BJiJvRIbdXRpbGl0eS1yZWdpc3RyeS1ob2xkaW5nLXYwGnQKQGRkM2E5ZjJkNTFjYzRjNTJkOWVjMmUxZDdmZjIzNTI5OGRjZmIzYWZkMWQ1MGFiNDQzMjhiMWFhYTlhMTg1ODcSB1V0aWxpdHkSCFJlZ2lzdHJ5EgdIb2xkaW5nEgJWMBIHSG9sZGluZxoHSG9sZGluZyKaB2qXBwpsCmo6aGF1dGgwXzAwN2M2NjQzNTM4ZjJlYWRkM2U1NzNkZDA1Yjk6OjEyMjA1YmNjMTA2ZWZhMGVhYTdmMThkYzQ5MWU1YzZmNWZiOWIwY2M2OGRjMTEwYWU2NmY0ZWQ2NDY3NDc1ZDdjNzhlCnQKcjpwcGFydHktMjhkYzQ1MTYtYjVjYS00NGZmLTg2YzctMjEwN2U5MGE2ODA3OjoxMjIwYjgzMDFlMThhYThhNDAxZDZlMzRlNmMyMGY4YjAyNDMxODNjNTE0MzczYmNhOGYxYjZiOTI3MDI0NjM0MWE5ZQp0CnI6cHBhcnR5LTI4ZGM0NTE2LWI1Y2EtNDRmZi04NmM3LTIxMDdlOTBhNjgwNzo6MTIyMGI4MzAxZTE4YWE4YTQwMWQ2ZTM0ZTZjMjBmOGIwMjQzMTgzYzUxNDM3M2JjYThmMWI2YjkyNzAyNDYzNDFhOWUKTQpLOklsZGc6OjEyMjBhNDUwNjJjZTZkYjY0ZTUzOWY0OTc3ODBmOGQwOGIzYzI1YmJhYmFjZmQ1YWYyMjAyNWRhNjI0MGYyN2ViNjIzCsMBCsABar0BCnQKcjpwcGFydHktMjhkYzQ1MTYtYjVjYS00NGZmLTg2YzctMjEwN2U5MGE2ODA3OjoxMjIwYjgzMDFlMThhYThhNDAxZDZlMzRlNmMyMGY4YjAyNDMxODNjNTE0MzczYmNhOGYxYjZiOTI3MDI0NjM0MWE5ZQooCiZCJGYyOWJkZDdhLTE0NjktNDk4YS1iYTJhLTc5NmJmNTM4N2IzMQobChlCF1JlZ2lzdHJhckludGVybmFsU2NoZW1lCgQKAkIAChAKDjIMMC4wMDAwMDUwMDAwCo0CCooCUocCCoQCaoECCoYBCoMBaoABCn4KfGJ6CngKcjpwcGFydHktMjhkYzQ1MTYtYjVjYS00NGZmLTg2YzctMjEwN2U5MGE2ODA3OjoxMjIwYjgzMDFlMThhYThhNDAxZDZlMzRlNmMyMGY4YjAyNDMxODNjNTE0MzczYmNhOGYxYjZiOTI3MDI0NjM0MWE5ZRICCgAKEwoRQg90ZXN0IHRva2VucyBzYmMKYQpfUl0KW2pZClcKVWJTClEKSzpJbGRnOjoxMjIwOWNiZWI4MTg4YTVlYmI4NTUxYzgwM2E2NzBhNGE2MTZmYjM4YmE0ZTEzZjQ5M2I4MDYzZDNhZTI4MzZlODQ0NhICCgAqSWxkZzo6MTIyMGE0NTA2MmNlNmRiNjRlNTM5ZjQ5Nzc4MGY4ZDA4YjNjMjViYmFiYWNmZDVhZjIyMDI1ZGE2MjQwZjI3ZWI2MjMqcHBhcnR5LTI4ZGM0NTE2LWI1Y2EtNDRmZi04NmM3LTIxMDdlOTBhNjgwNzo6MTIyMGI4MzAxZTE4YWE4YTQwMWQ2ZTM0ZTZjMjBmOGIwMjQzMTgzYzUxNDM3M2JjYThmMWI2YjkyNzAyNDYzNDFhOWUyaGF1dGgwXzAwN2M2NjQzNTM4ZjJlYWRkM2U1NzNkZDA1Yjk6OjEyMjA1YmNjMTA2ZWZhMGVhYTdmMThkYzQ5MWU1YzZmNWZiOWIwY2M2OGRjMTEwYWU2NmY0ZWQ2NDY3NDc1ZDdjNzhlMklsZGc6OjEyMjA5Y2JlYjgxODhhNWViYjg1NTFjODAzYTY3MGE0YTYxNmZiMzhiYTRlMTNmNDkzYjgwNjNkM2FlMjgzNmU4NDQ2OYOIoEuZRQYAQioKJgokCAESIOUR7VtzpXV8Ek/X5tONor+0Z2+VgSr2bO5MChQ+MkbEEB4="
+                }
+            ]
+        }
+    },
+    "hash": "96480c3585244a5524b7ef6e5b37b3d837f590c417c0c8b7f9854d5b30d95592"
+}

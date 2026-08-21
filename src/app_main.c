@@ -27,6 +27,7 @@
 #include "io.h"
 #include "sw.h"
 #include "menu.h"
+#include "mem.h"
 #include "dispatcher.h"
 
 global_ctx_t G_context;
@@ -44,14 +45,9 @@ void app_main() {
 
     io_init();
 
-#ifdef HAVE_SWAP
-    // When called in swap context as a library, we don't want to show the menu
-    if (!G_called_from_swap) {
-#endif
-        ui_menu_main();
-#ifdef HAVE_SWAP
-    }
-#endif
+    LEDGER_ASSERT(app_mem_init() == true, "Failed to initialize memory");
+
+    ui_menu_main();
 
     // Reset context
     explicit_bzero(&G_context, sizeof(G_context));
@@ -59,8 +55,7 @@ void app_main() {
     // Initialize the NVM data if required
     if (N_storage.initialized != 0x01) {
         internal_storage_t storage;
-        storage.dummy1_allowed = 0x00;
-        storage.dummy2_allowed = 0x00;
+        storage.allow_blind_sign = BlindSignDisabled;
         storage.initialized = 0x01;
         nvm_write((void *) &N_storage, &storage, sizeof(internal_storage_t));
     }

@@ -1,0 +1,85 @@
+{
+  "prepared_transaction": {
+    "transaction": {
+      "version": "2.1",
+      "roots": [
+        "0"
+      ],
+      "nodes": [
+        {
+          "nodeId": "0",
+          "v1": {
+            "create": {
+              "lfVersion": "2.1",
+              "contractId": "004cebeb3c7b8caed4ee99745386934b274ef405272cb27a7a328647e2e42ae44f",
+              "packageName": "splice-wallet",
+              "templateId": {
+                "packageId": "b30bb727552cf6b624dbc9a5ff95f6c158e0a654e2e9c5c27bcfe3f5d0f9ada2",
+                "moduleName": "Splice.Wallet.TransferPreapproval",
+                "entityName": "TransferPreapprovalProposal"
+              },
+              "argument": {
+                "record": {
+                  "recordId": {
+                    "packageId": "b30bb727552cf6b624dbc9a5ff95f6c158e0a654e2e9c5c27bcfe3f5d0f9ada2",
+                    "moduleName": "Splice.Wallet.TransferPreapproval",
+                    "entityName": "TransferPreapprovalProposal"
+                  },
+                  "fields": [
+                    {
+                      "label": "receiver",
+                      "value": {
+                        "party": "bob::12201dfb762b02137a019588dfb842058de99a9a58947ba55ea36c8db4c90a9e6321"
+                      }
+                    },
+                    {
+                      "label": "provider",
+                      "value": {
+                        "party": "app_user_localnet-localparty-1::1220037d88e7bdf9e9e644fd20f52e86ca82419168e2849d6f2108886edb65aa14a1"
+                      }
+                    },
+                    {
+                      "label": "expectedDso",
+                      "value": {
+                        "optional": {
+                          "value": {
+                            "party": "DSO::1220540f46fe214f533e81145d40b579d867b198b9b224483d7ad4d210df6052d885"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "signatories": [
+                "bob::12201dfb762b02137a019588dfb842058de99a9a58947ba55ea36c8db4c90a9e6321"
+              ],
+              "stakeholders": [
+                "app_user_localnet-localparty-1::1220037d88e7bdf9e9e644fd20f52e86ca82419168e2849d6f2108886edb65aa14a1",
+                "bob::12201dfb762b02137a019588dfb842058de99a9a58947ba55ea36c8db4c90a9e6321"
+              ]
+            }
+          }
+        }
+      ],
+      "nodeSeeds": [
+        {
+          "seed": "4oe/R7RFCT+sYzM/zB4dsGAObKVKE0g1HZqvOKhXOaY="
+        }
+      ]
+    },
+    "metadata": {
+      "submitterInfo": {
+        "actAs": [
+          "bob::12201dfb762b02137a019588dfb842058de99a9a58947ba55ea36c8db4c90a9e6321"
+        ],
+        "commandId": "a81ceb9d-65e3-48ad-b750-c157506dc568"
+      },
+      "synchronizerId": "global-domain::1220540f46fe214f533e81145d40b579d867b198b9b224483d7ad4d210df6052d885",
+      "transactionUuid": "5781e887-89a3-4b55-90ec-5a4cf9c4cba8",
+      "preparationTime": "1757957749534488"
+    }
+  },
+  "prepared_transaction_hash": "AogiBt33xHH1SqDuw3ijY4skoDh9ghwvyjj4JLRr3v8=",
+  "hashing_scheme_version": "HASHING_SCHEME_VERSION_V2"
+}

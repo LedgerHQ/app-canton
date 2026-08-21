@@ -30,17 +30,12 @@
 #include "constants.h"
 #include "globals.h"
 #include "sw.h"
-#include "address.h"
 #include "validate.h"
 #include "tx_types.h"
 #include "menu.h"
+#include "utils.h"
 
-// Buffer where the transaction amount string is written
-static char g_amount[30];
-// Buffer where the transaction address string is written
-static char g_address[43];
-
-static nbgl_contentTagValue_t pairs[2];
+#define BLIND_SIGN_PAIR_LIST_NB 1
 static nbgl_contentTagValueList_t pairList;
 
 // called when long press button on 3rd page is long-touched or when reject footer is touched
@@ -59,77 +54,78 @@ static void review_choice(bool confirm) {
 // - Format the amount and address strings in g_amount and g_address buffers
 // - Display the first screen of the transaction review
 // - Display a warning if the transaction is blind-signed
-int ui_display_transaction_bs_choice(bool is_blind_signed) {
+MUST_CHECK int ui_display_transaction_bs_choice(bool is_blind_signed) {
     if (G_context.req_type != CONFIRM_TRANSACTION || G_context.state != STATE_PARSED) {
         G_context.state = STATE_NONE;
         return io_send_sw(SW_BAD_STATE);
     }
 
-    // Format amount and address to g_amount and g_address buffers
-    memset(g_amount, 0, sizeof(g_amount));
-    char amount[30] = {0};
-    if (!format_fpu64(amount,
-                      sizeof(amount),
-                      G_context.tx_info.transaction.value,
-                      EXPONENT_SMALLEST_UNIT)) {
-        return io_send_sw(SW_DISPLAY_AMOUNT_FAIL);
-    }
-    snprintf(g_amount, sizeof(g_amount), "BOL %.*s", sizeof(amount), amount);
-    memset(g_address, 0, sizeof(g_address));
-
-    if (format_hex(G_context.tx_info.transaction.to, ADDRESS_LEN, g_address, sizeof(g_address)) ==
-        -1) {
-        return io_send_sw(SW_DISPLAY_ADDRESS_FAIL);
-    }
-
-    // Setup data to display
-    pairs[0].item = "Amount";
-    pairs[0].value = g_amount;
-    pairs[1].item = "Address";
-    pairs[1].value = g_address;
-
-    // Setup list
-    pairList.nbMaxLinesForValue = 0;
-    pairList.nbPairs = 2;
-    pairList.pairs = pairs;
-
     if (is_blind_signed) {
+        PRINTF("Hash: %.*H\n", sizeof(G_context.tx_info.m_hash), G_context.tx_info.m_hash);
+        // Setup data to display
+        size_t hex_hash_length = 2 * G_context.tx_info.m_hash_len + 1;
+        G_context.tx_info.pairs =
+            (nbgl_contentTagValue_t *) app_mem_alloc(sizeof(nbgl_contentTagValue_t));
+        LEDGER_ASSERT(G_context.tx_info.pairs != NULL, "Memory full");
+        memset(G_context.tx_info.pairs, 0, sizeof(nbgl_contentTagValue_t));
+        G_context.tx_info.pairs[0].item = "Transaction hash";
+        G_context.tx_info.pairs[0].value = (char *) app_mem_alloc(hex_hash_length);
+        G_context.tx_info.pairs_count = BLIND_SIGN_PAIR_LIST_NB;
+        LEDGER_ASSERT(G_context.tx_info.pairs[0].value != NULL, "Memory full");
+        SNPRINTF((char *) G_context.tx_info.pairs[0].value,
+                 hex_hash_length,
+                 "%.*H",
+                 G_context.tx_info.m_hash_len,
+                 G_context.tx_info.m_hash);
+
+        // Setup list
+        pairList.nbMaxLinesForValue = 0;
+        pairList.nbPairs = BLIND_SIGN_PAIR_LIST_NB;
+        pairList.pairs = G_context.tx_info.pairs;
+
         // Start blind-signing review flow
         nbgl_useCaseReviewBlindSigning(TYPE_TRANSACTION,
                                        &pairList,
-                                       &ICON_APP_BOILERPLATE,
-                                       "Review transaction\nto send BOL",
+                                       &ICON_APP_CANTON,
+                                       "Review transaction hash",
                                        NULL,
 #ifdef SCREEN_SIZE_WALLET
-                                       "Sign transaction\nto send BOL",
+                                       "Accept risk and sign\ntransaction?",
 #else
                                        NULL,
 #endif
                                        NULL,
                                        review_choice);
     } else {
+        pairList.nbPairs = G_context.tx_info.pairs_count;
+        pairList.pairs = G_context.tx_info.pairs;
+
+        PRINTF("Pair count: %d\n", pairList.nbPairs);
+        // Print all pairs for debugging
+        for (size_t i = 0; i < pairList.nbPairs; i++) {
+            PRINTF("Pair %d: %s: %s\n", i, pairList.pairs[i].item, pairList.pairs[i].value);
+        }
+
+        PRINTF("Hash : %.*H\n", G_context.tx_info.m_hash_len, G_context.tx_info.m_hash);
+
         // Start review flow
         nbgl_useCaseReview(TYPE_TRANSACTION,
                            &pairList,
-                           &ICON_APP_BOILERPLATE,
-                           "Review transaction\nto send BOL",
+                           &ICON_APP_CANTON,
+                           G_context.tx_info.review_title,
                            NULL,
-#ifdef SCREEN_SIZE_WALLET
-                           "Sign transaction\nto send BOL",
-#else
-                           NULL,
-#endif
+                           G_context.tx_info.review_finish,
                            review_choice);
     }
     return 0;
 }
 
 // Flow used to display a blind-signed transaction
-int ui_display_blind_signed_transaction(void) {
+MUST_CHECK int ui_display_blind_signed_transaction(void) {
     return ui_display_transaction_bs_choice(true);
 }
 
 // Flow used to display a clear-signed transaction
-int ui_display_transaction() {
+MUST_CHECK int ui_display_transaction() {
     return ui_display_transaction_bs_choice(false);
 }

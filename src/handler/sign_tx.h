@@ -4,6 +4,8 @@
 #include <stdbool.h>  // bool
 
 #include "buffer.h"
+#include "types.h"
+#include "utils.h"
 
 /**
  * Handler for SIGN_TX command. If successfully parse BIP32 path
@@ -18,8 +20,14 @@
  *   Index number of the APDU chunk.
  * @param[in]       more
  *   Whether more APDU chunk to be received or not.
+ * @param[in]       msg_end
+ *  Whether this is the last chunk of the message or not.
  *
  * @return zero or positive integer if success, negative integer otherwise.
  *
  */
-int handler_sign_tx(buffer_t *cdata, uint8_t chunk, bool more);
+MUST_CHECK int handler_sign_tx(buffer_t *cdata,
+                               signing_type_e signing_type,
+                               bool first,
+                               bool more,
+                               bool msg_end);

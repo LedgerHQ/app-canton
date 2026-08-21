@@ -1,6 +1,7 @@
 #pragma once
 
 #include "os.h"
+#include "utils.h"
 
 /**
  * Handler for GET_APP_NAME command. Send APDU response with ASCII
@@ -11,4 +12,4 @@
  * @return zero or positive integer if success, negative integer otherwise.
  *
  */
-int handler_get_app_name(void);
+MUST_CHECK int handler_get_app_name(void);

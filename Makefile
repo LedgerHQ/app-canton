@@ -19,6 +19,8 @@ ifeq ($(BOLOS_SDK),)
 $(error Environment variable BOLOS_SDK is not set)
 endif
 
+include $(BOLOS_SDK)/Makefile.target
+
 ########################################
 #        Mandatory configuration       #
 ########################################
@@ -26,9 +28,9 @@ endif
 APPNAME = "Canton"
 
 # Application version
-APPVERSION_M = 2
-APPVERSION_N = 2
-APPVERSION_P = 2
+APPVERSION_M = 3
+APPVERSION_N = 3
+APPVERSION_P = 5
 APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
 # Application source files
@@ -36,40 +38,33 @@ APP_SOURCE_PATH += src
 
 # Application icons following guidelines:
 # https://developers.ledger.com/docs/embedded-app/design-requirements/#device-icon
-ICON_NANOX = icons/app_boilerplate_14px.gif
-ICON_NANOSP = icons/app_boilerplate_14px.gif
-ICON_STAX = icons/app_boilerplate_32px.gif
-ICON_FLEX = icons/app_boilerplate_40px.gif
+ICON_NANOX = icons/app_canton_14px.gif
+ICON_NANOSP = icons/app_canton_14px.gif
+ICON_STAX = icons/app_canton_32px.gif
+ICON_FLEX = icons/app_canton_40px.gif
+ICON_APEX_P = icons/app_canton_32px_apex.png
 
 # With the Nano NBGL Design, the Home Screen icon is the reverse of the App icon:
 # It should be on white background, with rounded corners.
 # This definition allows SDK Makefiles to automatically generate it based on the App icon.
 # Please note that the icon is dynamically generated, and declared in the .gitignore to avoid storing it.
-ICON_HOME_NANO = glyphs/home_boilerplate_14px.gif
+ICON_HOME_NANO = glyphs/home_canton_14px.gif
+
+# Attestations for challenge signature during party onboarding.
+PROD_CANTON_PRIVATE_KEY?=0
+ifneq ($(PROD_CANTON_PRIVATE_KEY),0)
+    DEFINES += PROD_PRIVATE_KEY=${PROD_CANTON_PRIVATE_KEY}
+endif
 
 # Application allowed derivation curves.
-# Possibles curves are: secp256k1, secp256r1, ed25519 and bls12381g1
-# If your app needs it, you can specify multiple curves by using:
-# `CURVE_APP_LOAD_PARAMS = <curve1> <curve2>`
-CURVE_APP_LOAD_PARAMS = secp256k1
+CURVE_APP_LOAD_PARAMS = ed25519
 
 # Application allowed derivation paths.
-# You should request a specific path for your app.
-# This serve as an isolation mechanism.
-# Most application will have to request a path according to the BIP-0044
-# and SLIP-0044 standards.
-# If your app needs it, you can specify multiple path by using:
-# `PATH_APP_LOAD_PARAMS = "44'/1'" "45'/1'"`
-PATH_APP_LOAD_PARAMS = "44'/1'"   # purpose=coin(44) / coin_type=Testnet(1)
+PATH_APP_LOAD_PARAMS = "44'/6767'"
 
-# Setting to allow building variant applications
-# - <VARIANT_PARAM> is the name of the parameter which should be set
-#   to specify the variant that should be build.
-# - <VARIANT_VALUES> a list of variant that can be build using this app code.
-#   * It must at least contains one value.
-#   * Values can be the app ticker or anything else but should be unique.
+# Variants list
 VARIANT_PARAM = COIN
-VARIANT_VALUES = CANTON
+VARIANT_VALUES = CC
 
 # Enabling DEBUG flag will enable PRINTF and disable optimizations
 #DEBUG = 1
@@ -110,5 +105,24 @@ ENABLE_NBGL_QRCODE = 1
 #DISABLE_STANDARD_WEBUSB = 1
 #DISABLE_DEBUG_LEDGER_ASSERT = 1
 #DISABLE_DEBUG_THROW = 1
+
+ENABLE_DYNAMIC_ALLOC = 1
+ifneq ($(DEBUG), 0)
+    MEMORY_PROFILING ?= 0
+    ifneq ($(MEMORY_PROFILING),0)
+        DEFINES += HAVE_MEMORY_PROFILING
+    endif
+endif
+
+DEFINES += PB_ENABLE_MALLOC=1
+
+include vendor/nanopb/extra/nanopb.mk
+
+INCLUDES_PATH += $(NANOPB_DIR) . proto
+
+# DEFINES   += PB_NO_ERRMSG=1
+DEFINES   += PB_ENABLE_ERRORS=1
+SOURCE_FILES += $(NANOPB_CORE)
+APP_SOURCE_PATH += proto
 
 include $(BOLOS_SDK)/Makefile.standard_app

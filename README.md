@@ -1,12 +1,12 @@
 <br />
 <div align="center">
   <a href="https://github.com/LedgerHQ/app-canton">
-    <img src="https://www.canton.network/hubfs/Canton%20Network%20Files/Images/Canton-Network-logos-icons/Canton%20Icon.png" width="70"/>
+    <img src="doc/canton-vertical-black.png" width=200"/>
   </a>
-  <h1 align="center">app-canton</h1>
-  <p align="center">
-    Canton Network wallet application for Ledger devices.
-  </p>
+  <p></p>
+<p align="center">
+  Canton Network wallet application for Ledger devices.
+</p>
 </div>
 <br/>
 
