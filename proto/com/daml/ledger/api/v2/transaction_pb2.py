@@ -17,7 +17,7 @@ from com.daml.ledger.api.v2 import trace_context_pb2 as com_dot_daml_dot_ledger_
 from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n(com/daml/ledger/api/v2/transaction.proto\x12\x16\x63om.daml.ledger.api.v2\x1a\"com/daml/ledger/api/v2/event.proto\x1a*com/daml/ledger/api/v2/trace_context.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x87\x03\n\x0bTransaction\x12\x11\n\tupdate_id\x18\x01 \x01(\t\x12\x12\n\ncommand_id\x18\x02 \x01(\t\x12\x13\n\x0bworkflow_id\x18\x03 \x01(\t\x12\x30\n\x0c\x65\x66\x66\x65\x63tive_at\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12-\n\x06\x65vents\x18\x05 \x03(\x0b\x32\x1d.com.daml.ledger.api.v2.Event\x12\x0e\n\x06offset\x18\x06 \x01(\x03\x12\x17\n\x0fsynchronizer_id\x18\x07 \x01(\t\x12;\n\rtrace_context\x18\x08 \x01(\x0b\x32$.com.daml.ledger.api.v2.TraceContext\x12/\n\x0brecord_time\x18\t \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12&\n\x19\x65xternal_transaction_hash\x18\n \x01(\x0cH\x00\x88\x01\x01\x42\x1c\n\x1a_external_transaction_hashBH\n\x16\x63om.daml.ledger.api.v2B\x15TransactionOuterClass\xaa\x02\x16\x43om.Daml.Ledger.Api.V2b\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n(com/daml/ledger/api/v2/transaction.proto\x12\x16\x63om.daml.ledger.api.v2\x1a\"com/daml/ledger/api/v2/event.proto\x1a*com/daml/ledger/api/v2/trace_context.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xbd\x03\n\x0bTransaction\x12\x11\n\tupdate_id\x18\x01 \x01(\t\x12\x12\n\ncommand_id\x18\x02 \x01(\t\x12\x13\n\x0bworkflow_id\x18\x03 \x01(\t\x12\x30\n\x0c\x65\x66\x66\x65\x63tive_at\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12-\n\x06\x65vents\x18\x05 \x03(\x0b\x32\x1d.com.daml.ledger.api.v2.Event\x12\x0e\n\x06offset\x18\x06 \x01(\x03\x12\x17\n\x0fsynchronizer_id\x18\x07 \x01(\t\x12;\n\rtrace_context\x18\x08 \x01(\x0b\x32$.com.daml.ledger.api.v2.TraceContext\x12/\n\x0brecord_time\x18\t \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12&\n\x19\x65xternal_transaction_hash\x18\n \x01(\x0cH\x00\x88\x01\x01\x12\x1e\n\x11paid_traffic_cost\x18\x0b \x01(\x03H\x01\x88\x01\x01\x42\x1c\n\x1a_external_transaction_hashB\x14\n\x12_paid_traffic_costBH\n\x16\x63om.daml.ledger.api.v2B\x15TransactionOuterClass\xaa\x02\x16\x43om.Daml.Ledger.Api.V2b\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -26,5 +26,5 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _globals['DESCRIPTOR']._options = None
   _globals['DESCRIPTOR']._serialized_options = b'\n\026com.daml.ledger.api.v2B\025TransactionOuterClass\252\002\026Com.Daml.Ledger.Api.V2'
   _globals['_TRANSACTION']._serialized_start=182
-  _globals['_TRANSACTION']._serialized_end=573
+  _globals['_TRANSACTION']._serialized_end=627
 # @@protoc_insertion_point(module_scope)

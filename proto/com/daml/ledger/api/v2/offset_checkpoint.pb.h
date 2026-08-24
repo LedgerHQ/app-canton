@@ -17,16 +17,23 @@
  - provide an offset which can be used to restart consumption. */
 typedef struct _com_daml_ledger_api_v2_OffsetCheckpoint {
     /* The participant's offset, the details of the offset field are described in ``community/ledger-api/README.md``.
- Required, must be a valid absolute offset (positive integer). */
+ Must be a valid absolute offset (positive integer).
+
+ Required */
     int64_t offset;
+    /* The times associated with each synchronizer at this offset.
+
+ Optional: can be empty */
     pb_callback_t synchronizer_times;
 } com_daml_ledger_api_v2_OffsetCheckpoint;
 
 typedef struct _com_daml_ledger_api_v2_SynchronizerTime {
     /* The id of the synchronizer.
+
  Required */
     char synchronizer_id[1024];
     /* All commands with a maximum record time below this value MUST be considered lost if their completion has not arrived before this checkpoint.
+
  Required */
     bool has_record_time;
     google_protobuf_Timestamp record_time;

@@ -11,9 +11,12 @@
 
 /* Struct definitions */
 typedef struct _com_daml_ledger_api_v2_TraceContext {
-    /* https://www.w3.org/TR/trace-context/ */
+    /* https://www.w3.org/TR/trace-context/
+
+ Optional */
     bool has_traceparent;
     char traceparent[1024];
+    /* Optional */
     bool has_tracestate;
     char tracestate[1024];
 } com_daml_ledger_api_v2_TraceContext;

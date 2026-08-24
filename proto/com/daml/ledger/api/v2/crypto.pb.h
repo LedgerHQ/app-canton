@@ -69,21 +69,33 @@ typedef enum _com_daml_ledger_api_v2_SignatureFormat {
 /* Struct definitions */
 typedef PB_BYTES_ARRAY_T(1024) com_daml_ledger_api_v2_SigningPublicKey_key_data_t;
 typedef struct _com_daml_ledger_api_v2_SigningPublicKey {
-    /* The serialization format of the public key */
+    /* The serialization format of the public key
+
+ Required */
     com_daml_ledger_api_v2_CryptoKeyFormat format;
-    /* Serialized public key in the format specified above */
+    /* Serialized public key in the format specified above
+
+ Required: must be non-empty */
     com_daml_ledger_api_v2_SigningPublicKey_key_data_t key_data;
-    /* The key specification */
+    /* The key specification
+
+ Required */
     com_daml_ledger_api_v2_SigningKeySpec key_spec;
 } com_daml_ledger_api_v2_SigningPublicKey;
 
 typedef PB_BYTES_ARRAY_T(1024) com_daml_ledger_api_v2_Signature_signature_t;
 typedef struct _com_daml_ledger_api_v2_Signature {
+    /* Required */
     com_daml_ledger_api_v2_SignatureFormat format;
+    /* Required: must be non-empty */
     com_daml_ledger_api_v2_Signature_signature_t signature;
-    /* The fingerprint/id of the keypair used to create this signature and needed to verify. */
+    /* The fingerprint/id of the keypair used to create this signature and needed to verify.
+
+ Required */
     char signed_by[1024];
-    /* The signing algorithm specification used to produce this signature */
+    /* The signing algorithm specification used to produce this signature
+
+ Required */
     com_daml_ledger_api_v2_SigningAlgorithmSpec signing_algorithm_spec;
 } com_daml_ledger_api_v2_Signature;
 
