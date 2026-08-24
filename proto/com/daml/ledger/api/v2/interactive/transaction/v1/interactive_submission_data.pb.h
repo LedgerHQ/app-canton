@@ -4,6 +4,7 @@
 #ifndef PB_COM_DAML_LEDGER_API_V2_INTERACTIVE_TRANSACTION_V1_COM_DAML_LEDGER_API_V2_INTERACTIVE_TRANSACTION_V1_INTERACTIVE_SUBMISSION_DATA_PB_H_INCLUDED
 #define PB_COM_DAML_LEDGER_API_V2_INTERACTIVE_TRANSACTION_V1_COM_DAML_LEDGER_API_V2_INTERACTIVE_TRANSACTION_V1_INTERACTIVE_SUBMISSION_DATA_PB_H_INCLUDED
 #include <pb.h>
+#include "com/daml/ledger/api/v2/interactive/interactive_submission_common_data.pb.h"
 #include "com/daml/ledger/api/v2/value.pb.h"
 
 #if PB_PROTO_HEADER_VERSION != 40
@@ -13,74 +14,158 @@
 /* Struct definitions */
 /* Fetch node */
 typedef struct _com_daml_ledger_api_v2_interactive_transaction_v1_Fetch {
-    /* Specific LF version of the node */
+    /* Specific LF serialization version of the node
+
+ Required */
     char *lf_version;
+    /* Required */
     char *contract_id;
+    /* Required */
     char *package_name;
-    /* The identifier uses the package-id reference format. */
+    /* The identifier uses the package-id reference format.
+
+ Required */
     bool has_template_id;
     com_daml_ledger_api_v2_Identifier template_id;
+    /* Required: must be non-empty */
     pb_size_t signatories_count;
     char **signatories;
+    /* Required: must be non-empty */
     pb_size_t stakeholders_count;
     char **stakeholders;
+    /* Required: must be non-empty */
     pb_size_t acting_parties_count;
     char **acting_parties;
     /* Optional */
     struct _com_daml_ledger_api_v2_Identifier *interface_id;
+    /* Can only be populated from lf_version >= 2
+
+ Optional */
+    bool has_key;
+    com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers key;
+    /* Can only be true from lf_version >= 2
+
+ Required */
+    bool by_key;
 } com_daml_ledger_api_v2_interactive_transaction_v1_Fetch;
 
 /* Exercise node */
 typedef struct _com_daml_ledger_api_v2_interactive_transaction_v1_Exercise {
-    /* Specific LF version of the node */
+    /* Specific LF serialization version of the node
+
+ Required */
     char *lf_version;
+    /* Required */
     char *contract_id;
+    /* Required */
     char *package_name;
-    /* The identifier uses the package-id reference format. */
+    /* The identifier uses the package-id reference format.
+
+ Required */
     bool has_template_id;
     com_daml_ledger_api_v2_Identifier template_id;
+    /* Required: must be non-empty */
     pb_size_t signatories_count;
     char **signatories;
+    /* Required: must be non-empty */
     pb_size_t stakeholders_count;
     char **stakeholders;
+    /* Required: must be non-empty */
     pb_size_t acting_parties_count;
     char **acting_parties;
-    /* The identifier uses the package-id reference format. */
+    /* The identifier uses the package-id reference format.
+
+ Optional */
     struct _com_daml_ledger_api_v2_Identifier *interface_id;
+    /* Required */
     char *choice_id;
+    /* Required */
     bool has_chosen_value;
     com_daml_ledger_api_v2_Value chosen_value;
+    /* Required */
     bool consuming;
+    /* Optional: can be empty */
     pb_size_t children_count;
     char **children;
+    /* Optional */
     bool has_exercise_result;
     com_daml_ledger_api_v2_Value exercise_result;
+    /* Optional: can be empty */
     pb_size_t choice_observers_count;
     char **choice_observers;
+    /* Can only be populated from lf_version >= 2
+
+ Optional */
+    bool has_key;
+    com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers key;
+    /* Can only be true from lf_version >= 2
+
+ Required */
+    bool by_key;
 } com_daml_ledger_api_v2_interactive_transaction_v1_Exercise;
 
 /* Create Node */
 typedef struct _com_daml_ledger_api_v2_interactive_transaction_v1_Create {
-    /* Specific LF version of the node */
+    /* Specific LF serialization version of the node
+
+ Required */
     char *lf_version;
+    /* Required */
     char *contract_id;
+    /* Required */
     char *package_name;
-    /* The identifier uses the package-id reference format. */
+    /* The identifier uses the package-id reference format.
+
+ Required */
     bool has_template_id;
     com_daml_ledger_api_v2_Identifier template_id;
+    /* Required */
     bool has_argument;
     com_daml_ledger_api_v2_Value argument;
+    /* Required: must be non-empty */
     pb_size_t signatories_count;
     char **signatories;
+    /* Required: must be non-empty */
     pb_size_t stakeholders_count;
     char **stakeholders;
+    /* Only populated from lf_version >= 2
+
+ Optional */
+    bool has_key;
+    com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers key;
 } com_daml_ledger_api_v2_interactive_transaction_v1_Create;
 
 /* Rollback Node */
 typedef struct _com_daml_ledger_api_v2_interactive_transaction_v1_Rollback {
+    /* Required: must be non-empty */
     pb_size_t children_count;
     char **children;
 } com_daml_ledger_api_v2_interactive_transaction_v1_Rollback;
+
+typedef struct _com_daml_ledger_api_v2_interactive_transaction_v1_QueryByKey {
+    /* Specific LF serialization version of the node
+
+ Required */
+    char lf_version[1024];
+    /* Required */
+    char package_name[1024];
+    /* The identifier uses the package-id reference format.
+
+ Required */
+    bool has_template_id;
+    com_daml_ledger_api_v2_Identifier template_id;
+    /* Required */
+    bool exhaustive;
+    /* key to query for
+
+ Required */
+    bool has_key;
+    com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers key;
+    /* Result of the query: list of contract Ids matching the query
+
+ Optional: can be empty */
+    pb_callback_t result;
+} com_daml_ledger_api_v2_interactive_transaction_v1_QueryByKey;
 
 typedef struct _com_daml_ledger_api_v2_interactive_transaction_v1_Node {
     pb_callback_t cb_node_type;
@@ -90,6 +175,8 @@ typedef struct _com_daml_ledger_api_v2_interactive_transaction_v1_Node {
         com_daml_ledger_api_v2_interactive_transaction_v1_Fetch fetch;
         com_daml_ledger_api_v2_interactive_transaction_v1_Exercise exercise;
         com_daml_ledger_api_v2_interactive_transaction_v1_Rollback rollback;
+        /* Only from PV 35 */
+        com_daml_ledger_api_v2_interactive_transaction_v1_QueryByKey query_by_key;
     };
 } com_daml_ledger_api_v2_interactive_transaction_v1_Node;
 
@@ -99,15 +186,17 @@ extern "C" {
 #endif
 
 /* Initializer values for message structs */
-#define com_daml_ledger_api_v2_interactive_transaction_v1_Fetch_init_default {NULL, NULL, NULL, false, com_daml_ledger_api_v2_Identifier_init_default, 0, NULL, 0, NULL, 0, NULL, NULL}
-#define com_daml_ledger_api_v2_interactive_transaction_v1_Exercise_init_default {NULL, NULL, NULL, false, com_daml_ledger_api_v2_Identifier_init_default, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, false, com_daml_ledger_api_v2_Value_init_default, 0, 0, NULL, false, com_daml_ledger_api_v2_Value_init_default, 0, NULL}
-#define com_daml_ledger_api_v2_interactive_transaction_v1_Create_init_default {NULL, NULL, NULL, false, com_daml_ledger_api_v2_Identifier_init_default, false, com_daml_ledger_api_v2_Value_init_default, 0, NULL, 0, NULL}
+#define com_daml_ledger_api_v2_interactive_transaction_v1_Fetch_init_default {NULL, NULL, NULL, false, com_daml_ledger_api_v2_Identifier_init_default, 0, NULL, 0, NULL, 0, NULL, NULL, false, com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_init_default, 0}
+#define com_daml_ledger_api_v2_interactive_transaction_v1_Exercise_init_default {NULL, NULL, NULL, false, com_daml_ledger_api_v2_Identifier_init_default, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, false, com_daml_ledger_api_v2_Value_init_default, 0, 0, NULL, false, com_daml_ledger_api_v2_Value_init_default, 0, NULL, false, com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_init_default, 0}
+#define com_daml_ledger_api_v2_interactive_transaction_v1_Create_init_default {NULL, NULL, NULL, false, com_daml_ledger_api_v2_Identifier_init_default, false, com_daml_ledger_api_v2_Value_init_default, 0, NULL, 0, NULL, false, com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_init_default}
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Rollback_init_default {0, NULL}
+#define com_daml_ledger_api_v2_interactive_transaction_v1_QueryByKey_init_default {"", "", false, com_daml_ledger_api_v2_Identifier_init_default, 0, false, com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_init_default, {{NULL}, NULL}}
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Node_init_default {{{NULL}, NULL}, 0, {com_daml_ledger_api_v2_interactive_transaction_v1_Create_init_default}}
-#define com_daml_ledger_api_v2_interactive_transaction_v1_Fetch_init_zero {NULL, NULL, NULL, false, com_daml_ledger_api_v2_Identifier_init_zero, 0, NULL, 0, NULL, 0, NULL, NULL}
-#define com_daml_ledger_api_v2_interactive_transaction_v1_Exercise_init_zero {NULL, NULL, NULL, false, com_daml_ledger_api_v2_Identifier_init_zero, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, false, com_daml_ledger_api_v2_Value_init_zero, 0, 0, NULL, false, com_daml_ledger_api_v2_Value_init_zero, 0, NULL}
-#define com_daml_ledger_api_v2_interactive_transaction_v1_Create_init_zero {NULL, NULL, NULL, false, com_daml_ledger_api_v2_Identifier_init_zero, false, com_daml_ledger_api_v2_Value_init_zero, 0, NULL, 0, NULL}
+#define com_daml_ledger_api_v2_interactive_transaction_v1_Fetch_init_zero {NULL, NULL, NULL, false, com_daml_ledger_api_v2_Identifier_init_zero, 0, NULL, 0, NULL, 0, NULL, NULL, false, com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_init_zero, 0}
+#define com_daml_ledger_api_v2_interactive_transaction_v1_Exercise_init_zero {NULL, NULL, NULL, false, com_daml_ledger_api_v2_Identifier_init_zero, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, false, com_daml_ledger_api_v2_Value_init_zero, 0, 0, NULL, false, com_daml_ledger_api_v2_Value_init_zero, 0, NULL, false, com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_init_zero, 0}
+#define com_daml_ledger_api_v2_interactive_transaction_v1_Create_init_zero {NULL, NULL, NULL, false, com_daml_ledger_api_v2_Identifier_init_zero, false, com_daml_ledger_api_v2_Value_init_zero, 0, NULL, 0, NULL, false, com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_init_zero}
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Rollback_init_zero {0, NULL}
+#define com_daml_ledger_api_v2_interactive_transaction_v1_QueryByKey_init_zero {"", "", false, com_daml_ledger_api_v2_Identifier_init_zero, 0, false, com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_init_zero, {{NULL}, NULL}}
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Node_init_zero {{{NULL}, NULL}, 0, {com_daml_ledger_api_v2_interactive_transaction_v1_Create_init_zero}}
 
 /* Field tags (for use in manual encoding/decoding) */
@@ -119,6 +208,8 @@ extern "C" {
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Fetch_stakeholders_tag 6
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Fetch_acting_parties_tag 7
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Fetch_interface_id_tag 8
+#define com_daml_ledger_api_v2_interactive_transaction_v1_Fetch_key_tag 9
+#define com_daml_ledger_api_v2_interactive_transaction_v1_Fetch_by_key_tag 10
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Exercise_lf_version_tag 1
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Exercise_contract_id_tag 2
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Exercise_package_name_tag 3
@@ -133,6 +224,8 @@ extern "C" {
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Exercise_children_tag 12
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Exercise_exercise_result_tag 13
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Exercise_choice_observers_tag 14
+#define com_daml_ledger_api_v2_interactive_transaction_v1_Exercise_key_tag 15
+#define com_daml_ledger_api_v2_interactive_transaction_v1_Exercise_by_key_tag 16
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Create_lf_version_tag 1
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Create_contract_id_tag 2
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Create_package_name_tag 3
@@ -140,11 +233,19 @@ extern "C" {
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Create_argument_tag 5
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Create_signatories_tag 6
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Create_stakeholders_tag 7
+#define com_daml_ledger_api_v2_interactive_transaction_v1_Create_key_tag 8
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Rollback_children_tag 1
+#define com_daml_ledger_api_v2_interactive_transaction_v1_QueryByKey_lf_version_tag 1
+#define com_daml_ledger_api_v2_interactive_transaction_v1_QueryByKey_package_name_tag 2
+#define com_daml_ledger_api_v2_interactive_transaction_v1_QueryByKey_template_id_tag 3
+#define com_daml_ledger_api_v2_interactive_transaction_v1_QueryByKey_exhaustive_tag 4
+#define com_daml_ledger_api_v2_interactive_transaction_v1_QueryByKey_key_tag 5
+#define com_daml_ledger_api_v2_interactive_transaction_v1_QueryByKey_result_tag 6
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Node_create_tag 1
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Node_fetch_tag 2
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Node_exercise_tag 3
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Node_rollback_tag 4
+#define com_daml_ledger_api_v2_interactive_transaction_v1_Node_query_by_key_tag 5
 
 /* Struct field encoding specification for nanopb */
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Fetch_FIELDLIST(X, a) \
@@ -155,11 +256,14 @@ X(a, STATIC,   OPTIONAL, MESSAGE,  template_id,       4) \
 X(a, POINTER,  REPEATED, STRING,   signatories,       5) \
 X(a, POINTER,  REPEATED, STRING,   stakeholders,      6) \
 X(a, POINTER,  REPEATED, STRING,   acting_parties,    7) \
-X(a, POINTER,  OPTIONAL, MESSAGE,  interface_id,      8)
+X(a, POINTER,  OPTIONAL, MESSAGE,  interface_id,      8) \
+X(a, STATIC,   OPTIONAL, MESSAGE,  key,               9) \
+X(a, STATIC,   SINGULAR, BOOL,     by_key,           10)
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Fetch_CALLBACK NULL
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Fetch_DEFAULT NULL
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Fetch_template_id_MSGTYPE com_daml_ledger_api_v2_Identifier
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Fetch_interface_id_MSGTYPE com_daml_ledger_api_v2_Identifier
+#define com_daml_ledger_api_v2_interactive_transaction_v1_Fetch_key_MSGTYPE com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers
 
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Exercise_FIELDLIST(X, a) \
 X(a, POINTER,  SINGULAR, STRING,   lf_version,        1) \
@@ -175,13 +279,16 @@ X(a, STATIC,   OPTIONAL, MESSAGE,  chosen_value,     10) \
 X(a, STATIC,   SINGULAR, BOOL,     consuming,        11) \
 X(a, POINTER,  REPEATED, STRING,   children,         12) \
 X(a, STATIC,   OPTIONAL, MESSAGE,  exercise_result,  13) \
-X(a, POINTER,  REPEATED, STRING,   choice_observers,  14)
+X(a, POINTER,  REPEATED, STRING,   choice_observers,  14) \
+X(a, STATIC,   OPTIONAL, MESSAGE,  key,              15) \
+X(a, STATIC,   SINGULAR, BOOL,     by_key,           16)
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Exercise_CALLBACK NULL
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Exercise_DEFAULT NULL
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Exercise_template_id_MSGTYPE com_daml_ledger_api_v2_Identifier
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Exercise_interface_id_MSGTYPE com_daml_ledger_api_v2_Identifier
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Exercise_chosen_value_MSGTYPE com_daml_ledger_api_v2_Value
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Exercise_exercise_result_MSGTYPE com_daml_ledger_api_v2_Value
+#define com_daml_ledger_api_v2_interactive_transaction_v1_Exercise_key_MSGTYPE com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers
 
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Create_FIELDLIST(X, a) \
 X(a, POINTER,  SINGULAR, STRING,   lf_version,        1) \
@@ -190,33 +297,50 @@ X(a, POINTER,  SINGULAR, STRING,   package_name,      3) \
 X(a, STATIC,   OPTIONAL, MESSAGE,  template_id,       4) \
 X(a, STATIC,   OPTIONAL, MESSAGE,  argument,          5) \
 X(a, POINTER,  REPEATED, STRING,   signatories,       6) \
-X(a, POINTER,  REPEATED, STRING,   stakeholders,      7)
+X(a, POINTER,  REPEATED, STRING,   stakeholders,      7) \
+X(a, STATIC,   OPTIONAL, MESSAGE,  key,               8)
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Create_CALLBACK NULL
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Create_DEFAULT NULL
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Create_template_id_MSGTYPE com_daml_ledger_api_v2_Identifier
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Create_argument_MSGTYPE com_daml_ledger_api_v2_Value
+#define com_daml_ledger_api_v2_interactive_transaction_v1_Create_key_MSGTYPE com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers
 
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Rollback_FIELDLIST(X, a) \
 X(a, POINTER,  REPEATED, STRING,   children,          1)
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Rollback_CALLBACK NULL
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Rollback_DEFAULT NULL
 
+#define com_daml_ledger_api_v2_interactive_transaction_v1_QueryByKey_FIELDLIST(X, a) \
+X(a, STATIC,   SINGULAR, STRING,   lf_version,        1) \
+X(a, STATIC,   SINGULAR, STRING,   package_name,      2) \
+X(a, STATIC,   OPTIONAL, MESSAGE,  template_id,       3) \
+X(a, STATIC,   SINGULAR, BOOL,     exhaustive,        4) \
+X(a, STATIC,   OPTIONAL, MESSAGE,  key,               5) \
+X(a, CALLBACK, REPEATED, STRING,   result,            6)
+#define com_daml_ledger_api_v2_interactive_transaction_v1_QueryByKey_CALLBACK pb_default_field_callback
+#define com_daml_ledger_api_v2_interactive_transaction_v1_QueryByKey_DEFAULT NULL
+#define com_daml_ledger_api_v2_interactive_transaction_v1_QueryByKey_template_id_MSGTYPE com_daml_ledger_api_v2_Identifier
+#define com_daml_ledger_api_v2_interactive_transaction_v1_QueryByKey_key_MSGTYPE com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers
+
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Node_FIELDLIST(X, a) \
 X(a, STATIC,   ONEOF,    MSG_W_CB, (node_type,create,create),   1) \
 X(a, STATIC,   ONEOF,    MSG_W_CB, (node_type,fetch,fetch),   2) \
 X(a, STATIC,   ONEOF,    MSG_W_CB, (node_type,exercise,exercise),   3) \
-X(a, STATIC,   ONEOF,    MSG_W_CB, (node_type,rollback,rollback),   4)
+X(a, STATIC,   ONEOF,    MSG_W_CB, (node_type,rollback,rollback),   4) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (node_type,query_by_key,query_by_key),   5)
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Node_CALLBACK NULL
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Node_DEFAULT NULL
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Node_node_type_create_MSGTYPE com_daml_ledger_api_v2_interactive_transaction_v1_Create
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Node_node_type_fetch_MSGTYPE com_daml_ledger_api_v2_interactive_transaction_v1_Fetch
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Node_node_type_exercise_MSGTYPE com_daml_ledger_api_v2_interactive_transaction_v1_Exercise
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Node_node_type_rollback_MSGTYPE com_daml_ledger_api_v2_interactive_transaction_v1_Rollback
+#define com_daml_ledger_api_v2_interactive_transaction_v1_Node_node_type_query_by_key_MSGTYPE com_daml_ledger_api_v2_interactive_transaction_v1_QueryByKey
 
 extern const pb_msgdesc_t com_daml_ledger_api_v2_interactive_transaction_v1_Fetch_msg;
 extern const pb_msgdesc_t com_daml_ledger_api_v2_interactive_transaction_v1_Exercise_msg;
 extern const pb_msgdesc_t com_daml_ledger_api_v2_interactive_transaction_v1_Create_msg;
 extern const pb_msgdesc_t com_daml_ledger_api_v2_interactive_transaction_v1_Rollback_msg;
+extern const pb_msgdesc_t com_daml_ledger_api_v2_interactive_transaction_v1_QueryByKey_msg;
 extern const pb_msgdesc_t com_daml_ledger_api_v2_interactive_transaction_v1_Node_msg;
 
 /* Defines for backwards compatibility with code written before nanopb-0.4.0 */
@@ -224,6 +348,7 @@ extern const pb_msgdesc_t com_daml_ledger_api_v2_interactive_transaction_v1_Node
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Exercise_fields &com_daml_ledger_api_v2_interactive_transaction_v1_Exercise_msg
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Create_fields &com_daml_ledger_api_v2_interactive_transaction_v1_Create_msg
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Rollback_fields &com_daml_ledger_api_v2_interactive_transaction_v1_Rollback_msg
+#define com_daml_ledger_api_v2_interactive_transaction_v1_QueryByKey_fields &com_daml_ledger_api_v2_interactive_transaction_v1_QueryByKey_msg
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Node_fields &com_daml_ledger_api_v2_interactive_transaction_v1_Node_msg
 
 /* Maximum encoded size of messages (where known) */
@@ -231,6 +356,7 @@ extern const pb_msgdesc_t com_daml_ledger_api_v2_interactive_transaction_v1_Node
 /* com_daml_ledger_api_v2_interactive_transaction_v1_Exercise_size depends on runtime parameters */
 /* com_daml_ledger_api_v2_interactive_transaction_v1_Create_size depends on runtime parameters */
 /* com_daml_ledger_api_v2_interactive_transaction_v1_Rollback_size depends on runtime parameters */
+/* com_daml_ledger_api_v2_interactive_transaction_v1_QueryByKey_size depends on runtime parameters */
 /* com_daml_ledger_api_v2_interactive_transaction_v1_Node_size depends on runtime parameters */
 
 #ifdef __cplusplus

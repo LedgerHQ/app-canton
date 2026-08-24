@@ -24,20 +24,25 @@
  The hashing scheme version used when building the hash of the PreparedTransaction */
 typedef enum _com_daml_ledger_api_v2_interactive_HashingSchemeVersion {
     com_daml_ledger_api_v2_interactive_HashingSchemeVersion_HASHING_SCHEME_VERSION_UNSPECIFIED = 0,
-    com_daml_ledger_api_v2_interactive_HashingSchemeVersion_HASHING_SCHEME_VERSION_V2 = 2
+    com_daml_ledger_api_v2_interactive_HashingSchemeVersion_HASHING_SCHEME_VERSION_V2 = 2,
+    com_daml_ledger_api_v2_interactive_HashingSchemeVersion_HASHING_SCHEME_VERSION_V3 = 3
 } com_daml_ledger_api_v2_interactive_HashingSchemeVersion;
 
 /* Struct definitions */
 /* Hints to improve cost estimation precision of a prepared transaction */
 typedef struct _com_daml_ledger_api_v2_interactive_CostEstimationHints {
     /* Disable cost estimation
- Default (not set) is false */
+ Default (not set) is false
+
+ Optional */
     bool disabled;
     /* Details on the keys that will be used to sign the transaction (how many and of which type).
  Signature size impacts the cost of the transaction.
  If empty, the signature sizes will be approximated with threshold-many signatures (where threshold is defined
- in the PartyToKeyMapping of the external party), using keys in the order they are registered.
- Optional (empty list is equivalent to not providing this field) */
+ in the PartyToParticipant of the external party), using keys in the order they are registered.
+ Empty list is equivalent to not providing this field
+
+ Optional: can be empty */
     pb_callback_t expected_signatures;
 } com_daml_ledger_api_v2_interactive_CostEstimationHints;
 
@@ -46,33 +51,44 @@ typedef struct _com_daml_ledger_api_v2_interactive_CostEstimationHints {
  (or the one explicitly requested).
  The cost of re-assigning contracts to another synchronizer when necessary is not included in the estimation. */
 typedef struct _com_daml_ledger_api_v2_interactive_CostEstimation {
-    /* Timestamp at which the estimation was made */
+    /* Timestamp at which the estimation was made
+
+ Required */
     bool has_estimation_timestamp;
     google_protobuf_Timestamp estimation_timestamp;
-    /* Estimated traffic cost of the confirmation request associated with the transaction */
+    /* Estimated traffic cost of the confirmation request associated with the transaction
+
+ Required */
     uint64_t confirmation_request_traffic_cost_estimation;
     /* Estimated traffic cost of the confirmation response associated with the transaction
  This field can also be used as an indication of the cost that other potential confirming nodes
- of the party will incur to approve or reject the transaction */
+ of the party will incur to approve or reject the transaction
+
+ Required */
     uint64_t confirmation_response_traffic_cost_estimation;
-    /* Sum of the fields above */
+    /* Sum of the fields above
+
+ Required */
     uint64_t total_traffic_cost_estimation;
 } com_daml_ledger_api_v2_interactive_CostEstimation;
 
 /* Signatures provided by a single party */
 typedef struct _com_daml_ledger_api_v2_interactive_SinglePartySignatures {
     /* Submitting party
+
  Required */
     char party[1024];
     /* Signatures
- Required */
+
+ Required: must be non-empty */
     pb_callback_t signatures;
 } com_daml_ledger_api_v2_interactive_SinglePartySignatures;
 
 /* Additional signatures provided by the submitting parties */
 typedef struct _com_daml_ledger_api_v2_interactive_PartySignatures {
     /* Additional signatures provided by all individual parties
- Required */
+
+ Required: must be non-empty */
     pb_callback_t signatures;
 } com_daml_ledger_api_v2_interactive_PartySignatures;
 
@@ -83,9 +99,11 @@ typedef struct _com_daml_ledger_api_v2_interactive_ExecuteSubmissionResponse {
 typedef struct _com_daml_ledger_api_v2_interactive_ExecuteSubmissionAndWaitResponse {
     /* The id of the transaction that resulted from the submitted command.
  Must be a valid LedgerString (as described in ``value.proto``).
+
  Required */
     char update_id[1024];
     /* The details of the offset field are described in ``community/ledger-api/README.md``.
+
  Required */
     int64_t completion_offset;
 } com_daml_ledger_api_v2_interactive_ExecuteSubmissionAndWaitResponse;
@@ -93,6 +111,7 @@ typedef struct _com_daml_ledger_api_v2_interactive_ExecuteSubmissionAndWaitRespo
 typedef struct _com_daml_ledger_api_v2_interactive_ExecuteSubmissionAndWaitForTransactionResponse {
     /* The transaction that resulted from the submitted command.
  The transaction might contain no events (request conditions result in filtering out all of them).
+
  Required */
     bool has_transaction;
     com_daml_ledger_api_v2_Transaction transaction;
@@ -124,6 +143,7 @@ typedef struct _com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest {
  Must be a valid UserIdString (as described in ``value.proto``).
  Required unless authentication is used with a user token.
  In that case, the token's user-id will be used for the request's user_id.
+
  Optional */
     char user_id[1024];
     /* Uniquely identifies the command.
@@ -131,12 +151,14 @@ typedef struct _com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest {
  where act_as is interpreted as a set of party names.
  The change ID can be used for matching the intended ledger changes with all their completions.
  Must be a valid LedgerString (as described in ``value.proto``).
+
  Required */
     char command_id[1024];
     /* Individual elements of this atomic command. Must be non-empty.
  Limitation: Only single command transaction are currently supported by the API.
  The field is marked as repeated in preparation for future support of multiple commands.
- Required */
+
+ Required: must be non-empty */
     pb_callback_t commands;
     /* Optional */
     bool has_min_ledger_time;
@@ -147,7 +169,8 @@ typedef struct _com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest {
  and does not execute it. Therefore read authorization is sufficient even for actAs parties.
  Note: This may change, and more specific authorization scope may be introduced in the future.
  Each element must be a valid PartyIdString (as described in ``value.proto``).
- Required, must be non-empty. */
+
+ Required: must be non-empty */
     pb_callback_t act_as;
     /* Set of parties on whose behalf (in addition to all parties listed in ``act_as``) contracts can be retrieved.
  This affects Daml operations such as ``fetch``, ``fetchByKey``, ``lookupByKey``, ``exercise``, and ``exerciseByKey``.
@@ -156,22 +179,28 @@ typedef struct _com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest {
  rules for fetch operations.
  If ledger API authorization is enabled, then the authorization metadata must authorize the sender of the request
  to read contract data on behalf of each of the given parties.
- Optional */
+
+ Optional: can be empty */
     pb_callback_t read_as;
     /* Additional contracts used to resolve contract & contract key lookups.
- Optional */
+
+ Optional: can be empty */
     pb_callback_t disclosed_contracts;
     /* Must be a valid synchronizer id
  If not set, a suitable synchronizer that this node is connected to will be chosen
+
  Optional */
     char synchronizer_id[1024];
     /* The package-id selection preference of the client for resolving
  package names and interface instances in command submission and interpretation
- Optional */
+
+ Optional: can be empty */
     pb_callback_t package_id_selection_preference;
     /* When true, the response will contain additional details on how the transaction was encoded and hashed
  This can be useful for troubleshooting of hash mismatches. Should only be used for debugging.
- Optional, default to false */
+ Defaults to false
+
+ Optional */
     bool verbose_hashing;
     /* Maximum timestamp at which the transaction can be recorded onto the ledger via the synchronizer specified in the `PrepareSubmissionResponse`.
  If submitted after it will be rejected even if otherwise valid, in which case it needs to be prepared and signed again
@@ -180,6 +209,7 @@ typedef struct _com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest {
  which is useful to know when it can definitely not be accepted
  anymore and resorting to preparing another transaction for the same
  intent is safe again.
+
  Optional */
     bool has_max_record_time;
     google_protobuf_Timestamp max_record_time;
@@ -187,7 +217,7 @@ typedef struct _com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest {
  Should only contain contract keys that are expected to be resolved during interpretation of the commands.
  Keys of disclosed contracts do not need prefetching.
 
- Optional */
+ Optional: can be empty */
     pb_callback_t prefetch_contract_keys;
     /* Hints to improve the accuracy of traffic cost estimation.
  The estimation logic assumes that this node will be used for the execution of the transaction
@@ -195,53 +225,80 @@ typedef struct _com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest {
  Request amplification is not accounted for in the estimation: each amplified request will
  result in the cost of the confirmation request to be charged additionally.
 
- Optional - Traffic cost estimation is enabled by default if this field is not set
- To turn off cost estimation, set the CostEstimationHints#disabled field to true */
+ Traffic cost estimation is enabled by default if this field is not set
+ To turn off cost estimation, set the CostEstimationHints#disabled field to true
+
+ Optional */
     bool has_estimate_traffic_cost;
     com_daml_ledger_api_v2_interactive_CostEstimationHints estimate_traffic_cost;
+    /* The hashing scheme version to be used when building the hash.
+ Defaults to HASHING_SCHEME_VERSION_V2.
+
+ Optional */
+    bool has_hashing_scheme_version;
+    com_daml_ledger_api_v2_interactive_HashingSchemeVersion hashing_scheme_version;
+    /* The maximum number of passes for the Topology-Aware Package Selection (TAPS).
+ Higher values can increase the chance of successful package selection for routing of interpreted transactions.
+ If unset, this defaults to the value defined in the participant configuration.
+ The provided value must not exceed the limit specified in the participant configuration.
+
+ Optional */
+    bool has_taps_max_passes;
+    uint32_t taps_max_passes;
 } com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest;
 
 typedef struct _com_daml_ledger_api_v2_interactive_Metadata_SubmitterInfo {
+    /* Required: must be non-empty */
     pb_callback_t act_as;
+    /* Required */
     char command_id[1024];
 } com_daml_ledger_api_v2_interactive_Metadata_SubmitterInfo;
 
 /* Transaction Metadata
  Refer to the hashing documentation for information on how it should be hashed. */
 typedef struct _com_daml_ledger_api_v2_interactive_Metadata {
+    /* Required */
     bool has_submitter_info;
     com_daml_ledger_api_v2_interactive_Metadata_SubmitterInfo submitter_info;
+    /* Required */
     char synchronizer_id[1024];
+    /* Required */
     uint32_t mediator_group;
+    /* Required */
     char transaction_uuid[1024];
+    /* Required */
     uint64_t preparation_time;
+    /* Not populated if the transaction has no input contracts
+
+ Optional: can be empty */
     pb_callback_t input_contracts;
-    /* Contextual information needed to process the transaction but not signed, either because it's already indirectly
- signed by signing the transaction, or because it doesn't impact the ledger state */
+    /* This fields is deprecated and will always be empty.
+ Keys and associated contracts are already present and signed within the transaction nodes where they're used
+
+ Optional: can be empty */
     pb_callback_t global_key_mapping;
-    /* Where ledger time constraints are imposed during the execution of the contract they will be populated
- in the fields below. These are optional because if the transaction does NOT depend on time, these values
- do not need to be set.
- The final ledger effective time used will be chosen when the command is submitted through the [execute] RPC.
- If the ledger effective time is outside of any populated min/max bounds then a different transaction
- can result, that will cause a confirmation message rejection. */
+    /* Optional */
     bool has_min_ledger_effective_time;
     uint64_t min_ledger_effective_time;
+    /* Optional */
     bool has_max_ledger_effective_time;
     uint64_t max_ledger_effective_time;
     /* Maximum timestamp at which the transaction can be recorded onto the ledger via the synchronizer `synchronizer_id`.
  If submitted after it will be rejected even if otherwise valid, in which case it needs to be prepared and signed again
  with a new valid max_record_time.
- Unsigned in 3.3 to avoid a breaking protocol change
- Will be signed in 3.4+
- Set max_record_time in the PreparedTransactionRequest to get this field set accordingly */
+ Set max_record_time in the PreparedTransactionRequest to get this field set accordingly
+
+ Optional */
     bool has_max_record_time;
     uint64_t max_record_time;
 } com_daml_ledger_api_v2_interactive_Metadata;
 
+/* This message is deprecated and may be removed in future releases */
 typedef struct _com_daml_ledger_api_v2_interactive_Metadata_GlobalKeyMappingEntry {
+    /* Required */
     bool has_key;
     com_daml_ledger_api_v2_interactive_GlobalKey key;
+    /* Optional */
     bool has_value;
     com_daml_ledger_api_v2_Value value;
 } com_daml_ledger_api_v2_interactive_Metadata_GlobalKeyMappingEntry;
@@ -253,30 +310,44 @@ typedef struct _com_daml_ledger_api_v2_interactive_Metadata_InputContract {
         /* When new versions will be added, they will show here */
         com_daml_ledger_api_v2_interactive_transaction_v1_Create v1;
     };
+    /* Required */
     uint64_t created_at;
+    /* Required: must be non-empty */
     com_daml_ledger_api_v2_interactive_Metadata_InputContract_event_blob_t event_blob;
 } com_daml_ledger_api_v2_interactive_Metadata_InputContract;
 
 /* Daml Transaction.
  This represents the effect on the ledger if this transaction is successfully committed. */
 typedef struct _com_daml_ledger_api_v2_interactive_DamlTransaction {
-    /* serialization version, will be >= max(nodes version) */
+    /* serialization version, will be >= max(nodes version)
+
+ Required */
     char version[1024];
-    /* Root nodes of the transaction */
+    /* Root nodes of the transaction
+
+ Required: must be non-empty */
     pb_callback_t roots;
-    /* List of nodes in the transaction */
+    /* List of nodes in the transaction
+
+ Required: must be non-empty */
     pb_callback_t nodes;
-    /* Node seeds are values associated with certain nodes used for generating cryptographic salts */
+    /* Node seeds are values associated with certain nodes used for generating cryptographic salts
+
+ Required: must be non-empty */
     pb_callback_t node_seeds;
 } com_daml_ledger_api_v2_interactive_DamlTransaction;
 
 /* *
  Prepared Transaction Message */
 typedef struct _com_daml_ledger_api_v2_interactive_PreparedTransaction {
-    /* Daml Transaction representing the ledger effect if executed. See below */
+    /* Daml Transaction representing the ledger effect if executed. See below
+
+ Required */
     bool has_transaction;
     com_daml_ledger_api_v2_interactive_DamlTransaction transaction;
-    /* Metadata context necessary to execute the transaction */
+    /* Metadata context necessary to execute the transaction
+
+ Required */
     bool has_metadata;
     com_daml_ledger_api_v2_interactive_Metadata metadata;
 } com_daml_ledger_api_v2_interactive_PreparedTransaction;
@@ -284,20 +355,29 @@ typedef struct _com_daml_ledger_api_v2_interactive_PreparedTransaction {
 typedef PB_BYTES_ARRAY_T(32) com_daml_ledger_api_v2_interactive_PrepareSubmissionResponse_prepared_transaction_hash_t;
 typedef struct _com_daml_ledger_api_v2_interactive_PrepareSubmissionResponse {
     /* The interpreted transaction, it represents the ledger changes necessary to execute the commands specified in the request.
- Clients MUST display the content of the transaction to the user for them to validate before signing the hash if the preparing participant is not trusted. */
+ Clients MUST display the content of the transaction to the user for them to validate before signing the hash if the preparing participant is not trusted.
+
+ Required */
     bool has_prepared_transaction;
     com_daml_ledger_api_v2_interactive_PreparedTransaction prepared_transaction;
     /* Hash of the transaction, this is what needs to be signed by the party to authorize the transaction.
  Only provided for convenience, clients MUST recompute the hash from the raw transaction if the preparing participant is not trusted.
- May be removed in future versions */
+ May be removed in future versions
+
+ Required: must be non-empty */
     com_daml_ledger_api_v2_interactive_PrepareSubmissionResponse_prepared_transaction_hash_t prepared_transaction_hash;
-    /* The hashing scheme version used when building the hash */
+    /* The hashing scheme version used when building the hash
+
+ Required */
     com_daml_ledger_api_v2_interactive_HashingSchemeVersion hashing_scheme_version;
     /* Optional additional details on how the transaction was encoded and hashed. Only set if verbose_hashing = true in the request
  Note that there are no guarantees on the stability of the format or content of this field.
- Its content should NOT be parsed and should only be used for troubleshooting purposes. */
+ Its content should NOT be parsed and should only be used for troubleshooting purposes.
+
+ Optional */
     char *hashing_details;
     /* Traffic cost estimation of the prepared transaction
+
  Optional */
     bool has_cost_estimation;
     com_daml_ledger_api_v2_interactive_CostEstimation cost_estimation;
@@ -307,6 +387,7 @@ typedef struct _com_daml_ledger_api_v2_interactive_ExecuteSubmissionRequest {
     /* the prepared transaction
  Typically this is the value of the `prepared_transaction` field in `PrepareSubmissionResponse`
  obtained from calling `prepareSubmission`.
+
  Required */
     bool has_prepared_transaction;
     com_daml_ledger_api_v2_interactive_PreparedTransaction prepared_transaction;
@@ -314,6 +395,7 @@ typedef struct _com_daml_ledger_api_v2_interactive_ExecuteSubmissionRequest {
  Each party can provide one or more signatures..
  and one or more parties can sign.
  Note that currently, only single party submissions are supported.
+
  Required */
     bool has_party_signatures;
     com_daml_ledger_api_v2_interactive_PartySignatures party_signatures;
@@ -335,13 +417,16 @@ typedef struct _com_daml_ledger_api_v2_interactive_ExecuteSubmissionRequest {
  Required */
     char *submission_id;
     /* See [PrepareSubmissionRequest.user_id]
+
  Optional */
     char *user_id;
     /* The hashing scheme version used when building the hash
+
  Required */
     com_daml_ledger_api_v2_interactive_HashingSchemeVersion hashing_scheme_version;
     /* If set will influence the chosen ledger effective time but will not result in a submission delay so any override
  should be scheduled to executed within the window allowed by synchronizer.
+
  Optional */
     bool has_min_ledger_time;
     com_daml_ledger_api_v2_interactive_MinLedgerTime min_ledger_time;
@@ -351,6 +436,7 @@ typedef struct _com_daml_ledger_api_v2_interactive_ExecuteSubmissionAndWaitReque
     /* the prepared transaction
  Typically this is the value of the `prepared_transaction` field in `PrepareSubmissionResponse`
  obtained from calling `prepareSubmission`.
+
  Required */
     bool has_prepared_transaction;
     com_daml_ledger_api_v2_interactive_PreparedTransaction prepared_transaction;
@@ -358,6 +444,7 @@ typedef struct _com_daml_ledger_api_v2_interactive_ExecuteSubmissionAndWaitReque
  Each party can provide one or more signatures..
  and one or more parties can sign.
  Note that currently, only single party submissions are supported.
+
  Required */
     bool has_party_signatures;
     com_daml_ledger_api_v2_interactive_PartySignatures party_signatures;
@@ -379,13 +466,16 @@ typedef struct _com_daml_ledger_api_v2_interactive_ExecuteSubmissionAndWaitReque
  Required */
     char submission_id[1024];
     /* See [PrepareSubmissionRequest.user_id]
+
  Optional */
     char user_id[1024];
     /* The hashing scheme version used when building the hash
+
  Required */
     com_daml_ledger_api_v2_interactive_HashingSchemeVersion hashing_scheme_version;
     /* If set will influence the chosen ledger effective time but will not result in a submission delay so any override
  should be scheduled to executed within the window allowed by synchronizer.
+
  Optional */
     bool has_min_ledger_time;
     com_daml_ledger_api_v2_interactive_MinLedgerTime min_ledger_time;
@@ -395,6 +485,7 @@ typedef struct _com_daml_ledger_api_v2_interactive_ExecuteSubmissionAndWaitForTr
     /* the prepared transaction
  Typically this is the value of the `prepared_transaction` field in `PrepareSubmissionResponse`
  obtained from calling `prepareSubmission`.
+
  Required */
     bool has_prepared_transaction;
     com_daml_ledger_api_v2_interactive_PreparedTransaction prepared_transaction;
@@ -402,6 +493,7 @@ typedef struct _com_daml_ledger_api_v2_interactive_ExecuteSubmissionAndWaitForTr
  Each party can provide one or more signatures..
  and one or more parties can sign.
  Note that currently, only single party submissions are supported.
+
  Required */
     bool has_party_signatures;
     com_daml_ledger_api_v2_interactive_PartySignatures party_signatures;
@@ -423,13 +515,16 @@ typedef struct _com_daml_ledger_api_v2_interactive_ExecuteSubmissionAndWaitForTr
  Required */
     char submission_id[1024];
     /* See [PrepareSubmissionRequest.user_id]
+
  Optional */
     char user_id[1024];
     /* The hashing scheme version used when building the hash
+
  Required */
     com_daml_ledger_api_v2_interactive_HashingSchemeVersion hashing_scheme_version;
     /* If set will influence the chosen ledger effective time but will not result in a submission delay so any override
  should be scheduled to executed within the window allowed by synchronizer.
+
  Optional */
     bool has_min_ledger_time;
     com_daml_ledger_api_v2_interactive_MinLedgerTime min_ledger_time;
@@ -438,6 +533,7 @@ typedef struct _com_daml_ledger_api_v2_interactive_ExecuteSubmissionAndWaitForTr
  filter for all original ``act_as`` and ``read_as`` parties and the ``verbose`` flag is set.
  When the ``transaction_shape`` TRANSACTION_SHAPE_ACS_DELTA shape is used (explicitly or is defaulted to as explained above),
  events will only be returned if the submitting party is hosted on this node.
+
  Optional */
     bool has_transaction_format;
     com_daml_ledger_api_v2_TransactionFormat transaction_format;
@@ -445,7 +541,9 @@ typedef struct _com_daml_ledger_api_v2_interactive_ExecuteSubmissionAndWaitForTr
 
 typedef PB_BYTES_ARRAY_T(1024) com_daml_ledger_api_v2_interactive_DamlTransaction_NodeSeed_seed_t;
 typedef struct _com_daml_ledger_api_v2_interactive_DamlTransaction_NodeSeed {
+    /* Required */
     int32_t node_id;
+    /* Required: must be non-empty */
     com_daml_ledger_api_v2_interactive_DamlTransaction_NodeSeed_seed_t seed;
 } com_daml_ledger_api_v2_interactive_DamlTransaction_NodeSeed;
 
@@ -453,29 +551,36 @@ typedef struct _com_daml_ledger_api_v2_interactive_DamlTransaction_NodeSeed {
  Each node must be hashed using the hashing algorithm corresponding to its specific version.
  [docs-entry-start: DamlTransaction.Node] */
 typedef struct _com_daml_ledger_api_v2_interactive_DamlTransaction_Node {
+    /* Required */
     char node_id[1024];
     pb_size_t which_versioned_node;
     union {
         /* Start at 1000 so we can add more fields before if necessary
-     When new versions will be added, they will show here */
+     When new versions will be added, they will show here
+    
+     Required */
         com_daml_ledger_api_v2_interactive_transaction_v1_Node v1;
     };
 } com_daml_ledger_api_v2_interactive_DamlTransaction_Node;
 
 typedef struct _com_daml_ledger_api_v2_interactive_GetPreferredPackageVersionRequest {
     /* The parties whose participants' vetting state should be considered when resolving the preferred package.
- Required */
+
+ Required: must be non-empty */
     pb_callback_t parties;
     /* The package-name for which the preferred package should be resolved.
+
  Required */
     char package_name[1024];
     /* The synchronizer whose vetting state should be used for resolving this query.
  If not specified, the vetting states of all synchronizers to which the participant is connected are used.
+
  Optional */
     char synchronizer_id[1024];
     /* The timestamp at which the package vetting validity should be computed
  on the latest topology snapshot as seen by the participant.
  If not provided, the participant's current clock time is used.
+
  Optional */
     bool has_vetting_valid_at;
     google_protobuf_Timestamp vetting_valid_at;
@@ -483,17 +588,20 @@ typedef struct _com_daml_ledger_api_v2_interactive_GetPreferredPackageVersionReq
 
 typedef struct _com_daml_ledger_api_v2_interactive_PackagePreference {
     /* The package reference of the preferred package.
+
  Required */
     bool has_package_reference;
     com_daml_ledger_api_v2_PackageReference package_reference;
     /* The synchronizer for which the preferred package was computed.
  If the synchronizer_id was specified in the request, then it matches the request synchronizer_id.
+
  Required */
     char synchronizer_id[1024];
 } com_daml_ledger_api_v2_interactive_PackagePreference;
 
 typedef struct _com_daml_ledger_api_v2_interactive_GetPreferredPackageVersionResponse {
     /* Not populated when no preferred package is found
+
  Optional */
     bool has_package_preference;
     com_daml_ledger_api_v2_interactive_PackagePreference package_preference;
@@ -502,9 +610,11 @@ typedef struct _com_daml_ledger_api_v2_interactive_GetPreferredPackageVersionRes
 /* Defines a package-name for which the commonly vetted package with the highest version must be found. */
 typedef struct _com_daml_ledger_api_v2_interactive_PackageVettingRequirement {
     /* The parties whose participants' vetting state should be considered when resolving the preferred package.
- Required */
+
+ Required: must be non-empty */
     pb_callback_t parties;
     /* The package-name for which the preferred package should be resolved.
+
  Required */
     char package_name[1024];
 } com_daml_ledger_api_v2_interactive_PackageVettingRequirement;
@@ -516,15 +626,17 @@ typedef struct _com_daml_ledger_api_v2_interactive_GetPreferredPackagesRequest {
  Additional package-name requirements can be provided when additional Daml transaction informees need to use
  package dependencies of the command's root packages.
 
- Required */
+ Required: must be non-empty */
     pb_callback_t package_vetting_requirements;
     /* The synchronizer whose vetting state should be used for resolving this query.
  If not specified, the vetting states of all synchronizers to which the participant is connected are used.
+
  Optional */
     char synchronizer_id[1024];
     /* The timestamp at which the package vetting validity should be computed
  on the latest topology snapshot as seen by the participant.
  If not provided, the participant's current clock time is used.
+
  Optional */
     bool has_vetting_valid_at;
     google_protobuf_Timestamp vetting_valid_at;
@@ -539,10 +651,11 @@ typedef struct _com_daml_ledger_api_v2_interactive_GetPreferredPackagesResponse 
  in the ``package_id_selection_preference`` of the command submission to
  avoid race conditions with concurrent changes of the on-ledger package vetting state.
 
- Required */
+ Required: must be non-empty */
     pb_callback_t package_references;
     /* The synchronizer for which the package preferences are computed.
  If the synchronizer_id was specified in the request, then it matches the request synchronizer_id.
+
  Required */
     char synchronizer_id[1024];
 } com_daml_ledger_api_v2_interactive_GetPreferredPackagesResponse;
@@ -554,12 +667,13 @@ extern "C" {
 
 /* Helper constants for enums */
 #define _com_daml_ledger_api_v2_interactive_HashingSchemeVersion_MIN com_daml_ledger_api_v2_interactive_HashingSchemeVersion_HASHING_SCHEME_VERSION_UNSPECIFIED
-#define _com_daml_ledger_api_v2_interactive_HashingSchemeVersion_MAX com_daml_ledger_api_v2_interactive_HashingSchemeVersion_HASHING_SCHEME_VERSION_V2
-#define _com_daml_ledger_api_v2_interactive_HashingSchemeVersion_ARRAYSIZE ((com_daml_ledger_api_v2_interactive_HashingSchemeVersion)(com_daml_ledger_api_v2_interactive_HashingSchemeVersion_HASHING_SCHEME_VERSION_V2+1))
+#define _com_daml_ledger_api_v2_interactive_HashingSchemeVersion_MAX com_daml_ledger_api_v2_interactive_HashingSchemeVersion_HASHING_SCHEME_VERSION_V3
+#define _com_daml_ledger_api_v2_interactive_HashingSchemeVersion_ARRAYSIZE ((com_daml_ledger_api_v2_interactive_HashingSchemeVersion)(com_daml_ledger_api_v2_interactive_HashingSchemeVersion_HASHING_SCHEME_VERSION_V3+1))
 
 #define com_daml_ledger_api_v2_interactive_CostEstimationHints_expected_signatures_ENUMTYPE com_daml_ledger_api_v2_SigningAlgorithmSpec
 
 
+#define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_hashing_scheme_version_ENUMTYPE com_daml_ledger_api_v2_interactive_HashingSchemeVersion
 
 #define com_daml_ledger_api_v2_interactive_PrepareSubmissionResponse_hashing_scheme_version_ENUMTYPE com_daml_ledger_api_v2_interactive_HashingSchemeVersion
 
@@ -593,7 +707,7 @@ extern "C" {
 /* Initializer values for message structs */
 #define com_daml_ledger_api_v2_interactive_CostEstimationHints_init_default {0, {{NULL}, NULL}}
 #define com_daml_ledger_api_v2_interactive_CostEstimation_init_default {false, google_protobuf_Timestamp_init_default, 0, 0, 0}
-#define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_init_default {"", "", {{NULL}, NULL}, false, com_daml_ledger_api_v2_interactive_MinLedgerTime_init_default, {{NULL}, NULL}, {{NULL}, NULL}, {{NULL}, NULL}, "", {{NULL}, NULL}, 0, false, google_protobuf_Timestamp_init_default, {{NULL}, NULL}, false, com_daml_ledger_api_v2_interactive_CostEstimationHints_init_default}
+#define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_init_default {"", "", {{NULL}, NULL}, false, com_daml_ledger_api_v2_interactive_MinLedgerTime_init_default, {{NULL}, NULL}, {{NULL}, NULL}, {{NULL}, NULL}, "", {{NULL}, NULL}, 0, false, google_protobuf_Timestamp_init_default, {{NULL}, NULL}, false, com_daml_ledger_api_v2_interactive_CostEstimationHints_init_default, false, _com_daml_ledger_api_v2_interactive_HashingSchemeVersion_MIN, false, 0}
 #define com_daml_ledger_api_v2_interactive_PrepareSubmissionResponse_init_default {false, com_daml_ledger_api_v2_interactive_PreparedTransaction_init_default, {0, {0}}, _com_daml_ledger_api_v2_interactive_HashingSchemeVersion_MIN, NULL, false, com_daml_ledger_api_v2_interactive_CostEstimation_init_default}
 #define com_daml_ledger_api_v2_interactive_SinglePartySignatures_init_default {"", {{NULL}, NULL}}
 #define com_daml_ledger_api_v2_interactive_PartySignatures_init_default {{{NULL}, NULL}}
@@ -620,7 +734,7 @@ extern "C" {
 #define com_daml_ledger_api_v2_interactive_GetPreferredPackagesResponse_init_default {{{NULL}, NULL}, ""}
 #define com_daml_ledger_api_v2_interactive_CostEstimationHints_init_zero {0, {{NULL}, NULL}}
 #define com_daml_ledger_api_v2_interactive_CostEstimation_init_zero {false, google_protobuf_Timestamp_init_zero, 0, 0, 0}
-#define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_init_zero {"", "", {{NULL}, NULL}, false, com_daml_ledger_api_v2_interactive_MinLedgerTime_init_zero, {{NULL}, NULL}, {{NULL}, NULL}, {{NULL}, NULL}, "", {{NULL}, NULL}, 0, false, google_protobuf_Timestamp_init_zero, {{NULL}, NULL}, false, com_daml_ledger_api_v2_interactive_CostEstimationHints_init_zero}
+#define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_init_zero {"", "", {{NULL}, NULL}, false, com_daml_ledger_api_v2_interactive_MinLedgerTime_init_zero, {{NULL}, NULL}, {{NULL}, NULL}, {{NULL}, NULL}, "", {{NULL}, NULL}, 0, false, google_protobuf_Timestamp_init_zero, {{NULL}, NULL}, false, com_daml_ledger_api_v2_interactive_CostEstimationHints_init_zero, false, _com_daml_ledger_api_v2_interactive_HashingSchemeVersion_MIN, false, 0}
 #define com_daml_ledger_api_v2_interactive_PrepareSubmissionResponse_init_zero {false, com_daml_ledger_api_v2_interactive_PreparedTransaction_init_zero, {0, {0}}, _com_daml_ledger_api_v2_interactive_HashingSchemeVersion_MIN, NULL, false, com_daml_ledger_api_v2_interactive_CostEstimation_init_zero}
 #define com_daml_ledger_api_v2_interactive_SinglePartySignatures_init_zero {"", {{NULL}, NULL}}
 #define com_daml_ledger_api_v2_interactive_PartySignatures_init_zero {{{NULL}, NULL}}
@@ -674,6 +788,8 @@ extern "C" {
 #define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_max_record_time_tag 11
 #define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_prefetch_contract_keys_tag 15
 #define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_estimate_traffic_cost_tag 16
+#define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_hashing_scheme_version_tag 17
+#define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_taps_max_passes_tag 18
 #define com_daml_ledger_api_v2_interactive_Metadata_SubmitterInfo_act_as_tag 1
 #define com_daml_ledger_api_v2_interactive_Metadata_SubmitterInfo_command_id_tag 2
 #define com_daml_ledger_api_v2_interactive_Metadata_submitter_info_tag 2
@@ -775,7 +891,9 @@ X(a, CALLBACK, REPEATED, STRING,   package_id_selection_preference,   9) \
 X(a, STATIC,   SINGULAR, BOOL,     verbose_hashing,  10) \
 X(a, STATIC,   OPTIONAL, MESSAGE,  max_record_time,  11) \
 X(a, CALLBACK, REPEATED, MESSAGE,  prefetch_contract_keys,  15) \
-X(a, STATIC,   OPTIONAL, MESSAGE,  estimate_traffic_cost,  16)
+X(a, STATIC,   OPTIONAL, MESSAGE,  estimate_traffic_cost,  16) \
+X(a, STATIC,   OPTIONAL, UENUM,    hashing_scheme_version,  17) \
+X(a, STATIC,   OPTIONAL, UINT32,   taps_max_passes,  18)
 #define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_CALLBACK pb_default_field_callback
 #define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_DEFAULT NULL
 #define com_daml_ledger_api_v2_interactive_PrepareSubmissionRequest_commands_MSGTYPE com_daml_ledger_api_v2_Command

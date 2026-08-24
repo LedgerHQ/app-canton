@@ -20,7 +20,7 @@ OUTPUT_DIR="./"
 NANOPB_GENERATOR="../vendor/nanopb/generator/protoc-gen-nanopb"
 PROTOC="../vendor/nanopb/generator/protoc"
 PROTO_SOURCE_REPO_URL="git@github.com:LedgerHQ/canton-protos-scala.git"
-PROTO_SOURCE_REPO_REF="v1.4.0"
+PROTO_SOURCE_REPO_REF="v1.6.3"
 
 # Download utility
 download_if_not_exists() {

@@ -36,8 +36,10 @@ typedef struct _com_daml_ledger_api_v2_Filters {
  also be accumulated.
  A template or an interface SHOULD NOT appear twice in the accumulative field.
  A wildcard filter SHOULD NOT be defined more than once in the accumulative field.
- Optional, if no ``CumulativeFilter`` defined, the default of a single ``WildcardFilter`` with
- include_created_event_blob unset is used. */
+ If no ``CumulativeFilter`` defined, the default of a single ``WildcardFilter`` with
+ include_created_event_blob unset is used.
+
+ Optional: can be empty */
     pb_callback_t cumulative;
 } com_daml_ledger_api_v2_Filters;
 
@@ -46,6 +48,7 @@ typedef struct _com_daml_ledger_api_v2_WildcardFilter {
     /* Whether to include a ``created_event_blob`` in the returned ``CreatedEvent``.
  Use this to access the contract create event payload in your API client
  for submitting it as a disclosed contract with future commands.
+
  Optional */
     bool include_created_event_blob;
 } com_daml_ledger_api_v2_WildcardFilter;
@@ -63,11 +66,13 @@ typedef struct _com_daml_ledger_api_v2_InterfaceFilter {
     com_daml_ledger_api_v2_Identifier interface_id;
     /* Whether to include the interface view on the contract in the returned ``CreatedEvent``.
  Use this to access contract data in a uniform manner in your API client.
+
  Optional */
     bool include_interface_view;
     /* Whether to include a ``created_event_blob`` in the returned ``CreatedEvent``.
  Use this to access the contract create event payload in your API client
  for submitting it as a disclosed contract with future commands.
+
  Optional */
     bool include_created_event_blob;
 } com_daml_ledger_api_v2_InterfaceFilter;
@@ -86,6 +91,7 @@ typedef struct _com_daml_ledger_api_v2_TemplateFilter {
     /* Whether to include a ``created_event_blob`` in the returned ``CreatedEvent``.
  Use this to access the contract event payload in your API client
  for submitting it as a disclosed contract with future commands.
+
  Optional */
     bool include_created_event_blob;
 } com_daml_ledger_api_v2_TemplateFilter;
@@ -96,16 +102,19 @@ typedef struct _com_daml_ledger_api_v2_CumulativeFilter {
     pb_size_t which_identifier_filter;
     union {
         /* A wildcard filter that matches all templates
+    
      Optional */
         com_daml_ledger_api_v2_WildcardFilter wildcard_filter;
         /* Include an ``InterfaceView`` for every ``InterfaceFilter`` matching a contract.
      The ``InterfaceFilter`` instances MUST each use a unique ``interface_id``.
+    
      Optional */
         com_daml_ledger_api_v2_InterfaceFilter interface_filter;
         /* A template for which the data will be included in the
      ``create_arguments`` of a matching ``CreatedEvent``.
      If a contract is simultaneously selected by a template filter and one or more interface filters,
      the corresponding ``include_created_event_blob`` are consolidated using an OR operation.
+    
      Optional */
         com_daml_ledger_api_v2_TemplateFilter template_filter;
     } identifier_filter;
@@ -125,15 +134,17 @@ typedef struct _com_daml_ledger_api_v2_EventFormat {
  2. For **transaction and active-contract-set streams** create and archive events are returned for all contracts whose
     stakeholders include at least one of the listed parties and match the per-party filter.
 
- Optional */
+ Optional: can be empty */
     pb_callback_t filters_by_party;
     /* Wildcard filters that apply to all the parties existing on the participant. The interpretation of the filters is the same
  with the per-party filter as described above.
+
  Optional */
     bool has_filters_for_any_party;
     com_daml_ledger_api_v2_Filters filters_for_any_party;
     /* If enabled, values served over the API will contain more information than strictly necessary to interpret the data.
  In particular, setting the verbose flag to true triggers the ledger to include labels for record fields.
+
  Optional */
     bool verbose;
 } com_daml_ledger_api_v2_EventFormat;
@@ -151,6 +162,7 @@ typedef struct _com_daml_ledger_api_v2_TransactionFormat {
     bool has_event_format;
     com_daml_ledger_api_v2_EventFormat event_format;
     /* What transaction shape to use for interpreting the filters of the event format.
+
  Required */
     com_daml_ledger_api_v2_TransactionShape transaction_shape;
 } com_daml_ledger_api_v2_TransactionFormat;
@@ -158,14 +170,18 @@ typedef struct _com_daml_ledger_api_v2_TransactionFormat {
 /* A format specifying which participant authorization topology transactions to include and how to render them. */
 typedef struct _com_daml_ledger_api_v2_ParticipantAuthorizationTopologyFormat {
     /* List of parties for which the topology transactions should be sent.
- Empty means: for all parties. */
+ Empty means: for all parties.
+
+ Optional: can be empty */
     pb_callback_t parties;
 } com_daml_ledger_api_v2_ParticipantAuthorizationTopologyFormat;
 
 /* A format specifying which topology transactions to include and how to render them. */
 typedef struct _com_daml_ledger_api_v2_TopologyFormat {
     /* Include participant authorization topology events in streams.
- Optional, if unset no participant authorization topology events are emitted in the stream. */
+ If unset, no participant authorization topology events are emitted in the stream.
+
+ Optional */
     bool has_include_participant_authorization_events;
     com_daml_ledger_api_v2_ParticipantAuthorizationTopologyFormat include_participant_authorization_events;
 } com_daml_ledger_api_v2_TopologyFormat;
@@ -173,16 +189,22 @@ typedef struct _com_daml_ledger_api_v2_TopologyFormat {
 /* A format specifying what updates to include and how to render them. */
 typedef struct _com_daml_ledger_api_v2_UpdateFormat {
     /* Include Daml transactions in streams.
- Optional, if unset, no transactions are emitted in the stream. */
+ If unset, no transactions are emitted in the stream.
+
+ Optional */
     bool has_include_transactions;
     com_daml_ledger_api_v2_TransactionFormat include_transactions;
     /* Include (un)assignments in the stream.
  The events in the result take the shape TRANSACTION_SHAPE_ACS_DELTA.
- Optional, if unset, no (un)assignments are emitted in the stream. */
+ If unset, no (un)assignments are emitted in the stream.
+
+ Optional */
     bool has_include_reassignments;
     com_daml_ledger_api_v2_EventFormat include_reassignments;
     /* Include topology events in streams.
- Optional, if unset no topology events are emitted in the stream. */
+ If unset no topology events are emitted in the stream.
+
+ Optional */
     bool has_include_topology_events;
     com_daml_ledger_api_v2_TopologyFormat include_topology_events;
 } com_daml_ledger_api_v2_UpdateFormat;

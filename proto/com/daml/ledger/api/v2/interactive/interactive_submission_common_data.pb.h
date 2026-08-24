@@ -13,14 +13,31 @@
 /* Struct definitions */
 typedef PB_BYTES_ARRAY_T(1024) com_daml_ledger_api_v2_interactive_GlobalKey_hash_t;
 typedef struct _com_daml_ledger_api_v2_interactive_GlobalKey {
-    /* The identifier uses the package-id reference format. */
+    /* The identifier uses the package-id reference format.
+
+ Required */
     bool has_template_id;
     com_daml_ledger_api_v2_Identifier template_id;
+    /* Required */
     char package_name[1024];
+    /* Required */
     bool has_key;
     com_daml_ledger_api_v2_Value key;
+    /* Required: must be non-empty */
     com_daml_ledger_api_v2_interactive_GlobalKey_hash_t hash;
 } com_daml_ledger_api_v2_interactive_GlobalKey;
+
+typedef struct _com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers {
+    /* The key
+
+ Required */
+    bool has_key;
+    com_daml_ledger_api_v2_interactive_GlobalKey key;
+    /* Key maintainers
+
+ Required: must be non-empty */
+    pb_callback_t maintainers;
+} com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers;
 
 
 #ifdef __cplusplus
@@ -29,13 +46,17 @@ extern "C" {
 
 /* Initializer values for message structs */
 #define com_daml_ledger_api_v2_interactive_GlobalKey_init_default {false, com_daml_ledger_api_v2_Identifier_init_default, "", false, com_daml_ledger_api_v2_Value_init_default, {0, {0}}}
+#define com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_init_default {false, com_daml_ledger_api_v2_interactive_GlobalKey_init_default, {{NULL}, NULL}}
 #define com_daml_ledger_api_v2_interactive_GlobalKey_init_zero {false, com_daml_ledger_api_v2_Identifier_init_zero, "", false, com_daml_ledger_api_v2_Value_init_zero, {0, {0}}}
+#define com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_init_zero {false, com_daml_ledger_api_v2_interactive_GlobalKey_init_zero, {{NULL}, NULL}}
 
 /* Field tags (for use in manual encoding/decoding) */
 #define com_daml_ledger_api_v2_interactive_GlobalKey_template_id_tag 1
 #define com_daml_ledger_api_v2_interactive_GlobalKey_package_name_tag 2
 #define com_daml_ledger_api_v2_interactive_GlobalKey_key_tag 3
 #define com_daml_ledger_api_v2_interactive_GlobalKey_hash_tag 4
+#define com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_key_tag 1
+#define com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_maintainers_tag 2
 
 /* Struct field encoding specification for nanopb */
 #define com_daml_ledger_api_v2_interactive_GlobalKey_FIELDLIST(X, a) \
@@ -48,12 +69,22 @@ X(a, STATIC,   SINGULAR, BYTES,    hash,              4)
 #define com_daml_ledger_api_v2_interactive_GlobalKey_template_id_MSGTYPE com_daml_ledger_api_v2_Identifier
 #define com_daml_ledger_api_v2_interactive_GlobalKey_key_MSGTYPE com_daml_ledger_api_v2_Value
 
+#define com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_FIELDLIST(X, a) \
+X(a, STATIC,   OPTIONAL, MESSAGE,  key,               1) \
+X(a, CALLBACK, REPEATED, STRING,   maintainers,       2)
+#define com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_CALLBACK pb_default_field_callback
+#define com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_DEFAULT NULL
+#define com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_key_MSGTYPE com_daml_ledger_api_v2_interactive_GlobalKey
+
 extern const pb_msgdesc_t com_daml_ledger_api_v2_interactive_GlobalKey_msg;
+extern const pb_msgdesc_t com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_msg;
 
 /* Defines for backwards compatibility with code written before nanopb-0.4.0 */
 #define com_daml_ledger_api_v2_interactive_GlobalKey_fields &com_daml_ledger_api_v2_interactive_GlobalKey_msg
+#define com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_fields &com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_msg
 
 /* Maximum encoded size of messages (where known) */
+/* com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_size depends on runtime parameters */
 #if defined(com_daml_ledger_api_v2_Value_size)
 #define COM_DAML_LEDGER_API_V2_INTERACTIVE_COM_DAML_LEDGER_API_V2_INTERACTIVE_INTERACTIVE_SUBMISSION_COMMON_DATA_PB_H_MAX_SIZE com_daml_ledger_api_v2_interactive_GlobalKey_size
 #define com_daml_ledger_api_v2_interactive_GlobalKey_size (5140 + com_daml_ledger_api_v2_Value_size)
