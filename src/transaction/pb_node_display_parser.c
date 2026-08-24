@@ -847,7 +847,8 @@ MUST_CHECK int format_and_populate_display_items(pb_callback_context_t *ctx) {
     ctx->tx_info->pairs_count = 0;
     for (size_t i = 0; i < ctx->nb_fields; i++) {
         tx_field_t *state = &ctx->tx_fields[i];
-        if (state->found && state->display && state->value_len > 0) {
+        if (state->found && state->display && state->value_len > 0 &&
+            PIC(state->config->item_name) != NULL) {
             ctx->tx_info->pairs[idx].value = app_mem_alloc(state->value_len);
             if (ctx->tx_info->pairs[idx].value == NULL) {
                 G_context.tx_info.clear_signing_available = false;
