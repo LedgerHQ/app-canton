@@ -31,7 +31,10 @@ typedef struct _com_digitalasset_canton_protocol_v30_TrafficControlParameters {
     /* In bytes, base event cost added to all sequenced events.
  Optional */
     bool has_base_event_cost;
-    uint64_t base_event_cost; /* [doc-entry-end: TrafficControlParameters] */
+    uint64_t base_event_cost;
+    /* Whether to charge for confirmation responses
+ Default: false */
+    bool free_confirmation_responses; /* [doc-entry-end: TrafficControlParameters] */
 } com_digitalasset_canton_protocol_v30_TrafficControlParameters;
 
 /* Message representing a traffic receipt included in SequencedEvent receipts to update sender about
@@ -104,13 +107,13 @@ extern "C" {
 #endif
 
 /* Initializer values for message structs */
-#define com_digitalasset_canton_protocol_v30_TrafficControlParameters_init_default {0, false, google_protobuf_Duration_init_default, 0, false, google_protobuf_Duration_init_default, 0, false, 0}
+#define com_digitalasset_canton_protocol_v30_TrafficControlParameters_init_default {0, false, google_protobuf_Duration_init_default, 0, false, google_protobuf_Duration_init_default, 0, false, 0, 0}
 #define com_digitalasset_canton_protocol_v30_TrafficReceipt_init_default {0, 0, 0}
 #define com_digitalasset_canton_protocol_v30_TrafficConsumed_init_default {"", 0, 0, 0, 0}
 #define com_digitalasset_canton_protocol_v30_TrafficPurchased_init_default {"", 0, 0, 0}
 #define com_digitalasset_canton_protocol_v30_TrafficState_init_default {0, 0, 0, 0, 0, false, 0}
 #define com_digitalasset_canton_protocol_v30_SetTrafficPurchasedMessage_init_default {"", 0, 0, ""}
-#define com_digitalasset_canton_protocol_v30_TrafficControlParameters_init_zero {0, false, google_protobuf_Duration_init_zero, 0, false, google_protobuf_Duration_init_zero, 0, false, 0}
+#define com_digitalasset_canton_protocol_v30_TrafficControlParameters_init_zero {0, false, google_protobuf_Duration_init_zero, 0, false, google_protobuf_Duration_init_zero, 0, false, 0, 0}
 #define com_digitalasset_canton_protocol_v30_TrafficReceipt_init_zero {0, 0, 0}
 #define com_digitalasset_canton_protocol_v30_TrafficConsumed_init_zero {"", 0, 0, 0, 0}
 #define com_digitalasset_canton_protocol_v30_TrafficPurchased_init_zero {"", 0, 0, 0}
@@ -124,6 +127,7 @@ extern "C" {
 #define com_digitalasset_canton_protocol_v30_TrafficControlParameters_set_balance_request_submission_window_size_tag 5
 #define com_digitalasset_canton_protocol_v30_TrafficControlParameters_enforce_rate_limiting_tag 6
 #define com_digitalasset_canton_protocol_v30_TrafficControlParameters_base_event_cost_tag 7
+#define com_digitalasset_canton_protocol_v30_TrafficControlParameters_free_confirmation_responses_tag 8
 #define com_digitalasset_canton_protocol_v30_TrafficReceipt_consumed_cost_tag 1
 #define com_digitalasset_canton_protocol_v30_TrafficReceipt_extra_traffic_consumed_tag 2
 #define com_digitalasset_canton_protocol_v30_TrafficReceipt_base_traffic_remainder_tag 3
@@ -154,7 +158,8 @@ X(a, STATIC,   OPTIONAL, MESSAGE,  max_base_traffic_accumulation_duration,   3) 
 X(a, STATIC,   SINGULAR, UINT32,   read_vs_write_scaling_factor,   4) \
 X(a, STATIC,   OPTIONAL, MESSAGE,  set_balance_request_submission_window_size,   5) \
 X(a, STATIC,   SINGULAR, BOOL,     enforce_rate_limiting,   6) \
-X(a, STATIC,   OPTIONAL, UINT64,   base_event_cost,   7)
+X(a, STATIC,   OPTIONAL, UINT64,   base_event_cost,   7) \
+X(a, STATIC,   SINGULAR, BOOL,     free_confirmation_responses,   8)
 #define com_digitalasset_canton_protocol_v30_TrafficControlParameters_CALLBACK NULL
 #define com_digitalasset_canton_protocol_v30_TrafficControlParameters_DEFAULT NULL
 #define com_digitalasset_canton_protocol_v30_TrafficControlParameters_max_base_traffic_accumulation_duration_MSGTYPE google_protobuf_Duration
@@ -221,7 +226,7 @@ extern const pb_msgdesc_t com_digitalasset_canton_protocol_v30_SetTrafficPurchas
 #define COM_DIGITALASSET_CANTON_PROTOCOL_V30_COM_DIGITALASSET_CANTON_PROTOCOL_V30_TRAFFIC_CONTROL_PARAMETERS_PB_H_MAX_SIZE com_digitalasset_canton_protocol_v30_SetTrafficPurchasedMessage_size
 #define com_digitalasset_canton_protocol_v30_SetTrafficPurchasedMessage_size 2069
 #define com_digitalasset_canton_protocol_v30_TrafficConsumed_size 1070
-#define com_digitalasset_canton_protocol_v30_TrafficControlParameters_size 78
+#define com_digitalasset_canton_protocol_v30_TrafficControlParameters_size 80
 #define com_digitalasset_canton_protocol_v30_TrafficPurchased_size 1054
 #define com_digitalasset_canton_protocol_v30_TrafficReceipt_size 33
 #define com_digitalasset_canton_protocol_v30_TrafficState_size 61

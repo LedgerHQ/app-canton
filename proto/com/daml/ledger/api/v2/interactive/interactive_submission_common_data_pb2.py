@@ -15,7 +15,7 @@ _sym_db = _symbol_database.Default()
 from com.daml.ledger.api.v2 import value_pb2 as com_dot_daml_dot_ledger_dot_api_dot_v2_dot_value__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\nKcom/daml/ledger/api/v2/interactive/interactive_submission_common_data.proto\x12\"com.daml.ledger.api.v2.interactive\x1a\"com/daml/ledger/api/v2/value.proto\"\x94\x01\n\tGlobalKey\x12\x37\n\x0btemplate_id\x18\x01 \x01(\x0b\x32\".com.daml.ledger.api.v2.Identifier\x12\x14\n\x0cpackage_name\x18\x02 \x01(\t\x12*\n\x03key\x18\x03 \x01(\x0b\x32\x1d.com.daml.ledger.api.v2.Value\x12\x0c\n\x04hash\x18\x04 \x01(\x0c\x42t\n\"com.daml.ledger.api.v2.interactiveB)InteractiveSubmissionCommonDataOuterClass\xaa\x02\"Com.Daml.Ledger.Api.V2.Interactiveb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\nKcom/daml/ledger/api/v2/interactive/interactive_submission_common_data.proto\x12\"com.daml.ledger.api.v2.interactive\x1a\"com/daml/ledger/api/v2/value.proto\"\x94\x01\n\tGlobalKey\x12\x37\n\x0btemplate_id\x18\x01 \x01(\x0b\x32\".com.daml.ledger.api.v2.Identifier\x12\x14\n\x0cpackage_name\x18\x02 \x01(\t\x12*\n\x03key\x18\x03 \x01(\x0b\x32\x1d.com.daml.ledger.api.v2.Value\x12\x0c\n\x04hash\x18\x04 \x01(\x0c\"k\n\x18GlobalKeyWithMaintainers\x12:\n\x03key\x18\x01 \x01(\x0b\x32-.com.daml.ledger.api.v2.interactive.GlobalKey\x12\x13\n\x0bmaintainers\x18\x02 \x03(\tBt\n\"com.daml.ledger.api.v2.interactiveB)InteractiveSubmissionCommonDataOuterClass\xaa\x02\"Com.Daml.Ledger.Api.V2.Interactiveb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -25,4 +25,6 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _globals['DESCRIPTOR']._serialized_options = b'\n\"com.daml.ledger.api.v2.interactiveB)InteractiveSubmissionCommonDataOuterClass\252\002\"Com.Daml.Ledger.Api.V2.Interactive'
   _globals['_GLOBALKEY']._serialized_start=152
   _globals['_GLOBALKEY']._serialized_end=300
+  _globals['_GLOBALKEYWITHMAINTAINERS']._serialized_start=302
+  _globals['_GLOBALKEYWITHMAINTAINERS']._serialized_end=409
 # @@protoc_insertion_point(module_scope)

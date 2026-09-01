@@ -18,30 +18,38 @@
 typedef struct _com_daml_ledger_api_v2_Completion {
     /* The ID of the succeeded or failed command.
  Must be a valid LedgerString (as described in ``value.proto``).
+
  Required */
     char command_id[1024];
     /* Identifies the exact type of the error.
  It uses the same format of conveying error details as it is used for the RPC responses of the APIs.
+
  Optional */
     bool has_status;
     google_rpc_Status status;
     /* The update_id of the transaction or reassignment that resulted from the command with command_id.
+
  Only set for successfully executed commands.
- Must be a valid LedgerString (as described in ``value.proto``). */
+ Must be a valid LedgerString (as described in ``value.proto``).
+
+ Optional */
     char update_id[1024];
     /* The user-id that was used for the submission, as described in ``commands.proto``.
  Must be a valid UserIdString (as described in ``value.proto``).
- Optional for historic completions where this data is not available. */
+
+ Required */
     char user_id[1024];
     /* The set of parties on whose behalf the commands were executed.
  Contains the ``act_as`` parties from ``commands.proto``
  filtered to the requesting parties in CompletionStreamRequest.
  The order of the parties need not be the same as in the submission.
  Each element must be a valid PartyIdString (as described in ``value.proto``).
- Optional for historic completions where this data is not available. */
+
+ Required: must be non-empty */
     pb_callback_t act_as;
     /* The submission ID this completion refers to, as described in ``commands.proto``.
  Must be a valid LedgerString (as described in ``value.proto``).
+
  Optional */
     char submission_id[1024];
     pb_size_t which_deduplication_period;
@@ -56,7 +64,7 @@ typedef struct _com_daml_ledger_api_v2_Completion {
      Must be non-negative. */
         google_protobuf_Duration deduplication_duration;
     } deduplication_period;
-    /* Optional; ledger API trace context
+    /* The Ledger API trace context
 
  The trace context transported in this message corresponds to the trace context supplied
  by the client application in a HTTP2 header of the original command submission.
@@ -64,11 +72,15 @@ typedef struct _com_daml_ledger_api_v2_Completion {
  body, because it is used in gRPC streams which do not support per message headers.
  This field will be populated with the trace context contained in the original submission.
  If that was not provided, a unique ledger-api-server generated trace context will be used
- instead. */
+ instead.
+
+ Optional */
     bool has_trace_context;
     com_daml_ledger_api_v2_TraceContext trace_context;
     /* May be used in a subsequent CompletionStreamRequest to resume the consumption of this stream at a later time.
- Required, must be a valid absolute offset (positive integer). */
+ Must be a valid absolute offset (positive integer).
+
+ Required */
     int64_t offset;
     /* The synchronizer along with its record time.
  The synchronizer id provided, in case of
@@ -80,6 +92,31 @@ typedef struct _com_daml_ledger_api_v2_Completion {
  Required */
     bool has_synchronizer_time;
     com_daml_ledger_api_v2_SynchronizerTime synchronizer_time;
+    /* The traffic cost paid by this participant node for the confirmation request
+ for the submitted command.
+
+ Commands whose execution is rejected before their corresponding
+ confirmation request is ordered by the synchronizer will report a paid
+ traffic cost of zero.
+ If a confirmation request is ordered for a command, but the request fails
+ (e.g., due to contention with a concurrent contract archival), the traffic
+ cost is paid and reported on the failed completion for the request.
+
+ If you want to correlate the traffic cost of a successful completion
+ with the transaction that resulted from the command, you can use the
+ ``offset`` field to retrieve the transaction using
+ ``UpdateService.GetUpdateByOffset`` on the same participant node; or alternatively use the ``update_id``
+ field to retrieve the transaction using ``UpdateService.GetUpdateById`` on any participant node
+ that sees the transaction.
+
+ Note: for completions processed before the participant started serving
+ traffic cost on the Ledger API, this field will be set to zero.
+ Additionally, the total cost incurred by the submitting node for the submission of the transaction may be greater
+ than the reported cost, for example if retries were issued due to failed submissions to the synchronizer.
+ The cost reported here is the one paid for ordering the confirmation request.
+
+ Optional */
+    int64_t paid_traffic_cost;
 } com_daml_ledger_api_v2_Completion;
 
 
@@ -88,8 +125,8 @@ extern "C" {
 #endif
 
 /* Initializer values for message structs */
-#define com_daml_ledger_api_v2_Completion_init_default {"", false, google_rpc_Status_init_default, "", "", {{NULL}, NULL}, "", 0, {0}, false, com_daml_ledger_api_v2_TraceContext_init_default, 0, false, com_daml_ledger_api_v2_SynchronizerTime_init_default}
-#define com_daml_ledger_api_v2_Completion_init_zero {"", false, google_rpc_Status_init_zero, "", "", {{NULL}, NULL}, "", 0, {0}, false, com_daml_ledger_api_v2_TraceContext_init_zero, 0, false, com_daml_ledger_api_v2_SynchronizerTime_init_zero}
+#define com_daml_ledger_api_v2_Completion_init_default {"", false, google_rpc_Status_init_default, "", "", {{NULL}, NULL}, "", 0, {0}, false, com_daml_ledger_api_v2_TraceContext_init_default, 0, false, com_daml_ledger_api_v2_SynchronizerTime_init_default, 0}
+#define com_daml_ledger_api_v2_Completion_init_zero {"", false, google_rpc_Status_init_zero, "", "", {{NULL}, NULL}, "", 0, {0}, false, com_daml_ledger_api_v2_TraceContext_init_zero, 0, false, com_daml_ledger_api_v2_SynchronizerTime_init_zero, 0}
 
 /* Field tags (for use in manual encoding/decoding) */
 #define com_daml_ledger_api_v2_Completion_command_id_tag 1
@@ -103,6 +140,7 @@ extern "C" {
 #define com_daml_ledger_api_v2_Completion_trace_context_tag 9
 #define com_daml_ledger_api_v2_Completion_offset_tag 10
 #define com_daml_ledger_api_v2_Completion_synchronizer_time_tag 11
+#define com_daml_ledger_api_v2_Completion_paid_traffic_cost_tag 12
 
 /* Struct field encoding specification for nanopb */
 #define com_daml_ledger_api_v2_Completion_FIELDLIST(X, a) \
@@ -116,7 +154,8 @@ X(a, STATIC,   ONEOF,    INT64,    (deduplication_period,deduplication_offset,de
 X(a, STATIC,   ONEOF,    MESSAGE,  (deduplication_period,deduplication_duration,deduplication_period.deduplication_duration),   8) \
 X(a, STATIC,   OPTIONAL, MESSAGE,  trace_context,     9) \
 X(a, STATIC,   SINGULAR, INT64,    offset,           10) \
-X(a, STATIC,   OPTIONAL, MESSAGE,  synchronizer_time,  11)
+X(a, STATIC,   OPTIONAL, MESSAGE,  synchronizer_time,  11) \
+X(a, STATIC,   SINGULAR, INT64,    paid_traffic_cost,  12)
 #define com_daml_ledger_api_v2_Completion_CALLBACK pb_default_field_callback
 #define com_daml_ledger_api_v2_Completion_DEFAULT NULL
 #define com_daml_ledger_api_v2_Completion_status_MSGTYPE google_rpc_Status

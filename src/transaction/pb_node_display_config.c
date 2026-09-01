@@ -121,6 +121,14 @@ static const field_config_t TOKEN_TRANSFER_FIELDS[] = {
     FLD("transfer.instrumentId.admin", NULL, NULL, true),
     FLD("transfer.meta.values.splice\\.lfdecentralizedtrust\\.org/reason", "Memo", NULL, false)};
 
+static const field_config_t TOKEN_TRANSFER_V2_FIELDS[] = {
+    FLD("transfer.sender.owner", "From", NULL, true),
+    FLD("transfer.amount", "Amount", format_token_amount_field, true),
+    FLD("transfer.receiver.owner", "To", NULL, true),
+    FLD("transfer.instrumentId.id", "Token", NULL, true),
+    FLD("transfer.instrumentId.admin", NULL, NULL, true),
+    FLD("transfer.meta.values.splice\\.lfdecentralizedtrust\\.org/reason", "Memo", NULL, false)};
+
 static const field_config_t TOKEN_TRANSFER_ACCEPT_FIELDS[] = {
     FLD("transfer.sender", "From", NULL, true),
     FLD("transfer.amount", "Amount", format_token_amount_field, true),
@@ -176,6 +184,12 @@ const display_config_t DISPLAY_CONFIGS[] = {
               TOKEN_TRANSFER_REVIEW_FINISH,
               META_EMPTY),
 
+    CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV2", "TransferFactory_Transfer"),
+              TOKEN_TRANSFER_V2_FIELDS,
+              TOKEN_TRANSFER_REVIEW_TITLE,
+              TOKEN_TRANSFER_REVIEW_FINISH,
+              META_EMPTY),
+
     CFG_ENTRY(
         ID("Splice.ExternalPartyAmuletRules", "ExternalPartyAmuletRules_CreateTransferCommand"),
         NATIVE_COIN_TRANSFER_FIELDS,
@@ -195,13 +209,31 @@ const display_config_t DISPLAY_CONFIGS[] = {
               TOKEN_TRANSFER_ACCEPT_REVIEW_FINISH,
               TRANSFER_OFFER_META_ID_LIST),
 
+    CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV2", "TransferInstruction_Accept"),
+              TOKEN_TRANSFER_ACCEPT_FIELDS,
+              TOKEN_TRANSFER_ACCEPT_REVIEW_TITLE,
+              TOKEN_TRANSFER_ACCEPT_REVIEW_FINISH,
+              TRANSFER_OFFER_META_ID_LIST),
+
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV1", "TransferInstruction_Reject"),
+              TOKEN_TRANSFER_ACCEPT_FIELDS,
+              TOKEN_TRANSFER_REJECT_REVIEW_TITLE,
+              TOKEN_TRANSFER_REJECT_REVIEW_FINISH,
+              TRANSFER_OFFER_META_ID_LIST),
+    
+    CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV2", "TransferInstruction_Reject"),
               TOKEN_TRANSFER_ACCEPT_FIELDS,
               TOKEN_TRANSFER_REJECT_REVIEW_TITLE,
               TOKEN_TRANSFER_REJECT_REVIEW_FINISH,
               TRANSFER_OFFER_META_ID_LIST),
 
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV1", "TransferInstruction_Withdraw"),
+              TOKEN_TRANSFER_WITHDRAW_FIELDS,
+              TOKEN_TRANSFER_WITHDRAW_REVIEW_TITLE,
+              TOKEN_TRANSFER_WITHDRAW_REVIEW_FINISH,
+              TRANSFER_OFFER_META_ID_LIST),
+    
+    CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV2", "TransferInstruction_Withdraw"),
               TOKEN_TRANSFER_WITHDRAW_FIELDS,
               TOKEN_TRANSFER_WITHDRAW_REVIEW_TITLE,
               TOKEN_TRANSFER_WITHDRAW_REVIEW_FINISH,
