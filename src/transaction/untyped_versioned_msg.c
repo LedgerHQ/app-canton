@@ -289,6 +289,11 @@ static MUST_CHECK int sign_challenge(void) {
 
     if (sig_len != ED25519_SIG_LEN) {
         PRINTF("Invalid challenge signature length: %d\n", sig_len);
+        explicit_bzero(G_context.tx_info.challenge_signature,
+                       sizeof(G_context.tx_info.challenge_signature));
+        explicit_bzero(data_to_sign, sizeof(data_to_sign));
+        explicit_bzero(&privkey, sizeof(privkey));
+        explicit_bzero(challenge_and_deadline, sizeof(challenge_and_deadline));
         return -1;
     }
 
@@ -297,6 +302,10 @@ static MUST_CHECK int sign_challenge(void) {
     // Set signature length and flag
     G_context.tx_info.challenge_signature_len = (uint8_t) sig_len;
     G_context.tx_info.has_challenge_signature = true;
+
+    explicit_bzero(data_to_sign, sizeof(data_to_sign));
+    explicit_bzero(&privkey, sizeof(privkey));
+    explicit_bzero(challenge_and_deadline, sizeof(challenge_and_deadline));
 
     return 0;
 }
