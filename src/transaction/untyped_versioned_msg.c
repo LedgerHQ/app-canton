@@ -319,6 +319,7 @@ MUST_CHECK int process_untyped_versioned_msg_tx(buffer_t *buf) {
 
     int ret = parse_topology_transaction_for_display(buf);
     if (ret != 0) {
+        cleanup_hash_storage();
         return ret;
     }
 
@@ -478,7 +479,8 @@ static int process_party_to_key_mapping(const PartyToKeyMapping *mapping,
     int ret = 0;
     // Set party to key mapping specific fields
     if (!check_party_id_value(mapping->party)) {
-        return SW_TOPOLOGY_PARTY_ID_MISMATCH;
+        ret = SW_TOPOLOGY_PARTY_ID_MISMATCH;
+        goto cleanup;
     }
 
     // For signing keys, we'll show the first one or count if multiple
@@ -486,11 +488,19 @@ static int process_party_to_key_mapping(const PartyToKeyMapping *mapping,
         com_digitalasset_canton_crypto_v30_SigningPublicKey *key = &mapping->signing_keys[0];
         // Check key value against derived public key
         ret = check_party_key_value(key->public_key.bytes, key->public_key.size, key->format);
+        if (ret != 0) {
+            goto cleanup;
+        }
     } else {
         ret = SW_TOPOLOGY_NO_SIGNING_KEYS;
+        goto cleanup;
     }
 
     has_parsed_party_to_key_mapping = true;
+    return ret;
+
+cleanup:
+    cleanup_display_items();
     return ret;
 }
 
@@ -500,25 +510,32 @@ static int process_party_to_participant(const PartyToParticipant *mapping,
     LEDGER_ASSERT(!has_parsed_party_to_participant, "Multiple party to participant mappings found");
     LEDGER_ASSERT(tx_info != NULL, "NULL tx_ctx in process_party_to_participant");
 
+    int ret = 0;
+
     // Pre-checks and mandatory count checks
     if (mapping->party == NULL) {
-        return SW_TOPOLOGY_MISSING_PARTY;
+        ret = SW_TOPOLOGY_MISSING_PARTY;
+        goto cleanup;
     }
 
     if (!check_party_id_value(mapping->party)) {
-        return SW_TOPOLOGY_PARTY_ID_MISMATCH;
+        ret = SW_TOPOLOGY_PARTY_ID_MISMATCH;
+        goto cleanup;
     }
 
     if (mapping->participants_count != EXPECTED_PARTICIPANTS_NB) {
-        return SW_TOPOLOGY_UNEXPECTED_NUMBER_OF_PARTICIPANTS;
+        ret = SW_TOPOLOGY_UNEXPECTED_NUMBER_OF_PARTICIPANTS;
+        goto cleanup;
     }
 
     if (mapping->threshold != mapping->participants_count) {
-        return SW_TOPOLOGY_UNEXPECTED_THRESHOLD_VALUE;
+        ret = SW_TOPOLOGY_UNEXPECTED_THRESHOLD_VALUE;
+        goto cleanup;
     }
 
     if (mapping->participants == NULL) {
-        return SW_TOPOLOGY_MISSING_PARTICIPANT_DATA;
+        ret = SW_TOPOLOGY_MISSING_PARTICIPANT_DATA;
+        goto cleanup;
     }
 
     // Set party field
@@ -543,7 +560,8 @@ static int process_party_to_participant(const PartyToParticipant *mapping,
             for (size_t j = 0; j < pc; j++) {
                 const char *uid = (const char *) PIC(mapping->participants[j].participant_uid);
                 if (uid == NULL || *uid == '\0') {
-                    return SW_TOPOLOGY_MISSING_PARTICIPANT_DATA;
+                    ret = SW_TOPOLOGY_MISSING_PARTICIPANT_DATA;
+                    goto cleanup;
                 }
                 for (size_t k = 0; k < config.count; k++) {
                     participant_id_to_name_mapping_t *mappings =
@@ -552,7 +570,8 @@ static int process_party_to_participant(const PartyToParticipant *mapping,
                     const char *valid_name = (const char *) PIC(mappings[k].participant_name);
                     if (strcmp(uid, valid_id) == 0) {
                         if (matched_valid[k]) {
-                            return SW_TOPOLOGY_UNEXPECTED_DUPLICATE_PARTICIPANT;
+                            ret = SW_TOPOLOGY_UNEXPECTED_DUPLICATE_PARTICIPANT;
+                            goto cleanup;
                         }
                         matched_valid[k] = true;
                         found_valid++;
@@ -569,7 +588,8 @@ static int process_party_to_participant(const PartyToParticipant *mapping,
 
     // Final check for missing mandatory participants
     if (found_valid != pc) {
-        return SW_TOPOLOGY_UNEXPECTED_PARTICIPANT_ID;
+        ret = SW_TOPOLOGY_UNEXPECTED_PARTICIPANT_ID;
+        goto cleanup;
     }
 
     // Set participant name fields
@@ -594,6 +614,13 @@ static int process_party_to_participant(const PartyToParticipant *mapping,
 
     has_parsed_party_to_participant = true;
     return 0;
+
+cleanup:
+    // A non-nominal return above found the party field (and possibly matched participant
+    // names) already allocated in tx_info->pairs -- free them so they don't outlive this
+    // mapping's rejection.
+    cleanup_display_items();
+    return ret;
 }
 
 static int parse_topology_transaction_for_display(buffer_t *buf) {
