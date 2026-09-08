@@ -103,7 +103,12 @@
 /**
  * Status word for no signing keys found.
  */
-#define SW_TOPOLOGY_NO_SIGNING_KEYS 0xC202
+#define SW_TOPOLOGY_UNEXPECTED_PARTY_TO_KEY_SIGNING_KEYS_COUNT 0xC202
+
+/**
+ * Status word for unexpected party to key threshold value.
+ */
+#define SW_TOPOLOGY_UNEXPECTED_PARTY_TO_KEY_THRESHOLD_VALUE 0xC203
 
 // Party to participant errors (0xC300 range)
 /**

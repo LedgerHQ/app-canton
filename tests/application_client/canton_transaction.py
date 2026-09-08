@@ -215,7 +215,7 @@ class Transaction:
         return cls.compute_sha256_canton_hash(PURPOSE_PUBLIC_KEY_FINGERPRINT, raw_key).hex()
 
     @classmethod
-    def namespace_delegation(cls, public_key: bytes, der_format: bool) -> bytes:
+    def namespace_delegation(cls, public_key: Optional[bytes], der_format: bool) -> bytes:
         if der_format:
             key_format = CryptoKeyFormat.CRYPTO_KEY_FORMAT_DER_X509_SUBJECT_PUBLIC_KEY_INFO
         else:
@@ -223,7 +223,8 @@ class Transaction:
         key_scheme = SigningKeyScheme.SIGNING_KEY_SCHEME_ED25519
         key_spec = SigningKeySpec.SIGNING_KEY_SPEC_EC_CURVE25519
 
-        print(f"\nPublic key for namespace delegation: {public_key.hex()}\n")
+        if public_key:
+            print(f"\nPublic key for namespace delegation: {public_key.hex()}\n")
 
         signing_public_key = SigningPublicKey(
             format=key_format,
@@ -256,7 +257,14 @@ class Transaction:
         )
 
     @classmethod
-    def party_to_key(cls, public_key: bytes, der_format: bool, party_id: Optional[str] = None) -> bytes:
+    def party_to_key(
+        cls,
+        public_key: Optional[bytes],
+        der_format: bool,
+        party_id: Optional[str] = None,
+        signing_keys_count: int = 1,
+        threshold: Optional[int] = None,
+    ) -> bytes:
         if der_format:
             key_format = CryptoKeyFormat.CRYPTO_KEY_FORMAT_DER_X509_SUBJECT_PUBLIC_KEY_INFO
         else:
@@ -279,11 +287,14 @@ class Transaction:
             party_fingerprint = cls._compute_party_fingerprint(public_key)
             party_id = DEFAULT_PARTY_NAME + "::" + party_fingerprint
 
+        if threshold is None:
+            threshold = signing_keys_count
+
         party_to_key_mapping = TopologyMapping(
             party_to_key_mapping=PartyToKeyMapping(
                 party=party_id,
-                threshold=1,
-                signing_keys=[signing_public_key],
+                threshold=threshold,
+                signing_keys=[signing_public_key] * signing_keys_count,
             )
         )
 
@@ -333,7 +344,7 @@ class Transaction:
     @classmethod
     def party_to_participant_from_uid(
         cls,
-        public_key: bytes,
+        public_key: Optional[bytes],
         participant_uid: list[str],
         threshold: Optional[int] = None,
         party_id: Optional[str] = None,

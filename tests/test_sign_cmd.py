@@ -580,6 +580,8 @@ def _onboard_party_expect_error(
     threshold: Optional[int] = None,
     party_id: Optional[str] = None,
     which_party_tx: Optional[WhichPartyTx] = None,
+    party_to_key_signing_keys_count: int = 1,
+    party_to_key_threshold: Optional[int] = None,
     has_party_keys_in_party_to_participant: bool = False,
     expected_error: int = Errors.SW_WRONG_RESPONSE_LENGTH,
 ) -> None:
@@ -604,6 +606,8 @@ def _onboard_party_expect_error(
             public_key,
             der_key_format,
             party_id if which_party_tx == WhichPartyTx.PARTY_TO_KEY else None,
+            signing_keys_count=party_to_key_signing_keys_count,
+            threshold=party_to_key_threshold,
         ),
         Transaction.party_to_participant_from_uid(
             public_key,
@@ -615,9 +619,8 @@ def _onboard_party_expect_error(
     ]
 
     # Sign transactions and expect error
-    path = "m/44'/6767'/0'/0'/0'"
     with pytest.raises(ExceptionRAPDU) as e:
-        with client.sign_topology_tx(path=path, transactions=txs):
+        with client.sign_topology_tx(path="m/44'/6767'/0'/0'/0'", transactions=txs):
             pass
     assert e.value.status == expected_error
 
@@ -639,6 +642,26 @@ def test_sign_onboarding_expect_error_unexpected_number_of_participants_single(
         backend,
         validator_uids=[MAINNET_VALIDATOR_PARTY_ID_1],
         expected_error=Errors.SW_TOPOLOGY_UNEXPECTED_NUMBER_OF_PARTICIPANTS,
+    )
+
+
+def test_sign_onboarding_expect_error_unexpected_party_to_key_signing_keys_count(
+    backend: BackendInterface,
+) -> None:
+    _onboard_party_expect_error(
+        backend,
+        party_to_key_signing_keys_count=0,
+        expected_error=Errors.SW_TOPOLOGY_UNEXPECTED_PARTY_TO_KEY_SIGNING_KEYS_COUNT,
+    )
+
+
+def test_sign_onboarding_expect_error_unexpected_party_to_key_threshold_value(
+    backend: BackendInterface,
+) -> None:
+    _onboard_party_expect_error(
+        backend,
+        party_to_key_threshold=2,
+        expected_error=Errors.SW_TOPOLOGY_UNEXPECTED_PARTY_TO_KEY_THRESHOLD_VALUE,
     )
 
 

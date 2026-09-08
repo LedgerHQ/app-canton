@@ -483,8 +483,13 @@ static int process_party_to_key_mapping(const PartyToKeyMapping *mapping,
         goto cleanup;
     }
 
+    if (mapping->threshold != mapping->signing_keys_count) {
+        ret = SW_TOPOLOGY_UNEXPECTED_PARTY_TO_KEY_THRESHOLD_VALUE;
+        goto cleanup;
+    }
+
     // For signing keys, we'll show the first one or count if multiple
-    if (mapping->signing_keys_count > 0) {
+    if (mapping->signing_keys_count == 1) {
         com_digitalasset_canton_crypto_v30_SigningPublicKey *key = &mapping->signing_keys[0];
         // Check key value against derived public key
         ret = check_party_key_value(key->public_key.bytes, key->public_key.size, key->format);
@@ -492,7 +497,7 @@ static int process_party_to_key_mapping(const PartyToKeyMapping *mapping,
             goto cleanup;
         }
     } else {
-        ret = SW_TOPOLOGY_NO_SIGNING_KEYS;
+        ret = SW_TOPOLOGY_UNEXPECTED_PARTY_TO_KEY_SIGNING_KEYS_COUNT;
         goto cleanup;
     }
 
