@@ -580,6 +580,7 @@ def _onboard_party_expect_error(
     threshold: Optional[int] = None,
     party_id: Optional[str] = None,
     which_party_tx: Optional[WhichPartyTx] = None,
+    has_party_keys_in_party_to_participant: bool = False,
     expected_error: int = Errors.SW_WRONG_RESPONSE_LENGTH,
 ) -> None:
     client = CantonCommandSender(backend)
@@ -596,19 +597,21 @@ def _onboard_party_expect_error(
     if which_party_tx is None:
         which_party_tx = WhichPartyTx.PARTY_TO_PARTICIPANT
 
-    party_to_key_party_id = None
-    party_to_participant_party_id = None
-
-    if which_party_tx == WhichPartyTx.PARTY_TO_KEY:
-        party_to_key_party_id = party_id
-    else:
-        party_to_participant_party_id = party_id
-
     # Create transactions
     txs = [
         Transaction.namespace_delegation(public_key, der_key_format),
-        Transaction.party_to_key(public_key, der_key_format, party_to_key_party_id),
-        Transaction.party_to_participant_from_uid(public_key, validator_uids, threshold, party_to_participant_party_id),
+        Transaction.party_to_key(
+            public_key,
+            der_key_format,
+            party_id if which_party_tx == WhichPartyTx.PARTY_TO_KEY else None,
+        ),
+        Transaction.party_to_participant_from_uid(
+            public_key,
+            validator_uids,
+            threshold,
+            party_id if which_party_tx != WhichPartyTx.PARTY_TO_KEY else None,
+            has_party_signing_keys=has_party_keys_in_party_to_participant,
+        ),
     ]
 
     # Sign transactions and expect error
@@ -692,6 +695,16 @@ def test_sign_onboarding_expect_error_wrong_party_id_in_party_to_participant(
         party_id="invalid_party_id_in_party_to_participant",
         which_party_tx=WhichPartyTx.PARTY_TO_PARTICIPANT,
         expected_error=Errors.SW_TOPOLOGY_PARTY_ID_MISMATCH,
+    )
+
+
+def test_sign_onboarding_expect_error_unexpected_party_signing_keys(
+    backend: BackendInterface,
+) -> None:
+    _onboard_party_expect_error(
+        backend,
+        has_party_keys_in_party_to_participant=True,
+        expected_error=Errors.SW_TOPOLOGY_UNEXPECTED_PARTY_SIGNING_KEYS,
     )
 
 

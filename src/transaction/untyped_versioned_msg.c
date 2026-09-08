@@ -538,6 +538,11 @@ static int process_party_to_participant(const PartyToParticipant *mapping,
         goto cleanup;
     }
 
+    if (mapping->has_party_signing_keys) {
+        ret = SW_TOPOLOGY_UNEXPECTED_PARTY_SIGNING_KEYS;
+        goto cleanup;
+    }
+
     // Set party field
     LEDGER_ASSERT(set_field_value(tx_info, PARTY_FIELD_IDX, mapping->party) == true,
                   "Failed to set party field");

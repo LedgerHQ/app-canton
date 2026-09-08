@@ -136,6 +136,11 @@
  */
 #define SW_TOPOLOGY_UNEXPECTED_THRESHOLD_VALUE 0xC306
 
+/**
+ * Status word for unexpected party signing keys.
+ */
+#define SW_TOPOLOGY_UNEXPECTED_PARTY_SIGNING_KEYS 0xC307
+
 // General topology transaction errors (0xC400 range)
 /**
  * Status word for unknown mapping type.
