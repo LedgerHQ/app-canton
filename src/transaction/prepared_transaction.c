@@ -177,5 +177,10 @@ static MUST_CHECK int process_prepared_tx_finalize() {
 
     G_context.tx_info.m_hash_len = 32;
 
+    // Safety net: guarantee no deferred display-matching state (e.g. global_expected_contract_id)
+    // is left allocated once the whole transaction has been parsed, regardless of how display
+    // matching resolved.
+    reset_display_parser_state();
+
     return 0;
 }

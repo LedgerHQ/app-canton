@@ -96,6 +96,7 @@ struct pb_callback_context_t {
     const char *review_title;
     const char *review_finish;
     bool unknown_token;
+    char *last_parsed_contract_id;
 };
 
 /* -------------------------------------------------------------------------- */

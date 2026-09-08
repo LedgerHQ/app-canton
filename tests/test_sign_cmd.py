@@ -398,6 +398,28 @@ def test_sign_token_transfer_accept(backend: BackendInterface, scenario_navigato
     )
 
 
+def test_sign_token_transfer_accept_wrong_metadata_contract_id_blind_signing_disabled(
+    backend: BackendInterface, navigator: Navigator, test_name: str
+) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(
+        "tests/tx_examples/token_transfer_accept_wrong_metadata_contract_id.json"
+    )
+    if backend.device.is_nano:
+        validation_instructions = [NavInsID.BOTH_CLICK]
+        pattern = "Blind signing"
+    else:
+        validation_instructions = [NavInsID.USE_CASE_CHOICE_REJECT]
+        pattern = "Enable blind signing"
+    _check_blind_signing_rejection(backend, serialized_parts)
+    navigator.navigate_until_text_and_compare(
+        navigate_instruction=None,
+        validation_instructions=validation_instructions,
+        text=pattern,
+        path=ROOT_SCREENSHOT_PATH,
+        test_case_name=test_name,
+    )
+
+
 def test_sign_transfer_accept_with_empty_strings(
     backend: BackendInterface,
     scenario_navigator: NavigateWithScenario,

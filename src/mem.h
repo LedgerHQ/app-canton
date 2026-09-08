@@ -9,3 +9,4 @@
 
 MUST_CHECK bool app_mem_init(void);
 void app_mem_free(void *ptr);
+char *app_mem_strdup(const char *src);

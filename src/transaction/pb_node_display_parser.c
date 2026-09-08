@@ -46,11 +46,16 @@ static tx_field_t tx_fields[MAX_DISPLAY_FIELDS_NB];
 static identifier_config_t *const *global_tx_metadata_contract_identifiers = NULL;
 static size_t global_tx_metadata_contract_identifiers_count = 0;
 static display_config_t *global_tx_metadata_display_conf = NULL;
+static char *global_expected_contract_id = NULL;
 
 void reset_display_parser_state(void) {
     global_tx_metadata_contract_identifiers = NULL;
     global_tx_metadata_contract_identifiers_count = 0;
     global_tx_metadata_display_conf = NULL;
+    if (global_expected_contract_id != NULL) {
+        app_mem_free(global_expected_contract_id);
+        global_expected_contract_id = NULL;
+    }
 
     for (size_t i = 0; i < MAX_DISPLAY_FIELDS_NB; i++) {
         if (tx_fields[i].value != NULL) {
@@ -368,6 +373,47 @@ static void set_display_config(pb_callback_context_t *ctx, const display_config_
     return;
 }
 
+// Read contract_id then rewind the stream for the real decode (same trick as
+// count_value_helper in pb_hashing_parser.c).
+static char *peek_exercise_contract_id(pb_istream_t *stream) {
+    pb_istream_t saved_stream = *stream;
+    com_daml_ledger_api_v2_interactive_transaction_v1_cb_Exercise tmp =
+        com_daml_ledger_api_v2_interactive_transaction_v1_cb_Exercise_init_zero;
+    char *result = NULL;
+
+    if (pb_decode(stream,
+                  com_daml_ledger_api_v2_interactive_transaction_v1_cb_Exercise_fields,
+                  &tmp)) {
+        if (tmp.contract_id != NULL) {
+            result = app_mem_strdup(tmp.contract_id);
+        }
+    }
+    pb_release(com_daml_ledger_api_v2_interactive_transaction_v1_cb_Exercise_fields, &tmp);
+
+    *stream = saved_stream;
+    return result;
+}
+
+// Same as peek_exercise_contract_id, for Create submessages.
+static char *peek_create_contract_id(pb_istream_t *stream) {
+    pb_istream_t saved_stream = *stream;
+    com_daml_ledger_api_v2_interactive_transaction_v1_cb_Create tmp =
+        com_daml_ledger_api_v2_interactive_transaction_v1_cb_Create_init_zero;
+    char *result = NULL;
+
+    if (pb_decode(stream,
+                  com_daml_ledger_api_v2_interactive_transaction_v1_cb_Create_fields,
+                  &tmp)) {
+        if (tmp.contract_id != NULL) {
+            result = app_mem_strdup(tmp.contract_id);
+        }
+    }
+    pb_release(com_daml_ledger_api_v2_interactive_transaction_v1_cb_Create_fields, &tmp);
+
+    *stream = saved_stream;
+    return result;
+}
+
 // Helper function to match identifiers
 MUST_CHECK static bool match_identifier(const Identifier *id, const identifier_config_t *config) {
     LEDGER_ASSERT(id != NULL, "NULL identifier passed to match_identifier");
@@ -388,11 +434,15 @@ static void find_tx_type_and_config(pb_callback_context_t *ctx, const Identifier
     }
 
     if (global_tx_metadata_contract_identifiers != NULL) {
-        // Check if current id matches metadata contract identifier
+        // Match on type, and require this contract to be the one the exercise targeted.
+        bool contract_id_matches =
+            ctx->last_parsed_contract_id != NULL && global_expected_contract_id != NULL &&
+            strcmp(ctx->last_parsed_contract_id, global_expected_contract_id) == 0;
+
         for (size_t i = 0; i < global_tx_metadata_contract_identifiers_count; i++) {
-            if (match_identifier(id,
-                                 (const identifier_config_t *) PIC(
-                                     global_tx_metadata_contract_identifiers[i]))) {
+            const identifier_config_t *config =
+                (const identifier_config_t *) PIC(global_tx_metadata_contract_identifiers[i]);
+            if (match_identifier(id, config) && contract_id_matches) {
                 set_display_config(ctx, global_tx_metadata_display_conf);
                 return;
             }
@@ -410,6 +460,13 @@ static void find_tx_type_and_config(pb_callback_context_t *ctx, const Identifier
                 global_tx_metadata_contract_identifiers_count =
                     config->metadata_contract_identifiers_count;
                 global_tx_metadata_display_conf = (display_config_t *) PIC(config);
+                if (global_expected_contract_id != NULL) {
+                    app_mem_free(global_expected_contract_id);
+                    global_expected_contract_id = NULL;
+                }
+                if (ctx->last_parsed_contract_id != NULL) {
+                    global_expected_contract_id = app_mem_strdup(ctx->last_parsed_contract_id);
+                }
                 PRINTF("Metadata contract identifier set, deferring display config setting\n");
                 return;
             }
@@ -471,13 +528,19 @@ static void init_field_path(pb_callback_context_t *ctx) {
     memset(ctx->field_path, 0, MAX_FIELD_PATH_LEN);
 }
 
-// Function to free memory for the display field path
-static void free_field_path(pb_callback_context_t *ctx) {
-    LEDGER_ASSERT(ctx != NULL, "NULL context passed to free_field_path");
+// Function to clean the context, freeing memory for the display field path and other allocated
+// resources
+static void clean_ctx(pb_callback_context_t *ctx) {
+    LEDGER_ASSERT(ctx != NULL, "NULL context passed to clean_ctx");
 
     if (ctx->field_path != NULL) {
         app_mem_free(ctx->field_path);
         ctx->field_path = NULL;
+    }
+
+    if (ctx->last_parsed_contract_id != NULL) {
+        app_mem_free(ctx->last_parsed_contract_id);
+        ctx->last_parsed_contract_id = NULL;
     }
 }
 
@@ -758,7 +821,7 @@ MUST_CHECK static bool decode_value_variant(pb_istream_t *stream,
 
 // Callback to decode Node messages, focusing on Exercise and Create nodes
 static bool node_decode_callback(pb_istream_t *stream, const pb_field_t *field, void **arg) {
-    UNUSED(stream);
+    LEDGER_ASSERT(stream != NULL, "NULL stream passed to node_decode_callback");
     LEDGER_ASSERT(field != NULL, "NULL field passed to node_decode_callback");
     LEDGER_ASSERT(arg != NULL, "NULL arg passed to node_decode_callback");
 
@@ -770,10 +833,20 @@ static bool node_decode_callback(pb_istream_t *stream, const pb_field_t *field, 
         PRINTF("Decoding Exercise node\n");
         node->exercise.chosen_value.cb_sum.funcs.decode = &decode_value_variant;
         node->exercise.chosen_value.cb_sum.arg = ctx;
+
+        if (ctx->last_parsed_contract_id != NULL) {
+            app_mem_free(ctx->last_parsed_contract_id);
+        }
+        ctx->last_parsed_contract_id = peek_exercise_contract_id(stream);
     } else if (field->tag == NODE_V1_CREATE_TAG) {
         PRINTF("Decoding Create node\n");
         node->create.argument.cb_sum.funcs.decode = &decode_value_variant;
         node->create.argument.cb_sum.arg = ctx;
+
+        if (ctx->last_parsed_contract_id != NULL) {
+            app_mem_free(ctx->last_parsed_contract_id);
+        }
+        ctx->last_parsed_contract_id = peek_create_contract_id(stream);
     }
 
     return true;
@@ -885,6 +958,14 @@ MUST_CHECK static bool decode_create(pb_istream_t *stream, const pb_field_t *fie
     c_cb.argument.funcs.decode = &decode_value;
     c_cb.argument.arg = ctx;
 
+    // Capture this contract's own ID before decoding its nested argument, since
+    // find_tx_type_and_config (called from within the argument decode below) needs
+    // it to already be in ctx->last_parsed_contract_id to check the binding correctly.
+    if (ctx->last_parsed_contract_id != NULL) {
+        app_mem_free(ctx->last_parsed_contract_id);
+    }
+    ctx->last_parsed_contract_id = peek_create_contract_id(stream);
+
     if (!pb_decode(stream,
                    com_daml_ledger_api_v2_interactive_transaction_v1_cb_Create_fields,
                    &c_cb)) {
@@ -937,7 +1018,7 @@ MUST_CHECK static int process_display_parsing(buffer_t *buf,
     }
 
     pb_release(fields, dest);
-    free_field_path(&ctx);
+    clean_ctx(&ctx);
 
     if (!status) {
         PRINTF("Decode failed: %s\n", PB_GET_ERROR(&stream));
