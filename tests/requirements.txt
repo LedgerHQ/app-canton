@@ -1,6 +1,6 @@
-pytest
-ragger[speculos,ledgerwallet]>=1.11.4
+pytest==9.1.1
+ragger[speculos,ledgerwallet]==1.47.3
 ecdsa>=0.16.1,<0.17.0
-pycryptodome
-types-protobuf
-coloredlogs
+pycryptodome==3.23.0
+types-protobuf==7.35.1.20260906
+coloredlogs==15.0.1
