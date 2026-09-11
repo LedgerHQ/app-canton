@@ -20,6 +20,7 @@
 #include "pb_decode.h"
 #include "pb_node_display_parser.h"
 #include "pb_node_display_definitions.h"  // Shared structs/consts
+#include "node_values_check.h"            // values_bind_from_display
 #include "utils.h"                        // for atoull
 
 #include <stdio.h>
@@ -349,6 +350,8 @@ static void set_display_config(pb_callback_context_t *ctx, const display_config_
     ctx->nb_fields = config_source->fields_count;
     ctx->review_title = config_source->review_title;
     ctx->review_finish = config_source->review_finish;
+    ctx->destination = config_source->destination;
+    ctx->amount_check = config_source->amount_check;
 
     // Initialize field states
     for (size_t i = 0; i < ctx->nb_fields; i++) {
@@ -880,6 +883,9 @@ MUST_CHECK int format_and_populate_display_items(pb_callback_context_t *ctx) {
     LEDGER_ASSERT(ctx != NULL, "NULL ctx in format_and_populate_display_items");
 
     int ret = 0;
+
+    // Hand the screen's own values to the value check while they are still unformatted.
+    values_bind_from_display(ctx->tx_fields, ctx->nb_fields, ctx->destination, ctx->amount_check);
 
     // Loop for mandatory check + format callbacks
     for (size_t i = 0; i < ctx->nb_fields; i++) {

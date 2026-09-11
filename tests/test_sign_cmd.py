@@ -315,6 +315,41 @@ def test_sign_max_nodes_hash_error(backend: BackendInterface) -> None:
     assert e.value.status == Errors.SW_TX_HASH_FAIL
 
 
+# Node trees that the device refuses during the tree check itself
+TREE_CHECK_REFUSED_TX = [
+    "tree_err_node_id_out_of_range",
+    "tree_err_duplicate_node",
+    "tree_err_child_out_of_range",
+    "tree_err_self_child",
+    "tree_err_root_claimed",
+    "tree_err_duplicate_claim",
+]
+
+# Node trees that the device cannot display, so it falls back to blind signing
+TREE_CHECK_BLIND_SIGNING_TX = [
+    "tree_err_root_count",
+    "tree_err_orphan_node",
+    "tree_err_too_many_nodes",
+]
+
+
+@pytest.mark.parametrize("tx_name", TREE_CHECK_REFUSED_TX, ids=TREE_CHECK_REFUSED_TX)
+def test_sign_invalid_node_tree_error(backend: BackendInterface, tx_name: str) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(f"tests/tx_examples/{tx_name}.json")
+    path = "m/44'/6767'/0'/0'/0'"
+    client = CantonCommandSender(backend)
+    with pytest.raises(ExceptionRAPDU) as e:
+        with client.sign_tx_in_parts(path, *serialized_parts):
+            pass
+    assert e.value.status == Errors.SW_TX_INVALID_NODE_TREE
+
+
+@pytest.mark.parametrize("tx_name", TREE_CHECK_BLIND_SIGNING_TX, ids=TREE_CHECK_BLIND_SIGNING_TX)
+def test_sign_invalid_node_tree_blind_signing_disabled(backend: BackendInterface, tx_name: str) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(f"tests/tx_examples/{tx_name}.json")
+    _check_blind_signing_rejection(backend, serialized_parts)
+
+
 def test_sign_native_transfer(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
     _sign_and_verify_prepared_transaction(
         backend,
@@ -507,6 +542,26 @@ def test_sign_token_transfer_wrong_token_id_blind_signing_enabled(
         blind_sign=True,
         test_name="test_sign_token_transfer_wrong_token_id_blind_signing_enabled",
     )
+
+
+# Canton keeps no balance: each amount owned is its own contract naming an owner and an amount, and
+# the app sees one as a create node. Each fixture below is token_transfer.json with exactly one line
+# changed, so the screen still promises 20 CC to bob while the holdings say otherwise. Clear signing
+# has to drop, which leaves blind signing as the only route and makes the transaction refusable.
+@pytest.mark.parametrize(
+    "tx_name",
+    [
+        # bob's holding has 21 while the screen shows 20
+        "values_err_receiver_amount",
+        # bob's holding was issued by a party the displayed ticker was not resolved from
+        "values_err_holding_admin",
+        # the holding went to a third account, so nothing is written for the receiver shown
+        "values_err_no_holding",
+    ],
+)
+def test_sign_values_mismatch_blind_signing_disabled(backend: BackendInterface, tx_name: str) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(f"tests/tx_examples/{tx_name}.json")
+    _check_blind_signing_rejection(backend, serialized_parts)
 
 
 def test_sign_preapproval_proposal(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:

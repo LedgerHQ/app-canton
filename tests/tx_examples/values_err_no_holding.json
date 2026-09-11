@@ -173,7 +173,7 @@
                               {
                                  "label":"owner",
                                  "value":{
-                                    "party":"bob::12203553bdd6f3a73d90fe109747a2b55833cd510889b40f6936ec725135f5fa7d67"
+                                    "party":"carol::12203553bdd6f3a73d90fe109747a2b55833cd510889b40f6936ec725135f5fa7d67"
                                  }
                               },
                               {
@@ -3318,6 +3318,6 @@
          "maxLedgerEffectiveTime":"1756217906501963"
       }
    },
-   "prepared_transaction_hash": "1C8572FED2DD7A39AE65DD3BC36F9732AADC1D1ABEFF5AE138D97466254EF525",
+   "prepared_transaction_hash": "8741D6BB5470C94B9F2677C5C7BEA6485080A64B94482B08E88EFE60A798EF09",
    "hashing_scheme_version": "HASHING_SCHEME_VERSION_V2"
 }

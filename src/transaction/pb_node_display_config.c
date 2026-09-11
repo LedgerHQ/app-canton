@@ -5,9 +5,11 @@
 /* Macros for Concise Configuration                                           */
 /* -------------------------------------------------------------------------- */
 
-// Use distinct argument names (_p, _n) to avoid any potential macro expansion conflicts
-#define FLD(_p, _n, _f, _m) {.path = _p, .item_name = _n, .format_callback = _f, .mandatory = _m}
-#define ID(_mod, _ent)      {.module_name = _mod, .entity_name = _ent}
+// Use distinct argument names (_p, _n) to avoid any potential macro expansion conflicts.
+// _s says what the field means to the value check, so each path is written once.
+#define FLD(_p, _n, _f, _m, _s) \
+    {.path = _p, .item_name = _n, .format_callback = _f, .mandatory = _m, .shown_as = _s}
+#define ID(_mod, _ent) {.module_name = _mod, .entity_name = _ent}
 
 /* -------------------------------------------------------------------------- */
 /* Global Constants / Mappings                                                */
@@ -95,14 +97,16 @@ const size_t INSTRUMENT_TO_TICKER_MAPPING_NB =
 /* Reusable Field Definitions (Static arrays)                                 */
 /* -------------------------------------------------------------------------- */
 
-const field_config_t INSTRUMENT_ID_FIELD = FLD("transfer.instrumentId.id", "Token", NULL, true);
+const field_config_t INSTRUMENT_ID_FIELD =
+    FLD("transfer.instrumentId.id", "Token", NULL, true, SHOWN_AS_OTHER);
 const field_config_t PROXY_INSTRUMENT_ID_FIELD =
-    FLD("proxyArg.choiceArg.transfer.instrumentId.id", "Token", NULL, true);
+    FLD("proxyArg.choiceArg.transfer.instrumentId.id", "Token", NULL, true, SHOWN_AS_OTHER);
 const field_config_t INSTRUMENT_ID_ADMIN_FIELD =
-    FLD("transfer.instrumentId.admin", NULL, NULL, true);
+    FLD("transfer.instrumentId.admin", NULL, NULL, true, SHOWN_AS_ADMIN);
 const field_config_t INSTRUMENT_ID_PROXY_ADMIN_FIELD =
-    FLD("proxyArg.choiceArg.transfer.instrumentId.admin", NULL, NULL, true);
-const field_config_t PREAPPROVAL_ASSET_FIELD = FLD("asset", "For asset", NULL, true);
+    FLD("proxyArg.choiceArg.transfer.instrumentId.admin", NULL, NULL, true, SHOWN_AS_ADMIN);
+const field_config_t PREAPPROVAL_ASSET_FIELD =
+    FLD("asset", "For asset", NULL, true, SHOWN_AS_OTHER);
 
 static const identifier_config_t META_ID_TRANSFER_INSTRUCTION =
     ID("Splice.AmuletTransferInstruction", "AmuletTransferInstruction");
@@ -114,38 +118,46 @@ static const identifier_config_t META_ID_TRANSFER_OFFER =
 /* -------------------------------------------------------------------------- */
 
 static const field_config_t TOKEN_TRANSFER_FIELDS[] = {
-    FLD("transfer.sender", "From", NULL, true),
-    FLD("transfer.amount", "Amount", format_token_amount_field, true),
-    FLD("transfer.receiver", "To", NULL, true),
-    FLD("transfer.instrumentId.id", "Token", NULL, true),
-    FLD("transfer.instrumentId.admin", NULL, NULL, true),
-    FLD("transfer.meta.values.splice\\.lfdecentralizedtrust\\.org/reason", "Memo", NULL, false)};
+    FLD("transfer.sender", "From", NULL, true, SHOWN_AS_SENDER),
+    FLD("transfer.amount", "Amount", format_token_amount_field, true, SHOWN_AS_AMOUNT),
+    FLD("transfer.receiver", "To", NULL, true, SHOWN_AS_RECEIVER),
+    FLD("transfer.instrumentId.id", "Token", NULL, true, SHOWN_AS_OTHER),
+    FLD("transfer.instrumentId.admin", NULL, NULL, true, SHOWN_AS_ADMIN),
+    FLD("transfer.meta.values.splice\\.lfdecentralizedtrust\\.org/reason",
+        "Memo",
+        NULL,
+        false,
+        SHOWN_AS_OTHER)};
 
 static const field_config_t TOKEN_TRANSFER_ACCEPT_FIELDS[] = {
-    FLD("transfer.sender", "From", NULL, true),
-    FLD("transfer.amount", "Amount", format_token_amount_field, true),
-    FLD("transfer.receiver", "To", NULL, true),
-    FLD("transfer.instrumentId.id", "Token", NULL, true),
-    FLD("transfer.instrumentId.admin", NULL, NULL, true),
-    FLD("transfer.executeBefore", "Expiration time", format_timestamp_field, true),
-    FLD("transfer.meta.values.splice\\.lfdecentralizedtrust\\.org/reason", "Memo", NULL, false)};
+    FLD("transfer.sender", "From", NULL, true, SHOWN_AS_SENDER),
+    FLD("transfer.amount", "Amount", format_token_amount_field, true, SHOWN_AS_AMOUNT),
+    FLD("transfer.receiver", "To", NULL, true, SHOWN_AS_RECEIVER),
+    FLD("transfer.instrumentId.id", "Token", NULL, true, SHOWN_AS_OTHER),
+    FLD("transfer.instrumentId.admin", NULL, NULL, true, SHOWN_AS_ADMIN),
+    FLD("transfer.executeBefore", "Expiration time", format_timestamp_field, true, SHOWN_AS_OTHER),
+    FLD("transfer.meta.values.splice\\.lfdecentralizedtrust\\.org/reason",
+        "Memo",
+        NULL,
+        false,
+        SHOWN_AS_OTHER)};
 
 static const field_config_t TOKEN_TRANSFER_WITHDRAW_FIELDS[] = {
-    FLD("transfer.sender", "Withdraw to", format_token_amount_field, true),
-    FLD("transfer.amount", "Amount", format_token_amount_field, true),
-    FLD("transfer.instrumentId.id", "Token", NULL, true),
-    FLD("transfer.instrumentId.admin", NULL, NULL, true)};
+    FLD("transfer.sender", "Withdraw to", format_token_amount_field, true, SHOWN_AS_SENDER),
+    FLD("transfer.amount", "Amount", format_token_amount_field, true, SHOWN_AS_AMOUNT),
+    FLD("transfer.instrumentId.id", "Token", NULL, true, SHOWN_AS_OTHER),
+    FLD("transfer.instrumentId.admin", NULL, NULL, true, SHOWN_AS_ADMIN)};
 
 static const field_config_t NATIVE_COIN_TRANSFER_FIELDS[] = {
-    FLD("sender", "From", NULL, true),
-    FLD("amount", "Amount", format_native_amount_field, true),
-    FLD("receiver", "To", NULL, true),
-    FLD("description", "Memo", NULL, false)};
+    FLD("sender", "From", NULL, true, SHOWN_AS_SENDER),
+    FLD("amount", "Amount", format_native_amount_field, true, SHOWN_AS_AMOUNT),
+    FLD("receiver", "To", NULL, true, SHOWN_AS_RECEIVER),
+    FLD("description", "Memo", NULL, false, SHOWN_AS_OTHER)};
 
 static const field_config_t PREAPPROVAL_PROPOSAL_FIELDS[] = {
-    FLD("receiver", "Pre-approve for account", NULL, true),
-    FLD("asset", "For asset", NULL, true),
-    FLD("provider", "By validator", NULL, true)};
+    FLD("receiver", "Pre-approve for account", NULL, true, SHOWN_AS_RECEIVER),
+    FLD("asset", "For asset", NULL, true, SHOWN_AS_OTHER),
+    FLD("provider", "By validator", NULL, true, SHOWN_AS_OTHER)};
 
 /* -------------------------------------------------------------------------- */
 /* Metadata identifiers lists                                                 */
@@ -160,52 +172,66 @@ static const identifier_config_t *META_EMPTY[] = {};
 /* Main Display Configuration                                                 */
 /* -------------------------------------------------------------------------- */
 
-#define CFG_ENTRY(_id, _fields, _title, _finish, _meta)    \
-    {.identifier = _id,                                    \
-     .fields = _fields,                                    \
-     .fields_count = sizeof(_fields) / sizeof(_fields[0]), \
-     .review_title = _title,                               \
-     .review_finish = _finish,                             \
-     .metadata_contract_identifiers = _meta,               \
-     .metadata_contract_identifiers_count = sizeof(_meta) / sizeof(_meta[0])}
+#define CFG_ENTRY(_id, _fields, _title, _finish, _meta, _dest, _chk)          \
+    {.identifier = _id,                                                       \
+     .fields = _fields,                                                       \
+     .fields_count = sizeof(_fields) / sizeof(_fields[0]),                    \
+     .review_title = _title,                                                  \
+     .review_finish = _finish,                                                \
+     .metadata_contract_identifiers = _meta,                                  \
+     .metadata_contract_identifiers_count = sizeof(_meta) / sizeof(_meta[0]), \
+     .destination = _dest,                                                    \
+     .amount_check = _chk}
 
 const display_config_t DISPLAY_CONFIGS[] = {
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV1", "TransferFactory_Transfer"),
               TOKEN_TRANSFER_FIELDS,
               TOKEN_TRANSFER_REVIEW_TITLE,
               TOKEN_TRANSFER_REVIEW_FINISH,
-              META_EMPTY),
+              META_EMPTY,
+              DEST_RECEIVER,
+              AMOUNT_COMPARABLE),
 
     CFG_ENTRY(
         ID("Splice.ExternalPartyAmuletRules", "ExternalPartyAmuletRules_CreateTransferCommand"),
         NATIVE_COIN_TRANSFER_FIELDS,
         NATIVE_COIN_TRANSFER_REVIEW_TITLE,
         NATIVE_COIN_TRANSFER_REVIEW_FINISH,
-        META_EMPTY),
+        META_EMPTY,
+        DEST_RECEIVER,
+        AMOUNT_COMPARABLE),
 
     CFG_ENTRY(ID("Splice.Wallet.TransferPreapproval", "TransferPreapprovalProposal"),
               PREAPPROVAL_PROPOSAL_FIELDS,
               PREAPPROVAL_PROPOSAL_REVIEW_TITLE,
               PREAPPROVAL_PROPOSAL_REVIEW_FINISH,
-              META_EMPTY),
+              META_EMPTY,
+              DEST_NONE,
+              AMOUNT_NOT_COMPARABLE),
 
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV1", "TransferInstruction_Accept"),
               TOKEN_TRANSFER_ACCEPT_FIELDS,
               TOKEN_TRANSFER_ACCEPT_REVIEW_TITLE,
               TOKEN_TRANSFER_ACCEPT_REVIEW_FINISH,
-              TRANSFER_OFFER_META_ID_LIST),
+              TRANSFER_OFFER_META_ID_LIST,
+              DEST_RECEIVER,
+              AMOUNT_COMPARABLE),
 
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV1", "TransferInstruction_Reject"),
               TOKEN_TRANSFER_ACCEPT_FIELDS,
               TOKEN_TRANSFER_REJECT_REVIEW_TITLE,
               TOKEN_TRANSFER_REJECT_REVIEW_FINISH,
-              TRANSFER_OFFER_META_ID_LIST),
+              TRANSFER_OFFER_META_ID_LIST,
+              DEST_SENDER,
+              AMOUNT_NOT_COMPARABLE),
 
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV1", "TransferInstruction_Withdraw"),
               TOKEN_TRANSFER_WITHDRAW_FIELDS,
               TOKEN_TRANSFER_WITHDRAW_REVIEW_TITLE,
               TOKEN_TRANSFER_WITHDRAW_REVIEW_FINISH,
-              TRANSFER_OFFER_META_ID_LIST),
+              TRANSFER_OFFER_META_ID_LIST,
+              DEST_SENDER,
+              AMOUNT_NOT_COMPARABLE),
 
 };
 

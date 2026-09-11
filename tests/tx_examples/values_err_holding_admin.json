@@ -167,7 +167,7 @@
                               {
                                  "label":"dso",
                                  "value":{
-                                    "party":"DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
+                                    "party":"DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9"
                                  }
                               },
                               {
@@ -3318,6 +3318,6 @@
          "maxLedgerEffectiveTime":"1756217906501963"
       }
    },
-   "prepared_transaction_hash": "1C8572FED2DD7A39AE65DD3BC36F9732AADC1D1ABEFF5AE138D97466254EF525",
+   "prepared_transaction_hash": "437EE1AD440376A82E4A4765184C9F3F741CB290045159BAEC51EE419058A799",
    "hashing_scheme_version": "HASHING_SCHEME_VERSION_V2"
 }

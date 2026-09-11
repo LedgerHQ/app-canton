@@ -64,6 +64,10 @@
  * Status word for challenge signature fail.
  */
 #define SW_CHALLENGE_SIGNATURE_FAIL 0xB009
+/**
+ * Status word for a transaction whose node tree could never be valid.
+ */
+#define SW_TX_INVALID_NODE_TREE 0xB00A
 
 /**
  * Topology transaction error codes (0xC100-0xC4FF range)

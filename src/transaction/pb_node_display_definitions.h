@@ -63,11 +63,50 @@ typedef struct {
     const char *entity_name;
 } identifier_config_t;
 
+/**
+ * What a displayed field means to the value check.
+ *
+ * The path says where to read a field and the item name says how to label it, but neither says what
+ * it is. This does, so each path stays written once.
+ */
+typedef enum {
+    SHOWN_AS_OTHER = 0,  // nothing the value check compares
+    SHOWN_AS_SENDER,
+    SHOWN_AS_RECEIVER,
+    SHOWN_AS_AMOUNT,
+    SHOWN_AS_ADMIN,  // the instrument admin the displayed ticker was resolved from
+} shown_as_e;
+
+/**
+ * Which displayed account the value ends up with.
+ *
+ * Not always the one labelled as the receiver. Sending money, and accepting an offer of it, moves
+ * the value to the receiver. Rejecting or withdrawing an offer returns the locked funds to the
+ * sender, so the sender is the destination there.
+ */
+typedef enum {
+    DEST_NONE = 0,  // the action moves nothing
+    DEST_SENDER,
+    DEST_RECEIVER,
+} destination_e;
+
+/**
+ * Whether the amount shown can be compared against the destination's holding.
+ *
+ * Returning a locked holding hands back a fee reserve along with it, so its amount is legitimately
+ * larger than the amount on screen and only the destination is checkable.
+ */
+typedef enum {
+    AMOUNT_NOT_COMPARABLE = 0,
+    AMOUNT_COMPARABLE,
+} amount_check_e;
+
 typedef struct {
     const char *path;
     const char *item_name;
     field_format_callback_t format_callback;
     bool mandatory;
+    shown_as_e shown_as;
 } field_config_t;
 
 struct tx_field_t {
@@ -86,6 +125,9 @@ typedef struct {
     const char *review_finish;
     const identifier_config_t *const *metadata_contract_identifiers;
     const size_t metadata_contract_identifiers_count;
+    // What this action does with the value, which the field paths alone cannot say.
+    destination_e destination;
+    amount_check_e amount_check;
 } display_config_t;
 
 struct pb_callback_context_t {
@@ -97,6 +139,10 @@ struct pb_callback_context_t {
     const char *review_finish;
     bool unknown_token;
     char *last_parsed_contract_id;
+    // Copied from the matched configuration, so the value check can be handed the displayed values
+    // once they are resolved.
+    destination_e destination;
+    amount_check_e amount_check;
 };
 
 /* -------------------------------------------------------------------------- */

@@ -8,6 +8,7 @@
 #include "pb_decode.h"
 #include "ledger_assert.h"
 #include "constants.h"
+#include "node_tree_check.h"
 
 #define VALUE_ELEM_COUNT_NONE -1
 
@@ -15,6 +16,11 @@ typedef struct {
     transaction_ctx_t *tx_info;
     int32_t node_id;
     bool is_root_node;
+    // decode_create serves both a create node and a disclosed input contract.
+    bool is_input_contract;
+    // The display parser decodes the same node struct and re-triggers the callbacks set here, so
+    // the node tree records the children only on the first decode of each node part.
+    bool tree_children_claimed;
     int32_t value_elem_count;
     HashWriter node_hw;
 } cb_parser_ctx_t;
@@ -787,6 +793,14 @@ MUST_CHECK static bool decode_create(pb_istream_t *stream, const pb_field_t *fie
         return false;
     }
 
+    // A disclosed contract must have been used by a node; a created one is a contract the nodes
+    // themselves brought into being.
+    if (ctx.is_input_contract) {
+        values_check_disclosed_contract(c_cb.contract_id);
+    } else {
+        values_record_used_contract(c_cb.contract_id);
+    }
+
     // Hashing fields up to `argument` field
     const uint8_t *seed = NULL;
     DamlTransaction *daml_tx = &ctx.tx_info->tx_parts_ctx.daml_transaction;
@@ -854,6 +868,14 @@ MUST_CHECK static bool decode_exercise(pb_istream_t *stream, const pb_field_t *f
                    &e)) {
         PRINTF("Failed to decode Exercise node: %s\n", PB_GET_ERROR(stream));
         return false;
+    }
+
+    values_record_used_contract(e.contract_id);
+
+    // Record the children this node declares.
+    if (!ctx.tree_children_claimed) {
+        tree_claim_children(ctx.node_id, e.children, e.children_count);
+        ctx.tree_children_claimed = true;
     }
 
     const uint8_t *seed = NULL;
@@ -935,6 +957,8 @@ MUST_CHECK static bool decode_fetch(pb_istream_t *stream, const pb_field_t *fiel
         return false;
     }
 
+    values_record_used_contract(f.contract_id);
+
     encode_fetch(&ctx.node_hw, &f);
 
     pb_release(com_daml_ledger_api_v2_interactive_transaction_v1_Fetch_fields, &f);
@@ -955,6 +979,12 @@ MUST_CHECK static bool decode_rollback(pb_istream_t *stream, const pb_field_t *f
     if (!pb_decode(stream, com_daml_ledger_api_v2_interactive_transaction_v1_Rollback_fields, &r)) {
         PRINTF("Failed to decode Rollback node: %s\n", PB_GET_ERROR(stream));
         return false;
+    }
+
+    // A rollback node also declares children, so it must claim them like an exercise node does.
+    if (!ctx.tree_children_claimed) {
+        tree_claim_children(ctx.node_id, r.children, r.children_count);
+        ctx.tree_children_claimed = true;
     }
 
     encode_rollback(&ctx.node_hw, &r);
@@ -1027,6 +1057,8 @@ parser_status_e proto_deserialize_node(buffer_t *buf, transaction_ctx_t *tx_ctx)
     ctx.tx_info = tx_ctx;
     ctx.node_id = -1;
     ctx.is_root_node = false;
+    ctx.is_input_contract = false;
+    ctx.tree_children_claimed = false;
     ctx.value_elem_count = VALUE_ELEM_COUNT_NONE;
 
     hw_init(&ctx.node_hw);
@@ -1045,6 +1077,10 @@ parser_status_e proto_deserialize_node(buffer_t *buf, transaction_ctx_t *tx_ctx)
     hw_finalize(&ctx.node_hw, node_hash);
 
     PRINTF("Node id %d hash: %.*H\n", ctx.node_id, SHA256_HASH_LEN, node_hash);
+
+    // Record that this node arrived. This runs once per node part, so a repeated id here really is
+    // the same node sent twice.
+    tree_mark_seen(ctx.node_id);
 
     if (ctx.is_root_node) {
         encode_hash(&tx_ctx->hasher, node_hash);
@@ -1070,6 +1106,7 @@ parser_status_e proto_deserialize_input_contract(buffer_t *buf, transaction_ctx_
     ctx.tx_info = tx_ctx;
     ctx.node_id = -1;
     ctx.is_root_node = false;
+    ctx.is_input_contract = true;
     ctx.value_elem_count = VALUE_ELEM_COUNT_NONE;
 
     hw_init(&ctx.node_hw);
