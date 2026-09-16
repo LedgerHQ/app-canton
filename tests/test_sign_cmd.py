@@ -786,6 +786,101 @@ def test_sign_onboarding_expect_error_unexpected_party_signing_keys(
     )
 
 
+class TopologyTxKind(IntEnum):
+    NAMESPACE_DELEGATION = 1
+    PARTY_TO_KEY = 2
+    PARTY_TO_PARTICIPANT = 3
+
+
+def _onboard_party_expect_error_for_sequence(
+    backend: BackendInterface,
+    sequence: list[TopologyTxKind],
+    expected_error: int,
+) -> None:
+    """Send an arbitrary sequence of topology messages and expect one status word.
+
+    The helper above always sends one message of each kind. This one lets a test repeat a kind, or
+    send more messages than the app can hold, which is what the sequencing checks reject.
+    """
+    client = CantonCommandSender(backend)
+
+    _, raw_key, _, _ = unpack_get_public_key_response(client.get_public_key(path="m/44'/6767'/0'/0'/0'").data)
+    public_key = b"\x30\x2a\x30\x05\x06\x03\x2b\x65\x70\x03\x21\x00" + raw_key
+
+    txs = []
+    for kind in sequence:
+        if kind == TopologyTxKind.NAMESPACE_DELEGATION:
+            txs.append(Transaction.namespace_delegation(public_key, True))
+        elif kind == TopologyTxKind.PARTY_TO_KEY:
+            txs.append(Transaction.party_to_key(public_key, True))
+        else:
+            txs.append(
+                Transaction.party_to_participant_from_uid(
+                    public_key,
+                    [MAINNET_VALIDATOR_PARTY_ID_1, MAINNET_VALIDATOR_PARTY_ID_2],
+                )
+            )
+
+    with pytest.raises(ExceptionRAPDU) as e:
+        with client.sign_topology_tx(path="m/44'/6767'/0'/0'/0'", transactions=txs):
+            pass
+    assert e.value.status == expected_error
+
+
+def test_sign_onboarding_expect_error_multiple_namespace_delegations(
+    backend: BackendInterface,
+) -> None:
+    _onboard_party_expect_error_for_sequence(
+        backend,
+        [TopologyTxKind.NAMESPACE_DELEGATION, TopologyTxKind.NAMESPACE_DELEGATION],
+        Errors.SW_TOPOLOGY_MULTIPLE_NAMESPACE_DELEGATIONS,
+    )
+
+
+def test_sign_onboarding_expect_error_multiple_party_to_key_mappings(
+    backend: BackendInterface,
+) -> None:
+    _onboard_party_expect_error_for_sequence(
+        backend,
+        [
+            TopologyTxKind.NAMESPACE_DELEGATION,
+            TopologyTxKind.PARTY_TO_KEY,
+            TopologyTxKind.PARTY_TO_KEY,
+        ],
+        Errors.SW_TOPOLOGY_MULTIPLE_PARTY_TO_KEY_MAPPINGS,
+    )
+
+
+def test_sign_onboarding_expect_error_multiple_party_to_participants(
+    backend: BackendInterface,
+) -> None:
+    _onboard_party_expect_error_for_sequence(
+        backend,
+        [
+            TopologyTxKind.NAMESPACE_DELEGATION,
+            TopologyTxKind.PARTY_TO_PARTICIPANT,
+            TopologyTxKind.PARTY_TO_PARTICIPANT,
+        ],
+        Errors.SW_TOPOLOGY_MULTIPLE_PARTY_TO_PARTICIPANTS,
+    )
+
+
+def test_sign_onboarding_expect_error_too_many_messages(
+    backend: BackendInterface,
+) -> None:
+    # A fourth message has nowhere to store its hash, so it is refused before it is even parsed.
+    _onboard_party_expect_error_for_sequence(
+        backend,
+        [
+            TopologyTxKind.NAMESPACE_DELEGATION,
+            TopologyTxKind.PARTY_TO_KEY,
+            TopologyTxKind.PARTY_TO_PARTICIPANT,
+            TopologyTxKind.NAMESPACE_DELEGATION,
+        ],
+        Errors.SW_TOPOLOGY_TOO_MANY_MESSAGES,
+    )
+
+
 def _verify_attestation(
     attest_pub_key: bytes,
     multi_hash: bytes,

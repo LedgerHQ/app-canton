@@ -113,6 +113,10 @@
  * Status word for unexpected party to key threshold value.
  */
 #define SW_TOPOLOGY_UNEXPECTED_PARTY_TO_KEY_THRESHOLD_VALUE 0xC203
+/**
+ * Status word for multiple party to key mappings found.
+ */
+#define SW_TOPOLOGY_MULTIPLE_PARTY_TO_KEY_MAPPINGS 0xC204
 
 // Party to participant errors (0xC300 range)
 /**
@@ -149,6 +153,10 @@
  * Status word for unexpected party signing keys.
  */
 #define SW_TOPOLOGY_UNEXPECTED_PARTY_SIGNING_KEYS 0xC307
+/**
+ * Status word for multiple party to participant mappings found.
+ */
+#define SW_TOPOLOGY_MULTIPLE_PARTY_TO_PARTICIPANTS 0xC308
 
 // General topology transaction errors (0xC400 range)
 /**
@@ -163,3 +171,7 @@
  * Status word for mandatory field missing.
  */
 #define SW_TOPOLOGY_MANDATORY_FIELD_MISSING 0xC403
+/**
+ * Status word for more topology messages in one signing flow than the app can hold.
+ */
+#define SW_TOPOLOGY_TOO_MANY_MESSAGES 0xC404

@@ -161,12 +161,20 @@ static void cleanup_hash_storage() {
     }
 }
 
-static void add_hash(const uint8_t hash[HASH_LEN]) {
+// The host decides how many topology messages it sends, so a full store is a protocol error
+// and not a broken assumption.
+MUST_CHECK static int add_hash(const uint8_t hash[HASH_LEN]) {
     LEDGER_ASSERT(hash != NULL, "NULL hash");
     LEDGER_ASSERT(tx_hashes != NULL, "Hash storage not initialized");
-    LEDGER_ASSERT(hash_count < MAX_HASHES, "Hash storage full");
+
+    if (hash_count >= MAX_HASHES) {
+        PRINTF("Too many topology messages, max is %d\n", MAX_HASHES);
+        return SW_TOPOLOGY_TOO_MANY_MESSAGES;
+    }
+
     memcpy(tx_hashes[hash_count], hash, HASH_LEN);
     hash_count++;
+    return 0;
 }
 
 static int compare_hashes_hex(const void *a, const void *b) {
@@ -315,9 +323,14 @@ MUST_CHECK int process_untyped_versioned_msg_tx(buffer_t *buf) {
     uint8_t h[HASH_LEN] = {0};
 
     canton_hash(PURPOSE_TOPOLOGY_TRANSACTION_SIGNATURE, buf->ptr, buf->size, h);
-    add_hash(h);
 
-    int ret = parse_topology_transaction_for_display(buf);
+    int ret = add_hash(h);
+    if (ret != 0) {
+        cleanup_hash_storage();
+        return ret;
+    }
+
+    ret = parse_topology_transaction_for_display(buf);
     if (ret != 0) {
         cleanup_hash_storage();
         return ret;
@@ -451,8 +464,13 @@ MUST_CHECK static bool check_party_id_value(const char *party_id) {
 static int process_namespace_delegation(const NamespaceDelegation *delegation,
                                         transaction_ctx_t *tx_info) {
     UNUSED(tx_info);
-    LEDGER_ASSERT(!has_parsed_namespace_delegation, "Multiple namespace delegations found");
     LEDGER_ASSERT(delegation != NULL, "NULL namespace delegation");
+
+    // The host chooses how many mappings of each kind it sends, so a repeat is a protocol error.
+    if (has_parsed_namespace_delegation) {
+        PRINTF("Multiple namespace delegations found\n");
+        return SW_TOPOLOGY_MULTIPLE_NAMESPACE_DELEGATIONS;
+    }
 
     int ret = 0;
 
@@ -473,8 +491,12 @@ static int process_namespace_delegation(const NamespaceDelegation *delegation,
 static int process_party_to_key_mapping(const PartyToKeyMapping *mapping,
                                         transaction_ctx_t *tx_info) {
     UNUSED(tx_info);
-    LEDGER_ASSERT(!has_parsed_party_to_key_mapping, "Multiple party to key mappings found");
     LEDGER_ASSERT(mapping != NULL, "NULL party to key mapping");
+
+    if (has_parsed_party_to_key_mapping) {
+        PRINTF("Multiple party to key mappings found\n");
+        return SW_TOPOLOGY_MULTIPLE_PARTY_TO_KEY_MAPPINGS;
+    }
 
     int ret = 0;
     // Set party to key mapping specific fields
@@ -512,8 +534,12 @@ cleanup:
 // Process party to participant mapping
 static int process_party_to_participant(const PartyToParticipant *mapping,
                                         transaction_ctx_t *tx_info) {
-    LEDGER_ASSERT(!has_parsed_party_to_participant, "Multiple party to participant mappings found");
     LEDGER_ASSERT(tx_info != NULL, "NULL tx_ctx in process_party_to_participant");
+
+    if (has_parsed_party_to_participant) {
+        PRINTF("Multiple party to participant mappings found\n");
+        return SW_TOPOLOGY_MULTIPLE_PARTY_TO_PARTICIPANTS;
+    }
 
     int ret = 0;
 
