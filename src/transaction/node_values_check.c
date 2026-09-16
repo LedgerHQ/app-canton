@@ -87,8 +87,7 @@ void values_record_used_contract(const char *contract_id) {
         return;
     }
     if (store.used_contracts == NULL &&
-        !app_mem_calloc((void **) &store.used_contracts,
-                        MAX_USED_CONTRACTS * USED_CONTRACT_LEN)) {
+        !app_mem_calloc((void **) &store.used_contracts, MAX_USED_CONTRACTS * USED_CONTRACT_LEN)) {
         give_up("no memory for the contract list");
         return;
     }

@@ -57,8 +57,7 @@ static const identifier_config_t NON_HOLDING_TEMPLATES[] = {
 
 // Sized the way pb_node_display_config.c sizes DISPLAY_CONFIGS_NB, kept file-local because the
 // tables and their only reader live here.
-static const size_t HOLDING_TEMPLATES_NB =
-    sizeof(HOLDING_TEMPLATES) / sizeof(HOLDING_TEMPLATES[0]);
+static const size_t HOLDING_TEMPLATES_NB = sizeof(HOLDING_TEMPLATES) / sizeof(HOLDING_TEMPLATES[0]);
 static const size_t NON_HOLDING_TEMPLATES_NB =
     sizeof(NON_HOLDING_TEMPLATES) / sizeof(NON_HOLDING_TEMPLATES[0]);
 
@@ -194,8 +193,8 @@ MUST_CHECK static bool decode_label(pb_istream_t *stream, const pb_field_t *fiel
 }
 
 MUST_CHECK static bool decode_record_field(pb_istream_t *stream,
-                                         const pb_field_t *field,
-                                         void **arg) {
+                                           const pb_field_t *field,
+                                           void **arg) {
     cbRecordField rf = com_daml_ledger_api_v2_cb_RecordField_init_zero;
 
     (void) field, (void) arg;
@@ -244,8 +243,8 @@ MUST_CHECK static bool decode_argument(pb_istream_t *stream, const pb_field_t *f
 
 /* --- Node kinds --- */
 // Two passes over the same create: the first reads the template so the paths are known, the second
-// parses the argument with them. The stream is rewound in between, the same trick the hashing parser
-// uses to hash a create's plain fields before its argument.
+// parses the argument with them. The stream is rewound in between, the same trick the hashing
+// parser uses to hash a create's plain fields before its argument.
 MUST_CHECK static bool decode_create(pb_istream_t *stream) {
     com_daml_ledger_api_v2_interactive_transaction_v1_cb_Create probe =
         com_daml_ledger_api_v2_interactive_transaction_v1_cb_Create_init_zero;
@@ -313,8 +312,8 @@ MUST_CHECK static bool decode_node_type(pb_istream_t *stream, const pb_field_t *
 }
 
 MUST_CHECK static bool decode_versioned_node(pb_istream_t *stream,
-                                           const pb_field_t *field,
-                                           void **arg) {
+                                             const pb_field_t *field,
+                                             void **arg) {
     (void) stream, (void) arg;
 
     com_daml_ledger_api_v2_interactive_DeviceDamlTransaction_Node *node = field->message;

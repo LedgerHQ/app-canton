@@ -52,14 +52,14 @@ MUST_CHECK int handler_sign_tx(buffer_t *cdata,
                                bool first,
                                bool more,
                                bool msg_end) {
+    if (!first && G_context.signing_type != type) {
+        PRINTF("Signing type mismatch: expected %d, got %d\n", G_context.signing_type, type);
+        return io_send_sw(SW_BAD_STATE);
+    }
+
     int result = process_tx_chunk(cdata, type, first, more, msg_end);
     if (result != 0) {
         return io_send_sw(result);  // Send the error code via io_send_sw
-    }
-
-    if (G_context.signing_type != type) {
-        PRINTF("Signing type mismatch: expected %d, got %d\n", G_context.signing_type, type);
-        return io_send_sw(SW_BAD_STATE);
     }
 
     if (G_context.state == STATE_EXPECTING_MORE) {
@@ -113,10 +113,6 @@ static int process_tx_chunk(buffer_t *cdata,
     if (first) {  // first APDU, parse BIP32 path
         clean_context();
         PRINTF("Processing first chunk of transaction\n");
-        G_context.req_type = CONFIRM_TRANSACTION;
-        G_context.signing_type = type;
-        G_context.tx_info.clear_signing_available = false;
-        G_context.state = STATE_EXPECTING_MORE;
 
         if (!buffer_read_u8(cdata, &G_context.bip32_path_len) ||
             !buffer_read_bip32_path(cdata,
@@ -136,6 +132,12 @@ static int process_tx_chunk(buffer_t *cdata,
                 return SW_WRONG_DATA_LENGTH;
             }
         }
+
+        // Accept continuation chunks only once the path and the init both succeeded.
+        G_context.req_type = CONFIRM_TRANSACTION;
+        G_context.signing_type = type;
+        G_context.tx_info.clear_signing_available = false;
+        G_context.state = STATE_EXPECTING_MORE;
 
     } else {  // parse transaction
         if (G_context.req_type != CONFIRM_TRANSACTION) {

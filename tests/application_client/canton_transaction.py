@@ -283,7 +283,7 @@ class Transaction:
             ],
         )
 
-        if party_id is None:
+        if party_id is None and public_key is not None:
             party_fingerprint = cls._compute_party_fingerprint(public_key)
             party_id = DEFAULT_PARTY_NAME + "::" + party_fingerprint
 
@@ -350,7 +350,7 @@ class Transaction:
         party_id: Optional[str] = None,
         has_party_signing_keys: bool = False,
     ) -> bytes:
-        if party_id is None:
+        if party_id is None and public_key is not None:
             party_fingerprint = cls._compute_party_fingerprint(public_key)
             party_id = DEFAULT_PARTY_NAME + "::" + party_fingerprint
 
