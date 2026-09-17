@@ -190,17 +190,17 @@ static const identifier_config_t *NODE_ID_EMPTY[] = {};
 // _node_ids lists the templates the node may act on, and is empty for a create, whose template is
 // _id. Several choices share one template, so _node_ids never identifies the action on its own: the
 // choice id is checked against _id's entity name as well.
-#define CFG_ENTRY(_id, _node_ids, _fields, _title, _finish, _meta, _dest, _chk)    \
-    {.identifier = _id,                                                            \
-     .node_identifiers = _node_ids,                                                \
-     .node_identifiers_count = sizeof(_node_ids) / sizeof(_node_ids[0]),           \
-     .fields = _fields,                                                            \
-     .fields_count = sizeof(_fields) / sizeof(_fields[0]),                    \
-     .review_title = _title,                                                  \
-     .review_finish = _finish,                                                \
-     .metadata_contract_identifiers = _meta,                                  \
-     .metadata_contract_identifiers_count = sizeof(_meta) / sizeof(_meta[0]), \
-     .destination = _dest,                                                    \
+#define CFG_ENTRY(_id, _node_ids, _fields, _title, _finish, _meta, _dest, _chk) \
+    {.identifier = _id,                                                         \
+     .node_identifiers = _node_ids,                                             \
+     .node_identifiers_count = sizeof(_node_ids) / sizeof(_node_ids[0]),        \
+     .fields = _fields,                                                         \
+     .fields_count = sizeof(_fields) / sizeof(_fields[0]),                      \
+     .review_title = _title,                                                    \
+     .review_finish = _finish,                                                  \
+     .metadata_contract_identifiers = _meta,                                    \
+     .metadata_contract_identifiers_count = sizeof(_meta) / sizeof(_meta[0]),   \
+     .destination = _dest,                                                      \
      .amount_check = _chk}
 
 const display_config_t DISPLAY_CONFIGS[] = {

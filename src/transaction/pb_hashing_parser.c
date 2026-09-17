@@ -838,10 +838,14 @@ MUST_CHECK static bool exercise_is_complete(
                               (const com_daml_ledger_api_v2_Identifier *) &e->template_id,
                               "exercise without template_id") &&
            require_strings(e->signatories, e->signatories_count, "exercise signatory missing") &&
-           require_strings(e->stakeholders, e->stakeholders_count, "exercise stakeholder missing") &&
-           require_strings(e->acting_parties, e->acting_parties_count,
+           require_strings(e->stakeholders,
+                           e->stakeholders_count,
+                           "exercise stakeholder missing") &&
+           require_strings(e->acting_parties,
+                           e->acting_parties_count,
                            "exercise acting party missing") &&
-           require_strings(e->choice_observers, e->choice_observers_count,
+           require_strings(e->choice_observers,
+                           e->choice_observers_count,
                            "exercise choice observer missing") &&
            require_strings(e->children, e->children_count, "exercise child missing");
 }
@@ -854,7 +858,8 @@ MUST_CHECK static bool fetch_is_complete(
            require_identifier(f->has_template_id, &f->template_id, "fetch without template_id") &&
            require_strings(f->signatories, f->signatories_count, "fetch signatory missing") &&
            require_strings(f->stakeholders, f->stakeholders_count, "fetch stakeholder missing") &&
-           require_strings(f->acting_parties, f->acting_parties_count,
+           require_strings(f->acting_parties,
+                           f->acting_parties_count,
                            "fetch acting party missing");
 }
 
@@ -971,7 +976,8 @@ MUST_CHECK static bool decode_exercise(pb_istream_t *stream, const pb_field_t *f
     }
 
     if (!exercise_is_complete(&e) ||
-        !optional_interface_is_complete((const com_daml_ledger_api_v2_Identifier *) e.interface_id)) {
+        !optional_interface_is_complete(
+            (const com_daml_ledger_api_v2_Identifier *) e.interface_id)) {
         pb_release(com_daml_ledger_api_v2_interactive_transaction_v1_cb_Exercise_fields, &e);
         return false;
     }

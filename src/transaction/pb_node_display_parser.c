@@ -388,12 +388,10 @@ static void set_node_identity(pb_callback_context_t *ctx,
     app_mem_free(ctx->node_entity);
     app_mem_free(ctx->node_choice_id);
     ctx->last_parsed_contract_id = contract_id ? app_mem_strdup(contract_id) : NULL;
-    ctx->node_module = template_id && template_id->module_name
-                           ? app_mem_strdup(template_id->module_name)
-                           : NULL;
-    ctx->node_entity = template_id && template_id->entity_name
-                           ? app_mem_strdup(template_id->entity_name)
-                           : NULL;
+    ctx->node_module =
+        template_id && template_id->module_name ? app_mem_strdup(template_id->module_name) : NULL;
+    ctx->node_entity =
+        template_id && template_id->entity_name ? app_mem_strdup(template_id->entity_name) : NULL;
     ctx->node_choice_id = choice_id ? app_mem_strdup(choice_id) : NULL;
 }
 
