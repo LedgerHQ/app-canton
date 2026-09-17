@@ -118,7 +118,16 @@ struct tx_field_t {
 };
 
 typedef struct {
+    // The record that carries the displayed fields. For an exercise it is the choice argument, for
+    // a create it is the template itself.
     identifier_config_t identifier;
+    // The templates the node may act on. A record may only pick this screen when the node's own
+    // template_id is one of them, so the screen is tied to a contract type the app supports and
+    // not only to a record name the host wrote. It is a list because the same choice is performed
+    // on a different template per token family. Empty for a create, whose template is the
+    // identifier above.
+    const identifier_config_t *const *node_identifiers;
+    const size_t node_identifiers_count;
     const field_config_t *fields;
     size_t fields_count;
     const char *review_title;
@@ -139,6 +148,14 @@ struct pb_callback_context_t {
     const char *review_finish;
     bool unknown_token;
     char *last_parsed_contract_id;
+    // The action this node signs, read from the node before its argument is walked. Only a record
+    // that names this action may choose the screen, so a record nested inside the argument cannot.
+    char *node_module;     // the node's own template_id, both node kinds
+    char *node_entity;     //
+    char *node_choice_id;  // the choice an exercise performs, NULL for a create
+    // How many records deep the argument walk currently is. The screen is chosen by the outermost
+    // record only, which is depth 1.
+    uint8_t record_depth;
     // Copied from the matched configuration, so the value check can be handed the displayed values
     // once they are resolved.
     destination_e destination;

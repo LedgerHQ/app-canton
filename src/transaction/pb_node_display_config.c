@@ -169,12 +169,32 @@ static const identifier_config_t *const TRANSFER_OFFER_META_ID_LIST[] = {
 static const identifier_config_t *META_EMPTY[] = {};
 
 /* -------------------------------------------------------------------------- */
+/* Node template lists                                                        */
+/* -------------------------------------------------------------------------- */
+
+// The templates each screen's action is performed on. Accept, reject and withdraw exercise a choice
+// on the transfer instruction contract itself, which is also the contract they disclose, so they
+// reuse TRANSFER_OFFER_META_ID_LIST rather than repeating its two templates.
+static const identifier_config_t NODE_ID_EXTERNAL_PARTY_AMULET_RULES =
+    ID("Splice.ExternalPartyAmuletRules", "ExternalPartyAmuletRules");
+
+static const identifier_config_t *const AMULET_RULES_NODE_ID_LIST[] = {
+    &NODE_ID_EXTERNAL_PARTY_AMULET_RULES};
+// A create's argument record is its own template, so nothing extra is needed to tie the two.
+static const identifier_config_t *NODE_ID_EMPTY[] = {};
+
+/* -------------------------------------------------------------------------- */
 /* Main Display Configuration                                                 */
 /* -------------------------------------------------------------------------- */
 
-#define CFG_ENTRY(_id, _fields, _title, _finish, _meta, _dest, _chk)          \
-    {.identifier = _id,                                                       \
-     .fields = _fields,                                                       \
+// _node_ids lists the templates the node may act on, and is empty for a create, whose template is
+// _id. Several choices share one template, so _node_ids never identifies the action on its own: the
+// choice id is checked against _id's entity name as well.
+#define CFG_ENTRY(_id, _node_ids, _fields, _title, _finish, _meta, _dest, _chk)    \
+    {.identifier = _id,                                                            \
+     .node_identifiers = _node_ids,                                                \
+     .node_identifiers_count = sizeof(_node_ids) / sizeof(_node_ids[0]),           \
+     .fields = _fields,                                                            \
      .fields_count = sizeof(_fields) / sizeof(_fields[0]),                    \
      .review_title = _title,                                                  \
      .review_finish = _finish,                                                \
@@ -185,6 +205,7 @@ static const identifier_config_t *META_EMPTY[] = {};
 
 const display_config_t DISPLAY_CONFIGS[] = {
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV1", "TransferFactory_Transfer"),
+              AMULET_RULES_NODE_ID_LIST,
               TOKEN_TRANSFER_FIELDS,
               TOKEN_TRANSFER_REVIEW_TITLE,
               TOKEN_TRANSFER_REVIEW_FINISH,
@@ -194,6 +215,7 @@ const display_config_t DISPLAY_CONFIGS[] = {
 
     CFG_ENTRY(
         ID("Splice.ExternalPartyAmuletRules", "ExternalPartyAmuletRules_CreateTransferCommand"),
+        AMULET_RULES_NODE_ID_LIST,
         NATIVE_COIN_TRANSFER_FIELDS,
         NATIVE_COIN_TRANSFER_REVIEW_TITLE,
         NATIVE_COIN_TRANSFER_REVIEW_FINISH,
@@ -202,6 +224,7 @@ const display_config_t DISPLAY_CONFIGS[] = {
         AMOUNT_COMPARABLE),
 
     CFG_ENTRY(ID("Splice.Wallet.TransferPreapproval", "TransferPreapprovalProposal"),
+              NODE_ID_EMPTY,
               PREAPPROVAL_PROPOSAL_FIELDS,
               PREAPPROVAL_PROPOSAL_REVIEW_TITLE,
               PREAPPROVAL_PROPOSAL_REVIEW_FINISH,
@@ -210,6 +233,7 @@ const display_config_t DISPLAY_CONFIGS[] = {
               AMOUNT_NOT_COMPARABLE),
 
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV1", "TransferInstruction_Accept"),
+              TRANSFER_OFFER_META_ID_LIST,
               TOKEN_TRANSFER_ACCEPT_FIELDS,
               TOKEN_TRANSFER_ACCEPT_REVIEW_TITLE,
               TOKEN_TRANSFER_ACCEPT_REVIEW_FINISH,
@@ -218,6 +242,7 @@ const display_config_t DISPLAY_CONFIGS[] = {
               AMOUNT_COMPARABLE),
 
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV1", "TransferInstruction_Reject"),
+              TRANSFER_OFFER_META_ID_LIST,
               TOKEN_TRANSFER_ACCEPT_FIELDS,
               TOKEN_TRANSFER_REJECT_REVIEW_TITLE,
               TOKEN_TRANSFER_REJECT_REVIEW_FINISH,
@@ -226,6 +251,7 @@ const display_config_t DISPLAY_CONFIGS[] = {
               AMOUNT_NOT_COMPARABLE),
 
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV1", "TransferInstruction_Withdraw"),
+              TRANSFER_OFFER_META_ID_LIST,
               TOKEN_TRANSFER_WITHDRAW_FIELDS,
               TOKEN_TRANSFER_WITHDRAW_REVIEW_TITLE,
               TOKEN_TRANSFER_WITHDRAW_REVIEW_FINISH,
