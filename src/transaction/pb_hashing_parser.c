@@ -772,6 +772,101 @@ MUST_CHECK static bool decode_value_field(pb_istream_t *stream,
     return true;
 }
 
+/* -------------------------------------------------------------------------- */
+/*  Presence checks on a decoded node                                         */
+/* -------------------------------------------------------------------------- */
+
+// The schemas are proto3, so the decoder ignores the fields the comments call required. Anything
+// the host leaves out arrives as a NULL pointer, and every later reader of the node - the
+// canonical hash, a strcmp, the display parser - would dereference it.
+//
+// So each node kind is checked for the fields it must carry as soon as it is decoded. Returning
+// false here fails the enclosing pb_decode, which the caller turns into SW_TX_PARSING_FAIL.
+MUST_CHECK static bool require_present(const void *p, const char *what) {
+    UNUSED(what);  // PRINTF compiles away in release, leaving what unread
+
+    if (p == NULL) {
+        PRINTF("Malformed node: %s\n", what);
+        return false;
+    }
+    return true;
+}
+
+// A repeated string field: the array itself, then every element in it.
+MUST_CHECK static bool require_strings(char *const *values, size_t count, const char *what) {
+    if (count > 0 && !require_present(values, what)) {
+        return false;
+    }
+    for (size_t i = 0; i < count; i++) {
+        if (!require_present(values[i], what)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+MUST_CHECK static bool require_identifier(bool has_id,
+                                          const com_daml_ledger_api_v2_Identifier *id,
+                                          const char *what) {
+    if (!has_id) {
+        PRINTF("Malformed node: %s\n", what);
+        return false;
+    }
+    return require_present(id->package_id, what) && require_present(id->module_name, what) &&
+           require_present(id->entity_name, what);
+}
+
+MUST_CHECK static bool create_is_complete(
+    const com_daml_ledger_api_v2_interactive_transaction_v1_cb_Create *c) {
+    return require_present(c->lf_version, "create without lf_version") &&
+           require_present(c->contract_id, "create without contract_id") &&
+           require_present(c->package_name, "create without package_name") &&
+           require_identifier(c->has_template_id,
+                              (const com_daml_ledger_api_v2_Identifier *) &c->template_id,
+                              "create without template_id") &&
+           require_strings(c->signatories, c->signatories_count, "create signatory missing") &&
+           require_strings(c->stakeholders, c->stakeholders_count, "create stakeholder missing");
+}
+
+MUST_CHECK static bool exercise_is_complete(
+    const com_daml_ledger_api_v2_interactive_transaction_v1_cb_Exercise *e) {
+    return require_present(e->lf_version, "exercise without lf_version") &&
+           require_present(e->contract_id, "exercise without contract_id") &&
+           require_present(e->package_name, "exercise without package_name") &&
+           require_present(e->choice_id, "exercise without choice_id") &&
+           require_identifier(e->has_template_id,
+                              (const com_daml_ledger_api_v2_Identifier *) &e->template_id,
+                              "exercise without template_id") &&
+           require_strings(e->signatories, e->signatories_count, "exercise signatory missing") &&
+           require_strings(e->stakeholders, e->stakeholders_count, "exercise stakeholder missing") &&
+           require_strings(e->acting_parties, e->acting_parties_count,
+                           "exercise acting party missing") &&
+           require_strings(e->choice_observers, e->choice_observers_count,
+                           "exercise choice observer missing") &&
+           require_strings(e->children, e->children_count, "exercise child missing");
+}
+
+MUST_CHECK static bool fetch_is_complete(
+    const com_daml_ledger_api_v2_interactive_transaction_v1_Fetch *f) {
+    return require_present(f->lf_version, "fetch without lf_version") &&
+           require_present(f->contract_id, "fetch without contract_id") &&
+           require_present(f->package_name, "fetch without package_name") &&
+           require_identifier(f->has_template_id, &f->template_id, "fetch without template_id") &&
+           require_strings(f->signatories, f->signatories_count, "fetch signatory missing") &&
+           require_strings(f->stakeholders, f->stakeholders_count, "fetch stakeholder missing") &&
+           require_strings(f->acting_parties, f->acting_parties_count,
+                           "fetch acting party missing");
+}
+
+// An optional interface id still has to be complete when it is there.
+MUST_CHECK static bool optional_interface_is_complete(
+    const com_daml_ledger_api_v2_Identifier *interface_id) {
+    if (interface_id == NULL) {
+        return true;
+    }
+    return require_identifier(true, interface_id, "incomplete interface_id");
+}
+
 MUST_CHECK static bool decode_create(pb_istream_t *stream, const pb_field_t *field, void **arg) {
     (void) field;
     (void) arg;
@@ -790,6 +885,11 @@ MUST_CHECK static bool decode_create(pb_istream_t *stream, const pb_field_t *fie
                    com_daml_ledger_api_v2_interactive_transaction_v1_cb_Create_fields,
                    &c_cb)) {
         PRINTF("Failed to decode Create node: %s\n", PB_GET_ERROR(stream));
+        return false;
+    }
+
+    if (!create_is_complete(&c_cb)) {
+        pb_release(com_daml_ledger_api_v2_interactive_transaction_v1_cb_Create_fields, &c_cb);
         return false;
     }
 
@@ -867,6 +967,12 @@ MUST_CHECK static bool decode_exercise(pb_istream_t *stream, const pb_field_t *f
                    com_daml_ledger_api_v2_interactive_transaction_v1_cb_Exercise_fields,
                    &e)) {
         PRINTF("Failed to decode Exercise node: %s\n", PB_GET_ERROR(stream));
+        return false;
+    }
+
+    if (!exercise_is_complete(&e) ||
+        !optional_interface_is_complete((const com_daml_ledger_api_v2_Identifier *) e.interface_id)) {
+        pb_release(com_daml_ledger_api_v2_interactive_transaction_v1_cb_Exercise_fields, &e);
         return false;
     }
 
@@ -957,6 +1063,11 @@ MUST_CHECK static bool decode_fetch(pb_istream_t *stream, const pb_field_t *fiel
         return false;
     }
 
+    if (!fetch_is_complete(&f) || !optional_interface_is_complete(f.interface_id)) {
+        pb_release(com_daml_ledger_api_v2_interactive_transaction_v1_Fetch_fields, &f);
+        return false;
+    }
+
     values_record_used_contract(f.contract_id);
 
     encode_fetch(&ctx.node_hw, &f);
@@ -978,6 +1089,11 @@ MUST_CHECK static bool decode_rollback(pb_istream_t *stream, const pb_field_t *f
 
     if (!pb_decode(stream, com_daml_ledger_api_v2_interactive_transaction_v1_Rollback_fields, &r)) {
         PRINTF("Failed to decode Rollback node: %s\n", PB_GET_ERROR(stream));
+        return false;
+    }
+
+    if (!require_strings(r.children, r.children_count, "rollback child missing")) {
+        pb_release(com_daml_ledger_api_v2_interactive_transaction_v1_Rollback_fields, &r);
         return false;
     }
 
