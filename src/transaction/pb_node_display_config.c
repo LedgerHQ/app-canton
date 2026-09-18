@@ -166,6 +166,8 @@ static const field_config_t PREAPPROVAL_PROPOSAL_FIELDS[] = {
 static const identifier_config_t *const TRANSFER_OFFER_META_ID_LIST[] = {
     &META_ID_TRANSFER_INSTRUCTION,
     &META_ID_TRANSFER_OFFER};
+// Deliberately zero-length, so CFG_ENTRY's sizeof division yields a count of 0. A one-element
+// sentinel would make the count 1 and force every reader to skip it.
 static const identifier_config_t *META_EMPTY[] = {};
 
 /* -------------------------------------------------------------------------- */
@@ -183,6 +185,7 @@ static const identifier_config_t *const AMULET_RULES_NODE_ID_LIST[] = {
 // A create's argument record is its own template, so nothing extra is needed to tie the two.
 static const identifier_config_t *NODE_ID_EMPTY[] = {};
 
+// Zero-length for the same reason as META_EMPTY above.
 /* -------------------------------------------------------------------------- */
 /* Main Display Configuration                                                 */
 /* -------------------------------------------------------------------------- */

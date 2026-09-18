@@ -76,6 +76,12 @@ typedef struct {
     uint8_t hash[SHA256_HASH_LEN];
 } PrecomputedNodeHash;
 
+// A cache of the most recent node hashes, not a record of the whole transaction. Children arrive
+// before their parent, and a parent needs only its own children, so MAX_NODE_CHILDREN slots are
+// enough however many nodes the transaction has. Older entries are overwritten on purpose: a
+// 44-node transfer wraps this store and still hashes correctly. A hash a parent still needs but
+// that has been overwritten is a lookup failure, which refuses the transaction rather than
+// producing a wrong hash.
 static PrecomputedNodeHash G_hashed_nodes_store[MAX_NODE_CHILDREN] = {0};
 static size_t G_hashed_nodes_store_count = 0;
 

@@ -27,6 +27,8 @@
 
 /**
  * Maximum number of child nodes per transaction node.
+ * This also sizes the node hash store in canonical_hash.c, because a parent needs its children's
+ * hashes and nothing else. It is not a limit on how many nodes a transaction may have.
  */
 #define MAX_NODE_CHILDREN 32
 
