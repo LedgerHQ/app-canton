@@ -350,6 +350,20 @@ def test_sign_invalid_node_tree_blind_signing_disabled(backend: BackendInterface
     _check_blind_signing_rejection(backend, serialized_parts)
 
 
+# Nodes 4 and 5 claim each other. Every node still has exactly one parent, so the tree check finds
+# nothing wrong, and neither node hangs off the root. A parent hashes its children's hashes, and a
+# cycle has no order in which both children arrive before their parent, so the child hash lookup
+# fails and the transaction is refused. The tree check does not have to prove reachability itself.
+def test_sign_node_tree_cycle(backend: BackendInterface) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts("tests/tx_examples/tree_err_cycle.json")
+    path = "m/44'/6767'/0'/0'/0'"
+    client = CantonCommandSender(backend)
+    with pytest.raises(ExceptionRAPDU) as e:
+        with client.sign_tx_in_parts(path, *serialized_parts):
+            pass
+    assert e.value.status == Errors.SW_TX_HASH_FAIL
+
+
 def test_sign_native_transfer(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
     _sign_and_verify_prepared_transaction(
         backend,
