@@ -557,6 +557,10 @@ def test_sign_token_transfer_wrong_token_id_blind_signing_enabled(
         "values_err_holding_admin",
         # the holding went to a third account, so nothing is written for the receiver shown
         "values_err_no_holding",
+        # the change holding goes to bob as well, so bob is paid 20 CC and 67.79 CC on top. The
+        # screen still says 20, and the amounts are digests that cannot be added up, so a second
+        # holding for the receiver has to drop clear signing.
+        "values_err_extra_holding",
         # One create is turned into a pre-approval proposal, which the display parser reaches before
         # the transfer node, so the screen offers a pre-approval while the transfer still pays bob
         # 20 CC. A pre-approval moves nothing, so any holding at all has to drop clear signing.

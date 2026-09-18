@@ -131,30 +131,28 @@ MUST_CHECK bool values_still_collecting(void) {
     return store.ok;
 }
 
-// Deduplicated on the whole triple, because the same node can reach here more than once.
+// Every holding is recorded, repeats included. Two creates can legitimately write the same owner,
+// amount and admin, and the entries carry nothing that tells those two apart, so collapsing them
+// would hide what the second one pays. A create is decoded once per node part, so a repeat can only
+// come from a payload that writes the same value twice.
 void values_report_holding(const uint8_t owner[SHA256_HASH_LEN],
                            const uint8_t amount[SHA256_HASH_LEN],
                            const uint8_t admin[SHA256_HASH_LEN]) {
-    holding_t holding = {0};
+    holding_t *holding = NULL;
 
     LEDGER_ASSERT(owner != NULL, "NULL owner in values_report_holding");
     LEDGER_ASSERT(amount != NULL, "NULL amount in values_report_holding");
     LEDGER_ASSERT(admin != NULL, "NULL admin in values_report_holding");
 
-    memmove(holding.owner, owner, SHA256_HASH_LEN);
-    memmove(holding.amount, amount, SHA256_HASH_LEN);
-    memmove(holding.admin, admin, SHA256_HASH_LEN);
-
-    for (uint8_t i = 0; i < store.holdings_count; i++) {
-        if (memcmp(&store.holdings[i], &holding, sizeof(holding)) == 0) {
-            return;
-        }
-    }
     if (store.holdings_count >= MAX_HOLDINGS) {
         give_up("too many holdings written");
         return;
     }
-    memmove(&store.holdings[store.holdings_count], &holding, sizeof(holding));
+
+    holding = &store.holdings[store.holdings_count];
+    memmove(holding->owner, owner, SHA256_HASH_LEN);
+    memmove(holding->amount, amount, SHA256_HASH_LEN);
+    memmove(holding->admin, admin, SHA256_HASH_LEN);
     store.holdings_count++;
 }
 
@@ -236,28 +234,42 @@ void values_bind_from_display(const tx_field_t *fields,
     store.bound_destination = destination;
 }
 
-// A holding must exist for the account the value ends up with, and it must carry the amount shown
-// whenever that amount is comparable. Requiring one to exist matters on its own: without it, a
-// payload naming a destination that receives nothing would pass unnoticed.
+// Exactly one holding may name the account the value ends up with, and it must carry the amount
+// shown whenever that amount is comparable. Requiring one to exist matters on its own: without it,
+// a payload naming a destination that receives nothing would pass unnoticed. Requiring no more than
+// one is what bounds the payment: the amounts are digests and cannot be added up, so a second
+// holding for that account could pay it anything on top of the amount on screen.
+//
+// Every recorded transfer writes one holding for its destination. The change and the escrow go to
+// the sender, who is not the destination on those screens, and on the reject and withdraw screens,
+// where the sender is the destination, the returned lock is the only holding written.
 MUST_CHECK static bool destination_holds_value(void) {
-    bool owned = false;
+    const holding_t *held = NULL;
+    uint8_t owned = 0;
 
     for (uint8_t i = 0; i < store.holdings_count; i++) {
-        if (memcmp(store.holdings[i].owner, store.destination, SHA256_HASH_LEN) != 0) {
-            continue;  // this holding is not for the destination
-        }
-        owned = true;
-        // Returning a locked holding hands back a fee reserve with it, so no amount was bound and
-        // the destination owning a holding is all there is to check.
-        if (!store.has_amount ||
-            memcmp(store.holdings[i].amount, store.amount, SHA256_HASH_LEN) == 0) {
-            return true;
+        if (memcmp(store.holdings[i].owner, store.destination, SHA256_HASH_LEN) == 0) {
+            held = &store.holdings[i];
+            owned++;
         }
     }
 
-    give_up(owned ? "the destination's holding has another amount"
-                  : "no holding for the account the value goes to");
-    return false;
+    if (owned == 0) {
+        give_up("no holding for the account the value goes to");
+        return false;
+    }
+    if (owned > 1) {
+        give_up("more than one holding for the account the value goes to");
+        return false;
+    }
+    // Returning a locked holding hands back a fee reserve with it, so no amount was bound and the
+    // destination owning a holding is all there is to check.
+    if (store.has_amount && memcmp(held->amount, store.amount, SHA256_HASH_LEN) != 0) {
+        give_up("the destination's holding has another amount");
+        return false;
+    }
+
+    return true;
 }
 
 // Every holding must be issued by the party the displayed ticker was resolved from. The ticker

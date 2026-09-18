@@ -18,8 +18,9 @@
  * pb_holding_parser.h finds them; this decides what they mean.
  *
  * The checks are:
- *  - A holding must exist for the account the value ends up with, and it must carry the amount
- *    shown whenever that amount is comparable.
+ *  - Exactly one holding must name the account the value ends up with, and it must carry the amount
+ *    shown whenever that amount is comparable. One and no more, because the amounts are digests and
+ *    cannot be added up: a second holding for that account would pay it more than the screen says.
  *  - Every holding must be issued by the same party the displayed ticker was resolved from.
  *  - A create whose template is unknown drops clear signing, because nothing classified it.
  *
@@ -78,7 +79,8 @@ MUST_CHECK bool values_still_collecting(void);
  * value as it captures it. Comparison is unaffected: the displayed values are hashed too, so a
  * digest match still means the strings matched byte for byte.
  *
- * Deduplicated on the whole triple, because the same node can be parsed more than once.
+ * Repeats are kept, not collapsed. Two creates can write the same owner, amount and admin, and
+ * nothing recorded here tells them apart, so dropping the second one would hide what it pays.
  *
  * @param[in] owner   Digest of the account the holding belongs to.
  * @param[in] amount  Digest of the amount written in it, as the ledger wrote it.
