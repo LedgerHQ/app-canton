@@ -958,7 +958,7 @@ MUST_CHECK int format_and_populate_display_items(pb_callback_context_t *ctx) {
 
     // Loop for mandatory check + format callbacks
     for (size_t i = 0; i < ctx->nb_fields; i++) {
-        const tx_field_t *state = &ctx->tx_fields[i];
+        tx_field_t *state = &ctx->tx_fields[i];
         const field_config_t *cfg = state->config;
 
         // Mandatory field check
@@ -975,7 +975,7 @@ MUST_CHECK int format_and_populate_display_items(pb_callback_context_t *ctx) {
             field_format_callback_t callback =
                 (field_format_callback_t) PIC(ctx->tx_fields[i].config->format_callback);
             if (callback != NULL) {
-                callback(ctx, (void *) &state->value);
+                callback(ctx, state);
             }
         }
 
