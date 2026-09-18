@@ -295,8 +295,6 @@ MUST_CHECK bool init_transaction_pairs(transaction_ctx_t *tx_info, size_t count)
     tx_info->pairs_count = 0;
     tx_info->pairs =
         (nbgl_contentTagValue_t *) app_mem_alloc(count * sizeof(nbgl_contentTagValue_t));
-    memset(tx_info->pairs, 0, count * sizeof(nbgl_contentTagValue_t));
-
     if (tx_info->pairs == NULL) {
         return false;
     }
@@ -549,7 +547,7 @@ static void find_tx_field(pb_callback_context_t *ctx, cbValue *value) {
     LEDGER_ASSERT(ctx != NULL, "NULL context passed to find_tx_field");
     LEDGER_ASSERT(value != NULL, "NULL value passed to find_tx_field");
 
-    if (ctx->tx_fields != NULL) {
+    if (ctx->tx_fields != NULL && ctx->field_path != NULL) {
         PRINTF("Looking up field path: %s\n", ctx->field_path);
         tx_field_t *state = find_field_by_path(ctx, ctx->field_path);
         if (state != NULL && value != NULL) {
@@ -592,6 +590,9 @@ static void init_field_path(pb_callback_context_t *ctx) {
         app_mem_free(ctx->field_path);
     }
     ctx->field_path = (char *) app_mem_alloc(MAX_FIELD_PATH_LEN);
+    if (ctx->field_path == NULL) {
+        return;  // push_path, pop_path and find_tx_field all treat a NULL path as "no path"
+    }
     memset(ctx->field_path, 0, MAX_FIELD_PATH_LEN);
 }
 
