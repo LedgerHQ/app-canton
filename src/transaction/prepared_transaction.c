@@ -87,11 +87,18 @@ MUST_CHECK int process_prepared_tx_part(buffer_t *buf) {
                                    G_context.tx_info.tx_parts_ctx.daml_transaction.roots_count,
                                    G_context.tx_info.tx_parts_ctx.daml_transaction.nodes_count);
 
-            // No need to check for hashing errors here, set_hash_error is not called in
-            // this function. Critical errors are handled with assertions (CX_ASSERT,
-            // LEDGER_ASSERT).
+            // hash_transaction encodes the host-supplied version string, which is absent when the
+            // host omits it. An absent string writes no bytes at all, so the hash would be finished
+            // and signed over an encoding the ledger never accepts.
             hash_transaction(&G_context.tx_info.hasher,
                              &G_context.tx_info.tx_parts_ctx.daml_transaction);
+
+            int hash_res = get_hash_error();
+            if (hash_res != HASH_OK) {
+                PRINTF("Failed to hash DAML transaction. Hash error code : %d\n", hash_res);
+                release_daml_tx(&G_context.tx_info);
+                return abort_prepared_tx(SW_TX_HASH_FAIL);
+            }
 
             G_context.tx_info.recv_node_idx = 0;
             tx_state = G_context.tx_info.tx_parts_ctx.daml_transaction.nodes_count == 0
@@ -163,9 +170,10 @@ MUST_CHECK int process_prepared_tx_part(buffer_t *buf) {
                 return abort_prepared_tx(SW_TX_PARSING_FAIL);
             }
 
-            // No need to check for hashing errors here, set_hash_error is not called in
-            // this function. Critical errors are handled with assertions (CX_ASSERT,
-            // LEDGER_ASSERT).
+            // hash_metadata encodes the command id, the transaction uuid, the synchronizer id and
+            // every act_as party. All are host-supplied and any of them can be absent, and an
+            // absent string writes no bytes, so the error has to be read here as well. This is the
+            // last point that reads it for a transaction disclosing no input contract.
             hash_metadata(&G_context.tx_info.hasher, &G_context.tx_info.tx_parts_ctx.metadata);
 
             release_metadata(&G_context.tx_info);
@@ -176,6 +184,13 @@ MUST_CHECK int process_prepared_tx_part(buffer_t *buf) {
                 return process_prepared_tx_finalize();
             } else {
                 tx_state = RECEIVING_METADATA_INPUT_CONTRACTS;
+            int hash_res = get_hash_error();
+            if (hash_res != HASH_OK) {
+                PRINTF("Failed to hash metadata. Hash error code : %d\n", hash_res);
+                release_metadata(&G_context.tx_info);
+                return abort_prepared_tx(SW_TX_HASH_FAIL);
+            }
+
             }
 
         } break;
