@@ -37,7 +37,8 @@ static struct {
     uint8_t amount[SHA256_HASH_LEN];       // amount shown, before formatting
     uint8_t admin[SHA256_HASH_LEN];        // instrument admin the ticker was resolved from
     bool has_destination, has_amount, has_admin;
-    bool bound;  // a display configuration matched
+    bool bound;                       // a display configuration matched
+    destination_e bound_destination;  // which account that configuration says the value goes to
 
     bool ok;  // false means clear signing is off, the transaction is never refused
 } store;
@@ -226,6 +227,7 @@ void values_bind_from_display(const tx_field_t *fields,
         store.has_admin = true;
     }
     store.bound = true;
+    store.bound_destination = destination;
 }
 
 // A holding must exist for the account the value ends up with, and it must carry the amount shown
@@ -275,7 +277,25 @@ MUST_CHECK bool values_can_clear_sign(void) {
         return false;
     }
 
-    if (store.has_destination && !destination_holds_value()) {
+    // A screen with no destination authorizes something without moving value, so the transaction
+    // must write no holding at all. The two checks below need a destination to compare against, so
+    // skipping them would let the payload move anything it likes behind such a screen.
+    if (store.bound_destination == DEST_NONE) {
+        if (store.holdings_count > 0) {
+            give_up("a screen that moves nothing wrote a holding");
+            return false;
+        }
+        return true;
+    }
+
+    // The screen names a destination, so it must have resolved. Every configuration that names one
+    // marks that field mandatory, so this only fires if the table and this check disagree.
+    if (!store.has_destination) {
+        give_up("the screen's destination field did not resolve");
+        return false;
+    }
+
+    if (!destination_holds_value()) {
         return false;
     }
 

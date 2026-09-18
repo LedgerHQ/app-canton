@@ -30,9 +30,11 @@
  * larger than the amount on screen. The display configuration says which is which, and for those
  * two only the destination is checked.
  *
- * A check is skipped when the matched display configuration does not give the value it needs. The
- * pre-approval proposal authorizes future transfers without moving anything, so it has neither a
- * destination nor an amount.
+ * A screen that names no destination is held to a stricter rule instead of a weaker one. The
+ * pre-approval proposal authorizes future transfers without moving anything, so there is nothing to
+ * compare a holding against; a transaction behind such a screen must therefore write no holding at
+ * all. Were the checks merely skipped, one transaction could show a pre-approval screen and still
+ * carry creates that pay an attacker.
  *
  * There is deliberately no check that the account shown as the sender is this device's own account.
  * A stolen signature is only worth something when this device's party is an authorizing party, so a

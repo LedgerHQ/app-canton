@@ -557,6 +557,10 @@ def test_sign_token_transfer_wrong_token_id_blind_signing_enabled(
         "values_err_holding_admin",
         # the holding went to a third account, so nothing is written for the receiver shown
         "values_err_no_holding",
+        # One create is turned into a pre-approval proposal, which the display parser reaches before
+        # the transfer node, so the screen offers a pre-approval while the transfer still pays bob
+        # 20 CC. A pre-approval moves nothing, so any holding at all has to drop clear signing.
+        "values_err_preapproval_holding",
     ],
 )
 def test_sign_values_mismatch_blind_signing_disabled(backend: BackendInterface, tx_name: str) -> None:
