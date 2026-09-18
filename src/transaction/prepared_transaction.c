@@ -65,6 +65,10 @@ MUST_CHECK static int apply_node_tree_verdict(void) {
 
     PRINTF("Unexpected node tree (%d), falling back to blind signing\n", err);
     G_context.tx_info.clear_signing_available = false;
+    // The display parse has already allocated the pairs. The blind signing screen allocates its
+    // own, and the heap is never reinitialised, so without this the old ones are lost for the rest
+    // of the session.
+    cleanup_display_items();
     return 0;
 }
 
