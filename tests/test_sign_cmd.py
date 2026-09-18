@@ -561,6 +561,14 @@ def test_sign_token_transfer_wrong_token_id_blind_signing_enabled(
         # the transfer node, so the screen offers a pre-approval while the transfer still pays bob
         # 20 CC. A pre-approval moves nothing, so any holding at all has to drop clear signing.
         "values_err_preapproval_holding",
+        # bob's holding pays 21 and hides decoy owner, dso and amount fields one level down, behind a
+        # record field that carries no label. A label is only pushed onto the path when it is there,
+        # so the pop that follows the field must not remove a level the push never added, or the
+        # decoys are read as the holding's own fields and 20 looks correct.
+        "values_err_unlabelled_field",
+        # The same decoys, this time behind a label too long to fit in the path. A label that cannot
+        # be written down can never equal a configured path, so the holding has to read as unknown.
+        "values_err_overlong_label",
     ],
 )
 def test_sign_values_mismatch_blind_signing_disabled(backend: BackendInterface, tx_name: str) -> None:

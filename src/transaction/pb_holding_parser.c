@@ -1,7 +1,7 @@
 #include <stdbool.h>  // bool
 #include <stddef.h>   // size_t
 #include <stdint.h>   // uint*_t
-#include <string.h>   // memmove, strcmp, strlen, strrchr
+#include <string.h>   // memmove, strcmp, strlen
 
 #include "cx.h"  // cx_hash_sha256
 #include "ledger_assert.h"
@@ -117,27 +117,23 @@ MUST_CHECK static bool is_non_holding(const com_daml_ledger_api_v2_cb_Identifier
 }
 
 /* --- Label path tracking --- */
-// Overflow leaves the path unchanged, so it matches nothing and the ctx fails safely rather than
-// truncating into a wrong match.
+// A label is only pushed when the field carries one and it fits, so nothing here may assume a
+// level was added. decode_record_field is the one that undoes a push, and it does so by cutting
+// the path back to the length it had before the field, which is right in every case.
 static void path_push(const char *label) {
     size_t len = strlen(ctx.path);
     size_t add = strlen(label);
     if (len + (len > 0 ? 1 : 0) + add >= MAX_LABEL_PATH_LEN) {
+        // This path cannot be written down, so it can never legitimately equal a configured one.
+        // Stop matching for the rest of this create rather than read the fields under it at a
+        // depth they do not have. The create then reports an unreadable holding.
+        ctx.cfg = NULL;
         return;
     }
     if (len > 0) {
         ctx.path[len++] = '.';
     }
     memmove(ctx.path + len, label, add + 1);
-}
-
-static void path_pop(void) {
-    char *dot = strrchr(ctx.path, '.');
-    if (dot != NULL) {
-        *dot = '\0';
-    } else {
-        ctx.path[0] = '\0';
-    }
 }
 
 MUST_CHECK static bool path_is(const char *configured) {
@@ -196,6 +192,9 @@ MUST_CHECK static bool decode_record_field(pb_istream_t *stream,
                                            const pb_field_t *field,
                                            void **arg) {
     cbRecordField rf = com_daml_ledger_api_v2_cb_RecordField_init_zero;
+    // Where this field's siblings start. Cutting back to it undoes whatever decode_label pushed,
+    // including nothing at all when the field has no label or the label did not fit.
+    size_t parent_len = strlen(ctx.path);
 
     (void) field, (void) arg;
     rf.label.funcs.decode = &decode_label;
@@ -204,7 +203,7 @@ MUST_CHECK static bool decode_record_field(pb_istream_t *stream,
         return false;
     }
     find_holding_field(&rf.value);
-    path_pop();
+    ctx.path[parent_len] = '\0';
     pb_release(com_daml_ledger_api_v2_cb_RecordField_fields, &rf);
     return true;
 }
