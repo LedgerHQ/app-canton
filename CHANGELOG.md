@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.0] - 2026-09-18
+
+### Added
+
+- Check that every node of a prepared transaction belongs to the transaction shown on screen.
+- Check that value only reaches the account, and only in the amount, shown on screen.
+
+### Fixed
+
+- Refuse onboarding that carries more than one signing key, or signing keys the device never shows.
+- Choose the clear-signing screen from the node's own template and choice, not from a record found
+  inside it.
+- Bind the accept, reject and withdraw screens to the contract the transaction exercises.
+- Refuse prepared-transaction nodes that leave out a required field.
+- Return a status word instead of aborting the app on a malformed onboarding sequence.
+- Reject SIGN_TX commands with invalid parameters before they change any state.
+- Wipe key material from stack buffers after use.
+- Free parser and display memory when a transaction is refused.
+
+### Changed
+
+- Pin CI Python dependencies to exact versions.
+- Add a CODEOWNERS file.
+
 ## [3.3.5] - 2026-08-18
 
 ### Changed
