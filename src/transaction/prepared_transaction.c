@@ -184,13 +184,12 @@ MUST_CHECK int process_prepared_tx_part(buffer_t *buf) {
                 return process_prepared_tx_finalize();
             } else {
                 tx_state = RECEIVING_METADATA_INPUT_CONTRACTS;
-            int hash_res = get_hash_error();
-            if (hash_res != HASH_OK) {
-                PRINTF("Failed to hash metadata. Hash error code : %d\n", hash_res);
-                release_metadata(&G_context.tx_info);
-                return abort_prepared_tx(SW_TX_HASH_FAIL);
-            }
-
+                int hash_res = get_hash_error();
+                if (hash_res != HASH_OK) {
+                    PRINTF("Failed to hash metadata. Hash error code : %d\n", hash_res);
+                    release_metadata(&G_context.tx_info);
+                    return abort_prepared_tx(SW_TX_HASH_FAIL);
+                }
             }
 
         } break;
