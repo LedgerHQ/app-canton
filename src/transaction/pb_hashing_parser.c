@@ -1229,6 +1229,7 @@ parser_status_e proto_deserialize_input_contract(buffer_t *buf, transaction_ctx_
     ctx.node_id = -1;
     ctx.is_root_node = false;
     ctx.is_input_contract = true;
+    ctx.tree_children_claimed = false;
     ctx.value_elem_count = VALUE_ELEM_COUNT_NONE;
 
     hw_init(&ctx.node_hw);
