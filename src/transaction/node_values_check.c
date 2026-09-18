@@ -184,6 +184,12 @@ void values_bind_from_display(const tx_field_t *fields,
 
     LEDGER_ASSERT(fields != NULL, "NULL fields in values_bind_from_display");
 
+    // A second screen can bind in the same transaction, so drop the first screen's values. Without
+    // this the checks below would compare the new screen against the values the old one left.
+    store.has_destination = false;
+    store.has_amount = false;
+    store.has_admin = false;
+
     for (uint8_t i = 0; i < count; i++) {
         const tx_field_t *field = &fields[i];
 

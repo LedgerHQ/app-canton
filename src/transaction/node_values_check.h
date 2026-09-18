@@ -111,10 +111,13 @@ void values_report_parse_failure(void);
 /**
  * @brief Give the value check what the review screen shows.
  *
- * Called once, when a display configuration has matched and its field values are resolved. Each
- * field says what it is shown as, and the two enums say what this action does with the value, so
- * the same field list can serve both accept and reject. A value the configuration does not provide
- * is simply absent, and the checks needing it are skipped.
+ * Called when a display configuration has matched and its field values are resolved. Each field
+ * says what it is shown as, and the two enums say what this action does with the value, so the same
+ * field list can serve both accept and reject.
+ *
+ * A second screen can bind in the same transaction, because dropping clear signing over an unknown
+ * token lets parsing carry on to the next node. Each call therefore replaces the previous screen's
+ * values rather than adding to them.
  *
  * Must run before the formatting callbacks. A holding carries the amount exactly as the ledger
  * wrote it, "20.0000000000", while the screen shows "20 CC", so only the unformatted string
