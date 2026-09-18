@@ -200,6 +200,9 @@ MUST_CHECK static bool decode_record_field(pb_istream_t *stream,
     rf.label.funcs.decode = &decode_label;
     rf.value.cb_sum.funcs.decode = &decode_value;
     if (!pb_decode(stream, com_daml_ledger_api_v2_cb_RecordField_fields, &rf)) {
+        // pb_decode frees nothing of what it already built, and this field is a local, so the
+        // strings under it are only reachable from here.
+        pb_release(com_daml_ledger_api_v2_cb_RecordField_fields, &rf);
         return false;
     }
     find_holding_field(&rf.value);
@@ -221,11 +224,10 @@ MUST_CHECK static bool decode_value(pb_istream_t *stream, const pb_field_t *fiel
     ctx.depth++;
     bool ok = pb_decode(stream, com_daml_ledger_api_v2_cb_Record_fields, record);
     ctx.depth--;
-    if (!ok) {
-        return false;
-    }
+    // Released on both paths. The record belongs to the parent tree, but the parent is a local of
+    // decode_argument, and a failure unwinds past it without releasing anything.
     pb_release(com_daml_ledger_api_v2_cb_Record_fields, record);
-    return true;
+    return ok;
 }
 
 MUST_CHECK static bool decode_argument(pb_istream_t *stream, const pb_field_t *field, void **arg) {
@@ -233,11 +235,10 @@ MUST_CHECK static bool decode_argument(pb_istream_t *stream, const pb_field_t *f
 
     (void) field, (void) arg;
     value.cb_sum.funcs.decode = &decode_value;
-    if (!pb_decode(stream, com_daml_ledger_api_v2_cb_Value_fields, &value)) {
-        return false;
-    }
+    bool ok = pb_decode(stream, com_daml_ledger_api_v2_cb_Value_fields, &value);
+    // Released on both paths, for the same reason as the record above.
     pb_release(com_daml_ledger_api_v2_cb_Value_fields, &value);
-    return true;
+    return ok;
 }
 
 /* --- Node kinds --- */
@@ -256,6 +257,9 @@ MUST_CHECK static bool decode_create(pb_istream_t *stream) {
     if (!pb_decode(stream,
                    com_daml_ledger_api_v2_interactive_transaction_v1_cb_Create_fields,
                    &probe)) {
+        // The probe holds the contract id, the package name, the template id and both party
+        // arrays, and it is a local, so nothing else can give them back.
+        pb_release(com_daml_ledger_api_v2_interactive_transaction_v1_cb_Create_fields, &probe);
         return false;
     }
     if (probe.has_template_id) {
