@@ -37,6 +37,7 @@
 #include "untyped_versioned_msg.h"
 #include "mem.h"
 #include "utils.h"
+#include "pb_node_display_parser.h"  // cleanup_display_items
 
 static int process_tx_chunk(buffer_t *cdata,
                             signing_type_e type,
@@ -83,6 +84,10 @@ MUST_CHECK int handler_sign_tx(buffer_t *cdata,
                 return io_send_sw(SW_BAD_STATE);
         }
         if (result != 0) {
+            // A refused transaction shows no review screen, so the display items built so far are
+            // dead. Freeing them here covers every signing flow at once, instead of each of the
+            // parsers' error paths having to remember.
+            cleanup_display_items();
             return io_send_sw(result);  // Send the error code via io_send_sw
         }
 

@@ -38,6 +38,17 @@ void process_prepared_tx_init() {
     tx_state = RECEIVING_DAML_TX_PART;
 }
 
+// Give the check modules' heap back and return the status word that refuses the transaction.
+//
+// A refused transaction never reaches process_prepared_tx_finalize, so the releases there do not
+// run and the node array and the contract list would stay allocated until the next signing flow
+// calls clean_context. On a 3 KB heap that matters. Both resets are idempotent.
+MUST_CHECK static int abort_prepared_tx(int sw) {
+    tree_check_reset();
+    values_check_reset();
+    return sw;
+}
+
 // Read the cached node tree verdict once every node has arrived.
 // An impossible tree is refused. An unexpected tree falls back to blind signing.
 MUST_CHECK static int apply_node_tree_verdict(void) {
@@ -49,7 +60,7 @@ MUST_CHECK static int apply_node_tree_verdict(void) {
     if (tree_error_is_impossible(err)) {
         PRINTF("Refusing transaction, invalid node tree: %d\n", err);
         release_daml_tx(&G_context.tx_info);
-        return SW_TX_INVALID_NODE_TREE;
+        return abort_prepared_tx(SW_TX_INVALID_NODE_TREE);
     }
 
     PRINTF("Unexpected node tree (%d), falling back to blind signing\n", err);
@@ -66,7 +77,7 @@ MUST_CHECK int process_prepared_tx_part(buffer_t *buf) {
 
             if (status != PARSING_OK) {
                 PRINTF("Failed to parse DAML transaction part: %d\n", status);
-                return SW_TX_PARSING_FAIL;
+                return abort_prepared_tx(SW_TX_PARSING_FAIL);
             }
 
             // Start the node tree check. It needs the root and the node count from the header.
@@ -94,7 +105,7 @@ MUST_CHECK int process_prepared_tx_part(buffer_t *buf) {
 
             if (status != PARSING_OK) {
                 PRINTF("Failed to parse DAML Node part: %d\n", status);
-                return SW_TX_PARSING_FAIL;
+                return abort_prepared_tx(SW_TX_PARSING_FAIL);
             }
 
             // A hashing error might have occurred during deserialization :
@@ -103,7 +114,7 @@ MUST_CHECK int process_prepared_tx_part(buffer_t *buf) {
             if (res != HASH_OK) {
                 PRINTF("Failed to hash DAML Node. Hash error code : %d\n", res);
                 release_daml_tx(&G_context.tx_info);
-                return SW_TX_HASH_FAIL;
+                return abort_prepared_tx(SW_TX_HASH_FAIL);
             }
 
             // Collect what this node moves: the holding a create writes, and the contract a
@@ -118,7 +129,7 @@ MUST_CHECK int process_prepared_tx_part(buffer_t *buf) {
                 if (res != 0) {
                     PRINTF("Failed to parse DAML Node for display: %d\n", res);
                     release_daml_tx(&G_context.tx_info);
-                    return SW_TX_PARSING_FAIL;
+                    return abort_prepared_tx(SW_TX_PARSING_FAIL);
                 }
             }
 
@@ -135,7 +146,7 @@ MUST_CHECK int process_prepared_tx_part(buffer_t *buf) {
             // here and only once.
             int tree_res = apply_node_tree_verdict();
             if (tree_res != 0) {
-                return tree_res;
+                return abort_prepared_tx(tree_res);
             }
 
             // No need to check for hashing errors here, set_hash_error is not called in
@@ -149,7 +160,7 @@ MUST_CHECK int process_prepared_tx_part(buffer_t *buf) {
             if (status != PARSING_OK) {
                 PRINTF("Failed to parse Metadata part: %d\n", status);
                 release_metadata(&G_context.tx_info);
-                return SW_TX_PARSING_FAIL;
+                return abort_prepared_tx(SW_TX_PARSING_FAIL);
             }
 
             // No need to check for hashing errors here, set_hash_error is not called in
@@ -174,7 +185,7 @@ MUST_CHECK int process_prepared_tx_part(buffer_t *buf) {
 
             if (status != PARSING_OK) {
                 PRINTF("Failed to parse Input Contract part: %d\n", status);
-                return SW_TX_PARSING_FAIL;
+                return abort_prepared_tx(SW_TX_PARSING_FAIL);
             }
 
             // A hashing error might have occurred during deserialization :
@@ -182,13 +193,13 @@ MUST_CHECK int process_prepared_tx_part(buffer_t *buf) {
             int res = get_hash_error();
             if (res != HASH_OK) {
                 PRINTF("Failed to hash metadata. Hash error code : %d\n", res);
-                return SW_TX_HASH_FAIL;
+                return abort_prepared_tx(SW_TX_HASH_FAIL);
             }
 
             res = parse_input_contract_for_display(buf);
             if (res != 0) {
                 PRINTF("Failed to parse Input Contract for display: %d\n", res);
-                return SW_TX_PARSING_FAIL;
+                return abort_prepared_tx(SW_TX_PARSING_FAIL);
             }
 
             G_context.tx_info.recv_node_idx++;
@@ -200,7 +211,7 @@ MUST_CHECK int process_prepared_tx_part(buffer_t *buf) {
         } break;
         default:
             PRINTF("Invalid state during processing prepared tx part: %d\n", tx_state);
-            return SW_BAD_STATE;
+            return abort_prepared_tx(SW_BAD_STATE);
     }
 
     return 0;
@@ -209,7 +220,7 @@ MUST_CHECK int process_prepared_tx_part(buffer_t *buf) {
 static MUST_CHECK int process_prepared_tx_finalize() {
     if (G_context.state != STATE_PARSED) {
         PRINTF("Invalid state: expected STATE_PARSED, got %d\n", G_context.state);
-        return SW_BAD_STATE;
+        return abort_prepared_tx(SW_BAD_STATE);
     }
 
     // Every node and every input contract has arrived, so the values the screen shows can be
