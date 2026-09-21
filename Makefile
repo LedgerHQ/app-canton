@@ -29,8 +29,8 @@ APPNAME = "Canton"
 
 # Application version
 APPVERSION_M = 3
-APPVERSION_N = 3
-APPVERSION_P = 5
+APPVERSION_N = 4
+APPVERSION_P = 0
 APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
 # Application source files
@@ -124,5 +124,14 @@ INCLUDES_PATH += $(NANOPB_DIR) . proto
 DEFINES   += PB_ENABLE_ERRORS=1
 SOURCE_FILES += $(NANOPB_CORE)
 APP_SOURCE_PATH += proto
+
+# A deep transaction can crash on Nano X in debug builds (DEBUG=1), because debug code
+# uses more stack per step. This forces these 3 files to build like release code, but
+# only for Nano X, so debug testing works without changing real device behavior.
+ifneq ($(DEBUG), 0)
+build/nanox/obj/app/src/transaction/pb_hashing_parser.o: CFLAGS += -Oz
+build/nanox/obj/app/vendor/nanopb/pb_decode.o: CFLAGS += -Oz
+build/nanox/obj/app/vendor/nanopb/pb_common.o: CFLAGS += -Oz
+endif
 
 include $(BOLOS_SDK)/Makefile.standard_app

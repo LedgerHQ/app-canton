@@ -64,6 +64,10 @@
  * Status word for challenge signature fail.
  */
 #define SW_CHALLENGE_SIGNATURE_FAIL 0xB009
+/**
+ * Status word for a transaction whose node tree could never be valid.
+ */
+#define SW_TX_INVALID_NODE_TREE 0xB00A
 
 /**
  * Topology transaction error codes (0xC100-0xC4FF range)
@@ -103,7 +107,16 @@
 /**
  * Status word for no signing keys found.
  */
-#define SW_TOPOLOGY_NO_SIGNING_KEYS 0xC202
+#define SW_TOPOLOGY_UNEXPECTED_PARTY_TO_KEY_SIGNING_KEYS_COUNT 0xC202
+
+/**
+ * Status word for unexpected party to key threshold value.
+ */
+#define SW_TOPOLOGY_UNEXPECTED_PARTY_TO_KEY_THRESHOLD_VALUE 0xC203
+/**
+ * Status word for multiple party to key mappings found.
+ */
+#define SW_TOPOLOGY_MULTIPLE_PARTY_TO_KEY_MAPPINGS 0xC204
 
 // Party to participant errors (0xC300 range)
 /**
@@ -136,6 +149,15 @@
  */
 #define SW_TOPOLOGY_UNEXPECTED_THRESHOLD_VALUE 0xC306
 
+/**
+ * Status word for unexpected party signing keys.
+ */
+#define SW_TOPOLOGY_UNEXPECTED_PARTY_SIGNING_KEYS 0xC307
+/**
+ * Status word for multiple party to participant mappings found.
+ */
+#define SW_TOPOLOGY_MULTIPLE_PARTY_TO_PARTICIPANTS 0xC308
+
 // General topology transaction errors (0xC400 range)
 /**
  * Status word for unknown mapping type.
@@ -149,3 +171,7 @@
  * Status word for mandatory field missing.
  */
 #define SW_TOPOLOGY_MANDATORY_FIELD_MISSING 0xC403
+/**
+ * Status word for more topology messages in one signing flow than the app can hold.
+ */
+#define SW_TOPOLOGY_TOO_MANY_MESSAGES 0xC404

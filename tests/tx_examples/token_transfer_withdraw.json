@@ -19,13 +19,13 @@
                 "entityName": "OpenMiningRound"
               },
               "signatories": [
-                "DSO::12207a75b6449d239875200607f39bd009e5a231ecaf5e03bea44f8ea5806d3ab6a8"
+                "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
               ],
               "stakeholders": [
-                "DSO::12207a75b6449d239875200607f39bd009e5a231ecaf5e03bea44f8ea5806d3ab6a8"
+                "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
               ],
               "actingParties": [
-                "DSO::12207a75b6449d239875200607f39bd009e5a231ecaf5e03bea44f8ea5806d3ab6a8"
+                "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
               ]
             }
           }
@@ -43,13 +43,13 @@
                 "entityName": "OpenMiningRound"
               },
               "signatories": [
-                "DSO::12207a75b6449d239875200607f39bd009e5a231ecaf5e03bea44f8ea5806d3ab6a8"
+                "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
               ],
               "stakeholders": [
-                "DSO::12207a75b6449d239875200607f39bd009e5a231ecaf5e03bea44f8ea5806d3ab6a8"
+                "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
               ],
               "actingParties": [
-                "DSO::12207a75b6449d239875200607f39bd009e5a231ecaf5e03bea44f8ea5806d3ab6a8"
+                "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
               ]
             }
           }
@@ -77,7 +77,7 @@
                     {
                       "label": "dso",
                       "value": {
-                        "party": "DSO::12207a75b6449d239875200607f39bd009e5a231ecaf5e03bea44f8ea5806d3ab6a8"
+                        "party": "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                       }
                     },
                     {
@@ -150,11 +150,11 @@
                 }
               },
               "signatories": [
-                "DSO::12207a75b6449d239875200607f39bd009e5a231ecaf5e03bea44f8ea5806d3ab6a8",
+                "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
                 "ldg::1220b0cc0022d35ef1952c5445c45654e3b3935527fd9890f68182af04cf92b213cd"
               ],
               "stakeholders": [
-                "DSO::12207a75b6449d239875200607f39bd009e5a231ecaf5e03bea44f8ea5806d3ab6a8",
+                "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
                 "ldg::1220b0cc0022d35ef1952c5445c45654e3b3935527fd9890f68182af04cf92b213cd"
               ]
             }
@@ -173,15 +173,15 @@
                 "entityName": "LockedAmulet"
               },
               "signatories": [
-                "DSO::12207a75b6449d239875200607f39bd009e5a231ecaf5e03bea44f8ea5806d3ab6a8",
+                "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
                 "ldg::1220b0cc0022d35ef1952c5445c45654e3b3935527fd9890f68182af04cf92b213cd"
               ],
               "stakeholders": [
-                "DSO::12207a75b6449d239875200607f39bd009e5a231ecaf5e03bea44f8ea5806d3ab6a8",
+                "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
                 "ldg::1220b0cc0022d35ef1952c5445c45654e3b3935527fd9890f68182af04cf92b213cd"
               ],
               "actingParties": [
-                "DSO::12207a75b6449d239875200607f39bd009e5a231ecaf5e03bea44f8ea5806d3ab6a8",
+                "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
                 "ldg::1220b0cc0022d35ef1952c5445c45654e3b3935527fd9890f68182af04cf92b213cd"
               ],
               "choiceId": "LockedAmulet_Unlock",
@@ -319,11 +319,11 @@
                 "entityName": "AmuletTransferInstruction"
               },
               "signatories": [
-                "DSO::12207a75b6449d239875200607f39bd009e5a231ecaf5e03bea44f8ea5806d3ab6a8",
+                "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
                 "ldg::1220b0cc0022d35ef1952c5445c45654e3b3935527fd9890f68182af04cf92b213cd"
               ],
               "stakeholders": [
-                "DSO::12207a75b6449d239875200607f39bd009e5a231ecaf5e03bea44f8ea5806d3ab6a8",
+                "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
                 "ldg::122090d3a56c4abe9e1fcc40fa8f91ead4258c656bcd98b8eb84e8691244e04b05bc",
                 "ldg::1220b0cc0022d35ef1952c5445c45654e3b3935527fd9890f68182af04cf92b213cd"
               ],
@@ -693,11 +693,11 @@
               }
             },
             "signatories": [
-              "DSO::12207a75b6449d239875200607f39bd009e5a231ecaf5e03bea44f8ea5806d3ab6a8",
+              "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
               "ldg::1220b0cc0022d35ef1952c5445c45654e3b3935527fd9890f68182af04cf92b213cd"
             ],
             "stakeholders": [
-              "DSO::12207a75b6449d239875200607f39bd009e5a231ecaf5e03bea44f8ea5806d3ab6a8",
+              "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
               "ldg::122090d3a56c4abe9e1fcc40fa8f91ead4258c656bcd98b8eb84e8691244e04b05bc",
               "ldg::1220b0cc0022d35ef1952c5445c45654e3b3935527fd9890f68182af04cf92b213cd"
             ]
@@ -735,7 +735,7 @@
                           {
                             "label": "dso",
                             "value": {
-                              "party": "DSO::12207a75b6449d239875200607f39bd009e5a231ecaf5e03bea44f8ea5806d3ab6a8"
+                              "party": "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                             }
                           },
                           {
@@ -824,7 +824,7 @@
                               "list": {
                                 "elements": [
                                   {
-                                    "party": "DSO::12207a75b6449d239875200607f39bd009e5a231ecaf5e03bea44f8ea5806d3ab6a8"
+                                    "party": "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                                   }
                                 ]
                               }
@@ -854,11 +854,11 @@
               }
             },
             "signatories": [
-              "DSO::12207a75b6449d239875200607f39bd009e5a231ecaf5e03bea44f8ea5806d3ab6a8",
+              "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
               "ldg::1220b0cc0022d35ef1952c5445c45654e3b3935527fd9890f68182af04cf92b213cd"
             ],
             "stakeholders": [
-              "DSO::12207a75b6449d239875200607f39bd009e5a231ecaf5e03bea44f8ea5806d3ab6a8",
+              "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
               "ldg::1220b0cc0022d35ef1952c5445c45654e3b3935527fd9890f68182af04cf92b213cd"
             ]
           },
@@ -885,7 +885,7 @@
                   {
                     "label": "dso",
                     "value": {
-                      "party": "DSO::12207a75b6449d239875200607f39bd009e5a231ecaf5e03bea44f8ea5806d3ab6a8"
+                      "party": "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                     }
                   },
                   {
@@ -1226,10 +1226,10 @@
               }
             },
             "signatories": [
-              "DSO::12207a75b6449d239875200607f39bd009e5a231ecaf5e03bea44f8ea5806d3ab6a8"
+              "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
             ],
             "stakeholders": [
-              "DSO::12207a75b6449d239875200607f39bd009e5a231ecaf5e03bea44f8ea5806d3ab6a8"
+              "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
             ]
           },
           "createdAt": "1758636675089889"
@@ -1237,5 +1237,5 @@
       ]
     }
   },
-  "hash": "2c9037646fe63bf7fa7efcbd9ba24cbd65310fdf23e3b49d6813fd64782a3202"
+  "hash": "EE87D5E789D88C0E2CC76E2B58176984817E4808DAACA542A6C7E81158820181"
 }

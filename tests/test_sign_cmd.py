@@ -315,6 +315,55 @@ def test_sign_max_nodes_hash_error(backend: BackendInterface) -> None:
     assert e.value.status == Errors.SW_TX_HASH_FAIL
 
 
+# Node trees that the device refuses during the tree check itself
+TREE_CHECK_REFUSED_TX = [
+    "tree_err_node_id_out_of_range",
+    "tree_err_duplicate_node",
+    "tree_err_child_out_of_range",
+    "tree_err_self_child",
+    "tree_err_root_claimed",
+    "tree_err_duplicate_claim",
+]
+
+# Node trees that the device cannot display, so it falls back to blind signing
+TREE_CHECK_BLIND_SIGNING_TX = [
+    "tree_err_root_count",
+    "tree_err_orphan_node",
+    "tree_err_too_many_nodes",
+]
+
+
+@pytest.mark.parametrize("tx_name", TREE_CHECK_REFUSED_TX, ids=TREE_CHECK_REFUSED_TX)
+def test_sign_invalid_node_tree_error(backend: BackendInterface, tx_name: str) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(f"tests/tx_examples/{tx_name}.json")
+    path = "m/44'/6767'/0'/0'/0'"
+    client = CantonCommandSender(backend)
+    with pytest.raises(ExceptionRAPDU) as e:
+        with client.sign_tx_in_parts(path, *serialized_parts):
+            pass
+    assert e.value.status == Errors.SW_TX_INVALID_NODE_TREE
+
+
+@pytest.mark.parametrize("tx_name", TREE_CHECK_BLIND_SIGNING_TX, ids=TREE_CHECK_BLIND_SIGNING_TX)
+def test_sign_invalid_node_tree_blind_signing_disabled(backend: BackendInterface, tx_name: str) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(f"tests/tx_examples/{tx_name}.json")
+    _check_blind_signing_rejection(backend, serialized_parts)
+
+
+# Nodes 4 and 5 claim each other. Every node still has exactly one parent, so the tree check finds
+# nothing wrong, and neither node hangs off the root. A parent hashes its children's hashes, and a
+# cycle has no order in which both children arrive before their parent, so the child hash lookup
+# fails and the transaction is refused. The tree check does not have to prove reachability itself.
+def test_sign_node_tree_cycle(backend: BackendInterface) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts("tests/tx_examples/tree_err_cycle.json")
+    path = "m/44'/6767'/0'/0'/0'"
+    client = CantonCommandSender(backend)
+    with pytest.raises(ExceptionRAPDU) as e:
+        with client.sign_tx_in_parts(path, *serialized_parts):
+            pass
+    assert e.value.status == Errors.SW_TX_HASH_FAIL
+
+
 def test_sign_native_transfer(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
     _sign_and_verify_prepared_transaction(
         backend,
@@ -395,6 +444,28 @@ def test_sign_token_transfer_accept(backend: BackendInterface, scenario_navigato
         scenario_navigator,
         tx_json="tests/tx_examples/token_transfer_accept.json",
         custom_screen_text="Sign transaction to",
+    )
+
+
+def test_sign_token_transfer_accept_wrong_metadata_contract_id_blind_signing_disabled(
+    backend: BackendInterface, navigator: Navigator, test_name: str
+) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(
+        "tests/tx_examples/token_transfer_accept_wrong_metadata_contract_id.json"
+    )
+    if backend.device.is_nano:
+        validation_instructions = [NavInsID.BOTH_CLICK]
+        pattern = "Blind signing"
+    else:
+        validation_instructions = [NavInsID.USE_CASE_CHOICE_REJECT]
+        pattern = "Enable blind signing"
+    _check_blind_signing_rejection(backend, serialized_parts)
+    navigator.navigate_until_text_and_compare(
+        navigate_instruction=None,
+        validation_instructions=validation_instructions,
+        text=pattern,
+        path=ROOT_SCREENSHOT_PATH,
+        test_case_name=test_name,
     )
 
 
@@ -487,6 +558,42 @@ def test_sign_token_transfer_wrong_token_id_blind_signing_enabled(
     )
 
 
+# Canton keeps no balance: each amount owned is its own contract naming an owner and an amount, and
+# the app sees one as a create node. Each fixture below is token_transfer.json with exactly one line
+# changed, so the screen still promises 20 CC to bob while the holdings say otherwise. Clear signing
+# has to drop, which leaves blind signing as the only route and makes the transaction refusable.
+@pytest.mark.parametrize(
+    "tx_name",
+    [
+        # bob's holding has 21 while the screen shows 20
+        "values_err_receiver_amount",
+        # bob's holding was issued by a party the displayed ticker was not resolved from
+        "values_err_holding_admin",
+        # the holding went to a third account, so nothing is written for the receiver shown
+        "values_err_no_holding",
+        # the change holding goes to bob as well, so bob is paid 20 CC and 67.79 CC on top. The
+        # screen still says 20, and the amounts are digests that cannot be added up, so a second
+        # holding for the receiver has to drop clear signing.
+        "values_err_extra_holding",
+        # One create is turned into a pre-approval proposal, which the display parser reaches before
+        # the transfer node, so the screen offers a pre-approval while the transfer still pays bob
+        # 20 CC. A pre-approval moves nothing, so any holding at all has to drop clear signing.
+        "values_err_preapproval_holding",
+        # bob's holding pays 21 and hides decoy owner, dso and amount fields one level down, behind a
+        # record field that carries no label. A label is only pushed onto the path when it is there,
+        # so the pop that follows the field must not remove a level the push never added, or the
+        # decoys are read as the holding's own fields and 20 looks correct.
+        "values_err_unlabelled_field",
+        # The same decoys, this time behind a label too long to fit in the path. A label that cannot
+        # be written down can never equal a configured path, so the holding has to read as unknown.
+        "values_err_overlong_label",
+    ],
+)
+def test_sign_values_mismatch_blind_signing_disabled(backend: BackendInterface, tx_name: str) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(f"tests/tx_examples/{tx_name}.json")
+    _check_blind_signing_rejection(backend, serialized_parts)
+
+
 def test_sign_preapproval_proposal(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
     _sign_and_verify_prepared_transaction(
         backend,
@@ -558,6 +665,9 @@ def _onboard_party_expect_error(
     threshold: Optional[int] = None,
     party_id: Optional[str] = None,
     which_party_tx: Optional[WhichPartyTx] = None,
+    party_to_key_signing_keys_count: int = 1,
+    party_to_key_threshold: Optional[int] = None,
+    has_party_keys_in_party_to_participant: bool = False,
     expected_error: int = Errors.SW_WRONG_RESPONSE_LENGTH,
 ) -> None:
     client = CantonCommandSender(backend)
@@ -574,25 +684,28 @@ def _onboard_party_expect_error(
     if which_party_tx is None:
         which_party_tx = WhichPartyTx.PARTY_TO_PARTICIPANT
 
-    party_to_key_party_id = None
-    party_to_participant_party_id = None
-
-    if which_party_tx == WhichPartyTx.PARTY_TO_KEY:
-        party_to_key_party_id = party_id
-    else:
-        party_to_participant_party_id = party_id
-
     # Create transactions
     txs = [
         Transaction.namespace_delegation(public_key, der_key_format),
-        Transaction.party_to_key(public_key, der_key_format, party_to_key_party_id),
-        Transaction.party_to_participant_from_uid(public_key, validator_uids, threshold, party_to_participant_party_id),
+        Transaction.party_to_key(
+            public_key,
+            der_key_format,
+            party_id if which_party_tx == WhichPartyTx.PARTY_TO_KEY else None,
+            signing_keys_count=party_to_key_signing_keys_count,
+            threshold=party_to_key_threshold,
+        ),
+        Transaction.party_to_participant_from_uid(
+            public_key,
+            validator_uids,
+            threshold,
+            party_id if which_party_tx != WhichPartyTx.PARTY_TO_KEY else None,
+            has_party_signing_keys=has_party_keys_in_party_to_participant,
+        ),
     ]
 
     # Sign transactions and expect error
-    path = "m/44'/6767'/0'/0'/0'"
     with pytest.raises(ExceptionRAPDU) as e:
-        with client.sign_topology_tx(path=path, transactions=txs):
+        with client.sign_topology_tx(path="m/44'/6767'/0'/0'/0'", transactions=txs):
             pass
     assert e.value.status == expected_error
 
@@ -614,6 +727,26 @@ def test_sign_onboarding_expect_error_unexpected_number_of_participants_single(
         backend,
         validator_uids=[MAINNET_VALIDATOR_PARTY_ID_1],
         expected_error=Errors.SW_TOPOLOGY_UNEXPECTED_NUMBER_OF_PARTICIPANTS,
+    )
+
+
+def test_sign_onboarding_expect_error_unexpected_party_to_key_signing_keys_count(
+    backend: BackendInterface,
+) -> None:
+    _onboard_party_expect_error(
+        backend,
+        party_to_key_signing_keys_count=0,
+        expected_error=Errors.SW_TOPOLOGY_UNEXPECTED_PARTY_TO_KEY_SIGNING_KEYS_COUNT,
+    )
+
+
+def test_sign_onboarding_expect_error_unexpected_party_to_key_threshold_value(
+    backend: BackendInterface,
+) -> None:
+    _onboard_party_expect_error(
+        backend,
+        party_to_key_threshold=2,
+        expected_error=Errors.SW_TOPOLOGY_UNEXPECTED_PARTY_TO_KEY_THRESHOLD_VALUE,
     )
 
 
@@ -670,6 +803,111 @@ def test_sign_onboarding_expect_error_wrong_party_id_in_party_to_participant(
         party_id="invalid_party_id_in_party_to_participant",
         which_party_tx=WhichPartyTx.PARTY_TO_PARTICIPANT,
         expected_error=Errors.SW_TOPOLOGY_PARTY_ID_MISMATCH,
+    )
+
+
+def test_sign_onboarding_expect_error_unexpected_party_signing_keys(
+    backend: BackendInterface,
+) -> None:
+    _onboard_party_expect_error(
+        backend,
+        has_party_keys_in_party_to_participant=True,
+        expected_error=Errors.SW_TOPOLOGY_UNEXPECTED_PARTY_SIGNING_KEYS,
+    )
+
+
+class TopologyTxKind(IntEnum):
+    NAMESPACE_DELEGATION = 1
+    PARTY_TO_KEY = 2
+    PARTY_TO_PARTICIPANT = 3
+
+
+def _onboard_party_expect_error_for_sequence(
+    backend: BackendInterface,
+    sequence: list[TopologyTxKind],
+    expected_error: int,
+) -> None:
+    """Send an arbitrary sequence of topology messages and expect one status word.
+
+    The helper above always sends one message of each kind. This one lets a test repeat a kind, or
+    send more messages than the app can hold, which is what the sequencing checks reject.
+    """
+    client = CantonCommandSender(backend)
+
+    _, raw_key, _, _ = unpack_get_public_key_response(client.get_public_key(path="m/44'/6767'/0'/0'/0'").data)
+    public_key = b"\x30\x2a\x30\x05\x06\x03\x2b\x65\x70\x03\x21\x00" + raw_key
+
+    txs = []
+    for kind in sequence:
+        if kind == TopologyTxKind.NAMESPACE_DELEGATION:
+            txs.append(Transaction.namespace_delegation(public_key, True))
+        elif kind == TopologyTxKind.PARTY_TO_KEY:
+            txs.append(Transaction.party_to_key(public_key, True))
+        else:
+            txs.append(
+                Transaction.party_to_participant_from_uid(
+                    public_key,
+                    [MAINNET_VALIDATOR_PARTY_ID_1, MAINNET_VALIDATOR_PARTY_ID_2],
+                )
+            )
+
+    with pytest.raises(ExceptionRAPDU) as e:
+        with client.sign_topology_tx(path="m/44'/6767'/0'/0'/0'", transactions=txs):
+            pass
+    assert e.value.status == expected_error
+
+
+def test_sign_onboarding_expect_error_multiple_namespace_delegations(
+    backend: BackendInterface,
+) -> None:
+    _onboard_party_expect_error_for_sequence(
+        backend,
+        [TopologyTxKind.NAMESPACE_DELEGATION, TopologyTxKind.NAMESPACE_DELEGATION],
+        Errors.SW_TOPOLOGY_MULTIPLE_NAMESPACE_DELEGATIONS,
+    )
+
+
+def test_sign_onboarding_expect_error_multiple_party_to_key_mappings(
+    backend: BackendInterface,
+) -> None:
+    _onboard_party_expect_error_for_sequence(
+        backend,
+        [
+            TopologyTxKind.NAMESPACE_DELEGATION,
+            TopologyTxKind.PARTY_TO_KEY,
+            TopologyTxKind.PARTY_TO_KEY,
+        ],
+        Errors.SW_TOPOLOGY_MULTIPLE_PARTY_TO_KEY_MAPPINGS,
+    )
+
+
+def test_sign_onboarding_expect_error_multiple_party_to_participants(
+    backend: BackendInterface,
+) -> None:
+    _onboard_party_expect_error_for_sequence(
+        backend,
+        [
+            TopologyTxKind.NAMESPACE_DELEGATION,
+            TopologyTxKind.PARTY_TO_PARTICIPANT,
+            TopologyTxKind.PARTY_TO_PARTICIPANT,
+        ],
+        Errors.SW_TOPOLOGY_MULTIPLE_PARTY_TO_PARTICIPANTS,
+    )
+
+
+def test_sign_onboarding_expect_error_too_many_messages(
+    backend: BackendInterface,
+) -> None:
+    # A fourth message has nowhere to store its hash, so it is refused before it is even parsed.
+    _onboard_party_expect_error_for_sequence(
+        backend,
+        [
+            TopologyTxKind.NAMESPACE_DELEGATION,
+            TopologyTxKind.PARTY_TO_KEY,
+            TopologyTxKind.PARTY_TO_PARTICIPANT,
+            TopologyTxKind.NAMESPACE_DELEGATION,
+        ],
+        Errors.SW_TOPOLOGY_TOO_MANY_MESSAGES,
     )
 
 

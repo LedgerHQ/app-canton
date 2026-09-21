@@ -79,7 +79,6 @@ typedef struct {
     bool clear_signing_available;  /// whether clearing signing data is allowed
     const char *review_title;      /// dynamically allocated review title
     const char *review_finish;
-
 } transaction_ctx_t;
 
 /**

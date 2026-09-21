@@ -2,6 +2,7 @@ import json
 import base64
 import hashlib
 from io import BytesIO
+import os
 from typing import Optional, Union, List
 
 from nacl.signing import SigningKey
@@ -17,6 +18,7 @@ from com.digitalasset.canton.crypto.v30.crypto_pb2 import (
     SigningKeySpec,
     SigningPublicKey,
     SigningKeyUsage,
+    SigningKeysWithThreshold,
 )
 from com.digitalasset.canton.protocol.v30.topology_pb2 import (
     TopologyMapping,
@@ -213,7 +215,7 @@ class Transaction:
         return cls.compute_sha256_canton_hash(PURPOSE_PUBLIC_KEY_FINGERPRINT, raw_key).hex()
 
     @classmethod
-    def namespace_delegation(cls, public_key: bytes, der_format: bool) -> bytes:
+    def namespace_delegation(cls, public_key: Optional[bytes], der_format: bool) -> bytes:
         if der_format:
             key_format = CryptoKeyFormat.CRYPTO_KEY_FORMAT_DER_X509_SUBJECT_PUBLIC_KEY_INFO
         else:
@@ -221,7 +223,8 @@ class Transaction:
         key_scheme = SigningKeyScheme.SIGNING_KEY_SCHEME_ED25519
         key_spec = SigningKeySpec.SIGNING_KEY_SPEC_EC_CURVE25519
 
-        print(f"\nPublic key for namespace delegation: {public_key.hex()}\n")
+        if public_key:
+            print(f"\nPublic key for namespace delegation: {public_key.hex()}\n")
 
         signing_public_key = SigningPublicKey(
             format=key_format,
@@ -254,7 +257,14 @@ class Transaction:
         )
 
     @classmethod
-    def party_to_key(cls, public_key: bytes, der_format: bool, party_id: Optional[str] = None) -> bytes:
+    def party_to_key(
+        cls,
+        public_key: Optional[bytes],
+        der_format: bool,
+        party_id: Optional[str] = None,
+        signing_keys_count: int = 1,
+        threshold: Optional[int] = None,
+    ) -> bytes:
         if der_format:
             key_format = CryptoKeyFormat.CRYPTO_KEY_FORMAT_DER_X509_SUBJECT_PUBLIC_KEY_INFO
         else:
@@ -273,15 +283,18 @@ class Transaction:
             ],
         )
 
-        if party_id is None:
+        if party_id is None and public_key is not None:
             party_fingerprint = cls._compute_party_fingerprint(public_key)
             party_id = DEFAULT_PARTY_NAME + "::" + party_fingerprint
+
+        if threshold is None:
+            threshold = signing_keys_count
 
         party_to_key_mapping = TopologyMapping(
             party_to_key_mapping=PartyToKeyMapping(
                 party=party_id,
-                threshold=1,
-                signing_keys=[signing_public_key],
+                threshold=threshold,
+                signing_keys=[signing_public_key] * signing_keys_count,
             )
         )
 
@@ -331,12 +344,13 @@ class Transaction:
     @classmethod
     def party_to_participant_from_uid(
         cls,
-        public_key: bytes,
+        public_key: Optional[bytes],
         participant_uid: list[str],
         threshold: Optional[int] = None,
         party_id: Optional[str] = None,
+        has_party_signing_keys: bool = False,
     ) -> bytes:
-        if party_id is None:
+        if party_id is None and public_key is not None:
             party_fingerprint = cls._compute_party_fingerprint(public_key)
             party_id = DEFAULT_PARTY_NAME + "::" + party_fingerprint
 
@@ -352,11 +366,32 @@ class Transaction:
 
         threshold = threshold if threshold is not None else validators_count
 
+        party_to_participant_party_signing_keys: Optional[SigningKeysWithThreshold] = None
+
+        if has_party_signing_keys:
+            # Generate random bytes for the public key
+            random_key = os.urandom(32)
+            signing_public_key = SigningPublicKey(
+                format=CryptoKeyFormat.CRYPTO_KEY_FORMAT_RAW,
+                public_key=random_key,
+                scheme=SigningKeyScheme.SIGNING_KEY_SCHEME_ED25519,
+                key_spec=SigningKeySpec.SIGNING_KEY_SPEC_EC_CURVE25519,
+                usage=[
+                    SigningKeyUsage.SIGNING_KEY_USAGE_NAMESPACE,
+                    SigningKeyUsage.SIGNING_KEY_USAGE_PROTOCOL,
+                ],
+            )
+            party_to_participant_party_signing_keys = SigningKeysWithThreshold(
+                threshold=1,
+                keys=[signing_public_key],
+            )
+
         party_to_participant_mapping = TopologyMapping(
             party_to_participant=PartyToParticipant(
                 party=party_id,
                 threshold=threshold,
                 participants=validators,
+                party_signing_keys=party_to_participant_party_signing_keys,
             )
         )
 

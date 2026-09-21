@@ -26,3 +26,7 @@ void app_mem_free(void *ptr) {
     }
     APP_MEM_FREE(ptr);
 }
+
+char *app_mem_strdup(const char *src) {
+    return APP_MEM_STRDUP(src);
+}

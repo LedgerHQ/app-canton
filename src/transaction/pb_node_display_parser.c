@@ -20,6 +20,7 @@
 #include "pb_decode.h"
 #include "pb_node_display_parser.h"
 #include "pb_node_display_definitions.h"  // Shared structs/consts
+#include "node_values_check.h"            // values_bind_from_display
 #include "utils.h"                        // for atoull
 
 #include <stdio.h>
@@ -46,11 +47,16 @@ static tx_field_t tx_fields[MAX_DISPLAY_FIELDS_NB];
 static identifier_config_t *const *global_tx_metadata_contract_identifiers = NULL;
 static size_t global_tx_metadata_contract_identifiers_count = 0;
 static display_config_t *global_tx_metadata_display_conf = NULL;
+static char *global_expected_contract_id = NULL;
 
 void reset_display_parser_state(void) {
     global_tx_metadata_contract_identifiers = NULL;
     global_tx_metadata_contract_identifiers_count = 0;
     global_tx_metadata_display_conf = NULL;
+    if (global_expected_contract_id != NULL) {
+        app_mem_free(global_expected_contract_id);
+        global_expected_contract_id = NULL;
+    }
 
     for (size_t i = 0; i < MAX_DISPLAY_FIELDS_NB; i++) {
         if (tx_fields[i].value != NULL) {
@@ -289,8 +295,6 @@ MUST_CHECK bool init_transaction_pairs(transaction_ctx_t *tx_info, size_t count)
     tx_info->pairs_count = 0;
     tx_info->pairs =
         (nbgl_contentTagValue_t *) app_mem_alloc(count * sizeof(nbgl_contentTagValue_t));
-    memset(tx_info->pairs, 0, count * sizeof(nbgl_contentTagValue_t));
-
     if (tx_info->pairs == NULL) {
         return false;
     }
@@ -344,6 +348,8 @@ static void set_display_config(pb_callback_context_t *ctx, const display_config_
     ctx->nb_fields = config_source->fields_count;
     ctx->review_title = config_source->review_title;
     ctx->review_finish = config_source->review_finish;
+    ctx->destination = config_source->destination;
+    ctx->amount_check = config_source->amount_check;
 
     // Initialize field states
     for (size_t i = 0; i < ctx->nb_fields; i++) {
@@ -368,6 +374,108 @@ static void set_display_config(pb_callback_context_t *ctx, const display_config_
     return;
 }
 
+// Drop whatever the previous node left behind, then store a copy of this node's own strings. The
+// submessage they came from is released as soon as the caller returns, so copies are the only
+// option.
+static void set_node_identity(pb_callback_context_t *ctx,
+                              const char *contract_id,
+                              const Identifier *template_id,
+                              const char *choice_id) {
+    app_mem_free(ctx->last_parsed_contract_id);
+    app_mem_free(ctx->node_module);
+    app_mem_free(ctx->node_entity);
+    app_mem_free(ctx->node_choice_id);
+    ctx->last_parsed_contract_id = contract_id ? app_mem_strdup(contract_id) : NULL;
+    ctx->node_module =
+        template_id && template_id->module_name ? app_mem_strdup(template_id->module_name) : NULL;
+    ctx->node_entity =
+        template_id && template_id->entity_name ? app_mem_strdup(template_id->entity_name) : NULL;
+    ctx->node_choice_id = choice_id ? app_mem_strdup(choice_id) : NULL;
+}
+
+// Read the node's contract id and the action it signs, before its argument is walked. Decodes the
+// submessage into a throwaway struct, then rewinds the stream so nanopb can decode it again for
+// real with the argument callbacks attached. Same trick as count_value_helper in
+// pb_hashing_parser.c.
+static void read_exercise_identity(pb_istream_t *stream, pb_callback_context_t *ctx) {
+    pb_istream_t saved_stream = *stream;
+    com_daml_ledger_api_v2_interactive_transaction_v1_cb_Exercise tmp =
+        com_daml_ledger_api_v2_interactive_transaction_v1_cb_Exercise_init_zero;
+
+    if (pb_decode(stream,
+                  com_daml_ledger_api_v2_interactive_transaction_v1_cb_Exercise_fields,
+                  &tmp)) {
+        set_node_identity(ctx,
+                          tmp.contract_id,
+                          tmp.has_template_id ? (const Identifier *) &tmp.template_id : NULL,
+                          tmp.choice_id);
+    } else {
+        set_node_identity(ctx, NULL, NULL, NULL);
+    }
+    pb_release(com_daml_ledger_api_v2_interactive_transaction_v1_cb_Exercise_fields, &tmp);
+
+    *stream = saved_stream;
+}
+
+// Same as read_exercise_identity, for Create submessages.
+static void read_create_identity(pb_istream_t *stream, pb_callback_context_t *ctx) {
+    pb_istream_t saved_stream = *stream;
+    com_daml_ledger_api_v2_interactive_transaction_v1_cb_Create tmp =
+        com_daml_ledger_api_v2_interactive_transaction_v1_cb_Create_init_zero;
+
+    if (pb_decode(stream,
+                  com_daml_ledger_api_v2_interactive_transaction_v1_cb_Create_fields,
+                  &tmp)) {
+        // No choice id: a create performs no choice, which is how the two kinds are told apart.
+        set_node_identity(ctx,
+                          tmp.contract_id,
+                          tmp.has_template_id ? (const Identifier *) &tmp.template_id : NULL,
+                          NULL);
+    } else {
+        set_node_identity(ctx, NULL, NULL, NULL);
+    }
+    pb_release(com_daml_ledger_api_v2_interactive_transaction_v1_cb_Create_fields, &tmp);
+
+    *stream = saved_stream;
+}
+
+// Does this identifier name the same template as the node?
+MUST_CHECK static bool is_node_template(const pb_callback_context_t *ctx,
+                                        const char *module_name,
+                                        const char *entity_name) {
+    return module_name != NULL && entity_name != NULL && ctx->node_module != NULL &&
+           ctx->node_entity != NULL && strcmp(module_name, ctx->node_module) == 0 &&
+           strcmp(entity_name, ctx->node_entity) == 0;
+}
+
+// A record may choose a screen only if it names the action the node signs. Without this, a record
+// nested anywhere inside the argument could select a configuration the node never performs.
+MUST_CHECK static bool config_matches_node_action(const pb_callback_context_t *ctx,
+                                                  const display_config_t *config,
+                                                  const Identifier *id) {
+    if (ctx->node_choice_id == NULL) {
+        // A create. Its argument record is the template itself, so the record the caller matched
+        // has to be this node's own template.
+        return is_node_template(ctx, id->module_name, id->entity_name);
+    }
+
+    // An exercise. The node must act on one of the templates this screen is written for, and the
+    // record must name the choice being exercised. Both are needed: several choices share one
+    // template, and the choice id is a string the host writes on both sides. An empty list belongs
+    // to a screen only a create can reach, so no exercise may pick it.
+    const identifier_config_t *const *expected =
+        (const identifier_config_t *const *) PIC(config->node_identifiers);
+    for (size_t i = 0; i < config->node_identifiers_count; i++) {
+        const identifier_config_t *node_id = (const identifier_config_t *) PIC(expected[i]);
+        if (is_node_template(ctx,
+                             (const char *) PIC(node_id->module_name),
+                             (const char *) PIC(node_id->entity_name))) {
+            return id->entity_name != NULL && strcmp(id->entity_name, ctx->node_choice_id) == 0;
+        }
+    }
+    return false;
+}
+
 // Helper function to match identifiers
 MUST_CHECK static bool match_identifier(const Identifier *id, const identifier_config_t *config) {
     LEDGER_ASSERT(id != NULL, "NULL identifier passed to match_identifier");
@@ -388,11 +496,17 @@ static void find_tx_type_and_config(pb_callback_context_t *ctx, const Identifier
     }
 
     if (global_tx_metadata_contract_identifiers != NULL) {
-        // Check if current id matches metadata contract identifier
+        // Match on type, and require this contract to be the one the exercise targeted.
+        bool contract_id_matches =
+            ctx->last_parsed_contract_id != NULL && global_expected_contract_id != NULL &&
+            strcmp(ctx->last_parsed_contract_id, global_expected_contract_id) == 0;
+
         for (size_t i = 0; i < global_tx_metadata_contract_identifiers_count; i++) {
-            if (match_identifier(id,
-                                 (const identifier_config_t *) PIC(
-                                     global_tx_metadata_contract_identifiers[i]))) {
+            const identifier_config_t *config =
+                (const identifier_config_t *) PIC(global_tx_metadata_contract_identifiers[i]);
+            // The disclosed contract is a create, so its record must also be its own template.
+            if (match_identifier(id, config) && contract_id_matches &&
+                is_node_template(ctx, id->module_name, id->entity_name)) {
                 set_display_config(ctx, global_tx_metadata_display_conf);
                 return;
             }
@@ -401,7 +515,8 @@ static void find_tx_type_and_config(pb_callback_context_t *ctx, const Identifier
 
     for (size_t i = 0; i < DISPLAY_CONFIGS_NB; i++) {
         const display_config_t *config = (const display_config_t *) PIC(&DISPLAY_CONFIGS[i]);
-        if (match_identifier(id, &config->identifier)) {
+        if (match_identifier(id, &config->identifier) &&
+            config_matches_node_action(ctx, config, id)) {
             // If metadata contract identifier is set, set it in global transaction context for
             // later use and do not set display config yet
             if (config->metadata_contract_identifiers_count > 0) {
@@ -410,6 +525,13 @@ static void find_tx_type_and_config(pb_callback_context_t *ctx, const Identifier
                 global_tx_metadata_contract_identifiers_count =
                     config->metadata_contract_identifiers_count;
                 global_tx_metadata_display_conf = (display_config_t *) PIC(config);
+                if (global_expected_contract_id != NULL) {
+                    app_mem_free(global_expected_contract_id);
+                    global_expected_contract_id = NULL;
+                }
+                if (ctx->last_parsed_contract_id != NULL) {
+                    global_expected_contract_id = app_mem_strdup(ctx->last_parsed_contract_id);
+                }
                 PRINTF("Metadata contract identifier set, deferring display config setting\n");
                 return;
             }
@@ -425,7 +547,7 @@ static void find_tx_field(pb_callback_context_t *ctx, cbValue *value) {
     LEDGER_ASSERT(ctx != NULL, "NULL context passed to find_tx_field");
     LEDGER_ASSERT(value != NULL, "NULL value passed to find_tx_field");
 
-    if (ctx->tx_fields != NULL) {
+    if (ctx->tx_fields != NULL && ctx->field_path != NULL) {
         PRINTF("Looking up field path: %s\n", ctx->field_path);
         tx_field_t *state = find_field_by_path(ctx, ctx->field_path);
         if (state != NULL && value != NULL) {
@@ -468,17 +590,30 @@ static void init_field_path(pb_callback_context_t *ctx) {
         app_mem_free(ctx->field_path);
     }
     ctx->field_path = (char *) app_mem_alloc(MAX_FIELD_PATH_LEN);
+    if (ctx->field_path == NULL) {
+        return;  // push_path, pop_path and find_tx_field all treat a NULL path as "no path"
+    }
     memset(ctx->field_path, 0, MAX_FIELD_PATH_LEN);
 }
 
-// Function to free memory for the display field path
-static void free_field_path(pb_callback_context_t *ctx) {
-    LEDGER_ASSERT(ctx != NULL, "NULL context passed to free_field_path");
+// Function to clean the context, freeing memory for the display field path and other allocated
+// resources
+static void clean_ctx(pb_callback_context_t *ctx) {
+    LEDGER_ASSERT(ctx != NULL, "NULL context passed to clean_ctx");
 
     if (ctx->field_path != NULL) {
         app_mem_free(ctx->field_path);
         ctx->field_path = NULL;
     }
+
+    app_mem_free(ctx->last_parsed_contract_id);
+    ctx->last_parsed_contract_id = NULL;
+    app_mem_free(ctx->node_module);
+    ctx->node_module = NULL;
+    app_mem_free(ctx->node_entity);
+    ctx->node_entity = NULL;
+    app_mem_free(ctx->node_choice_id);
+    ctx->node_choice_id = NULL;
 }
 
 // Push a new segment onto the field path with escaping for dots
@@ -573,9 +708,12 @@ MUST_CHECK static bool decode_record_id_field(pb_istream_t *stream,
         return false;
     }
 
-    // Identify the kind of record with match_identifier to know if we should
-    // process fields for display.
-    find_tx_type_and_config(ctx, &id);
+    // Only the outermost record of the node's argument may pick the display configuration. A record
+    // nested inside it describes a part of the argument, not the action being signed.
+    // find_tx_type_and_config checks the identifier against the node's own action from there.
+    if (ctx->record_depth == 1) {
+        find_tx_type_and_config(ctx, &id);
+    }
 
     pb_release(com_daml_ledger_api_v2_Identifier_fields, &id);
 
@@ -727,7 +865,10 @@ MUST_CHECK static bool decode_value_variant(pb_istream_t *stream,
             msg->record_id.funcs.decode = &decode_record_id_field;
             msg->record_id.arg = ctx;
             // decode the record, which will invoke the callbacks
-            if (!pb_decode(stream, com_daml_ledger_api_v2_cb_Record_fields, msg)) {
+            ctx->record_depth++;
+            bool decoded = pb_decode(stream, com_daml_ledger_api_v2_cb_Record_fields, msg);
+            ctx->record_depth--;
+            if (!decoded) {
                 PRINTF("Failed to decode Record in Value: %s\n", PB_GET_ERROR(stream));
                 return false;
             }
@@ -758,7 +899,7 @@ MUST_CHECK static bool decode_value_variant(pb_istream_t *stream,
 
 // Callback to decode Node messages, focusing on Exercise and Create nodes
 static bool node_decode_callback(pb_istream_t *stream, const pb_field_t *field, void **arg) {
-    UNUSED(stream);
+    LEDGER_ASSERT(stream != NULL, "NULL stream passed to node_decode_callback");
     LEDGER_ASSERT(field != NULL, "NULL field passed to node_decode_callback");
     LEDGER_ASSERT(arg != NULL, "NULL arg passed to node_decode_callback");
 
@@ -770,10 +911,14 @@ static bool node_decode_callback(pb_istream_t *stream, const pb_field_t *field, 
         PRINTF("Decoding Exercise node\n");
         node->exercise.chosen_value.cb_sum.funcs.decode = &decode_value_variant;
         node->exercise.chosen_value.cb_sum.arg = ctx;
+
+        read_exercise_identity(stream, ctx);
     } else if (field->tag == NODE_V1_CREATE_TAG) {
         PRINTF("Decoding Create node\n");
         node->create.argument.cb_sum.funcs.decode = &decode_value_variant;
         node->create.argument.cb_sum.arg = ctx;
+
+        read_create_identity(stream, ctx);
     }
 
     return true;
@@ -808,9 +953,12 @@ MUST_CHECK int format_and_populate_display_items(pb_callback_context_t *ctx) {
 
     int ret = 0;
 
+    // Hand the screen's own values to the value check while they are still unformatted.
+    values_bind_from_display(ctx->tx_fields, ctx->nb_fields, ctx->destination, ctx->amount_check);
+
     // Loop for mandatory check + format callbacks
     for (size_t i = 0; i < ctx->nb_fields; i++) {
-        const tx_field_t *state = &ctx->tx_fields[i];
+        tx_field_t *state = &ctx->tx_fields[i];
         const field_config_t *cfg = state->config;
 
         // Mandatory field check
@@ -827,7 +975,7 @@ MUST_CHECK int format_and_populate_display_items(pb_callback_context_t *ctx) {
             field_format_callback_t callback =
                 (field_format_callback_t) PIC(ctx->tx_fields[i].config->format_callback);
             if (callback != NULL) {
-                callback(ctx, (void *) &state->value);
+                callback(ctx, state);
             }
         }
 
@@ -885,6 +1033,11 @@ MUST_CHECK static bool decode_create(pb_istream_t *stream, const pb_field_t *fie
     c_cb.argument.funcs.decode = &decode_value;
     c_cb.argument.arg = ctx;
 
+    // Capture this contract's own ID and template before decoding its nested argument, since
+    // find_tx_type_and_config (called from within the argument decode below) needs both to already
+    // be in ctx to check the bindings correctly.
+    read_create_identity(stream, ctx);
+
     if (!pb_decode(stream,
                    com_daml_ledger_api_v2_interactive_transaction_v1_cb_Create_fields,
                    &c_cb)) {
@@ -937,7 +1090,7 @@ MUST_CHECK static int process_display_parsing(buffer_t *buf,
     }
 
     pb_release(fields, dest);
-    free_field_path(&ctx);
+    clean_ctx(&ctx);
 
     if (!status) {
         PRINTF("Decode failed: %s\n", PB_GET_ERROR(&stream));
