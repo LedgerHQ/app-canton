@@ -130,12 +130,16 @@ static const field_config_t TOKEN_TRANSFER_FIELDS[] = {
         SHOWN_AS_OTHER)};
 
 static const field_config_t TOKEN_TRANSFER_V2_FIELDS[] = {
-    FLD("transfer.sender.owner", "From", NULL, true),
-    FLD("transfer.amount", "Amount", format_token_amount_field, true),
-    FLD("transfer.receiver.owner", "To", NULL, true),
-    FLD("transfer.instrumentId.id", "Token", NULL, true),
-    FLD("transfer.instrumentId.admin", NULL, NULL, true),
-    FLD("transfer.meta.values.splice\\.lfdecentralizedtrust\\.org/reason", "Memo", NULL, false)};
+    FLD("transfer.sender.owner", "From", NULL, true, SHOWN_AS_SENDER),
+    FLD("transfer.amount", "Amount", format_token_amount_field, true, SHOWN_AS_AMOUNT),
+    FLD("transfer.receiver.owner", "To", NULL, true, SHOWN_AS_RECEIVER),
+    FLD("transfer.instrumentId.id", "Token", NULL, true, SHOWN_AS_OTHER),
+    FLD("transfer.instrumentId.admin", NULL, NULL, true, SHOWN_AS_ADMIN),
+    FLD("transfer.meta.values.splice\\.lfdecentralizedtrust\\.org/reason",
+        "Memo",
+        NULL,
+        false,
+        SHOWN_AS_OTHER)};
 
 static const field_config_t TOKEN_TRANSFER_ACCEPT_FIELDS[] = {
     FLD("transfer.sender", "From", NULL, true, SHOWN_AS_SENDER),
@@ -198,76 +202,113 @@ static const identifier_config_t *NODE_ID_EMPTY[] = {};
 /* Main Display Configuration                                                 */
 /* -------------------------------------------------------------------------- */
 
-#define CFG_ENTRY(_id, _fields, _title, _finish, _meta)    \
-    {.identifier = _id,                                    \
-     .fields = _fields,                                    \
-     .fields_count = sizeof(_fields) / sizeof(_fields[0]), \
-     .review_title = _title,                               \
-     .review_finish = _finish,                             \
-     .metadata_contract_identifiers = _meta,               \
-     .metadata_contract_identifiers_count = sizeof(_meta) / sizeof(_meta[0])}
+// _node_ids lists the templates the node may act on, and is empty for a create, whose template is
+// _id. Several choices share one template, so _node_ids never identifies the action on its own: the
+// choice id is checked against _id's entity name as well.
+#define CFG_ENTRY(_id, _node_ids, _fields, _title, _finish, _meta, _dest, _chk) \
+    {.identifier = _id,                                                         \
+     .node_identifiers = _node_ids,                                             \
+     .node_identifiers_count = sizeof(_node_ids) / sizeof(_node_ids[0]),        \
+     .fields = _fields,                                                         \
+     .fields_count = sizeof(_fields) / sizeof(_fields[0]),                      \
+     .review_title = _title,                                                    \
+     .review_finish = _finish,                                                  \
+     .metadata_contract_identifiers = _meta,                                    \
+     .metadata_contract_identifiers_count = sizeof(_meta) / sizeof(_meta[0]),   \
+     .destination = _dest,                                                      \
+     .amount_check = _chk}
 
 const display_config_t DISPLAY_CONFIGS[] = {
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV1", "TransferFactory_Transfer"),
+              AMULET_RULES_NODE_ID_LIST,
               TOKEN_TRANSFER_FIELDS,
               TOKEN_TRANSFER_REVIEW_TITLE,
               TOKEN_TRANSFER_REVIEW_FINISH,
-              META_EMPTY),
+              META_EMPTY,
+              DEST_RECEIVER,
+              AMOUNT_COMPARABLE),
 
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV2", "TransferFactory_Transfer"),
+              AMULET_RULES_NODE_ID_LIST,
               TOKEN_TRANSFER_V2_FIELDS,
               TOKEN_TRANSFER_REVIEW_TITLE,
               TOKEN_TRANSFER_REVIEW_FINISH,
-              META_EMPTY),
+              META_EMPTY,
+              DEST_RECEIVER,
+              AMOUNT_COMPARABLE),
 
     CFG_ENTRY(
         ID("Splice.ExternalPartyAmuletRules", "ExternalPartyAmuletRules_CreateTransferCommand"),
+        AMULET_RULES_NODE_ID_LIST,
         NATIVE_COIN_TRANSFER_FIELDS,
         NATIVE_COIN_TRANSFER_REVIEW_TITLE,
         NATIVE_COIN_TRANSFER_REVIEW_FINISH,
-        META_EMPTY),
+        META_EMPTY,
+        DEST_RECEIVER,
+        AMOUNT_COMPARABLE),
 
     CFG_ENTRY(ID("Splice.Wallet.TransferPreapproval", "TransferPreapprovalProposal"),
+              NODE_ID_EMPTY,
               PREAPPROVAL_PROPOSAL_FIELDS,
               PREAPPROVAL_PROPOSAL_REVIEW_TITLE,
               PREAPPROVAL_PROPOSAL_REVIEW_FINISH,
-              META_EMPTY),
+              META_EMPTY,
+              DEST_NONE,
+              AMOUNT_NOT_COMPARABLE),
 
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV1", "TransferInstruction_Accept"),
+              TRANSFER_OFFER_META_ID_LIST,
               TOKEN_TRANSFER_ACCEPT_FIELDS,
               TOKEN_TRANSFER_ACCEPT_REVIEW_TITLE,
               TOKEN_TRANSFER_ACCEPT_REVIEW_FINISH,
-              TRANSFER_OFFER_META_ID_LIST),
+              TRANSFER_OFFER_META_ID_LIST,
+              DEST_RECEIVER,
+              AMOUNT_COMPARABLE),
 
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV2", "TransferInstruction_Accept"),
+              TRANSFER_OFFER_META_ID_LIST,
               TOKEN_TRANSFER_ACCEPT_FIELDS,
               TOKEN_TRANSFER_ACCEPT_REVIEW_TITLE,
               TOKEN_TRANSFER_ACCEPT_REVIEW_FINISH,
-              TRANSFER_OFFER_META_ID_LIST),
+              TRANSFER_OFFER_META_ID_LIST,
+              DEST_RECEIVER,
+              AMOUNT_COMPARABLE),
 
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV1", "TransferInstruction_Reject"),
+              TRANSFER_OFFER_META_ID_LIST,
               TOKEN_TRANSFER_ACCEPT_FIELDS,
               TOKEN_TRANSFER_REJECT_REVIEW_TITLE,
               TOKEN_TRANSFER_REJECT_REVIEW_FINISH,
-              TRANSFER_OFFER_META_ID_LIST),
-    
+              TRANSFER_OFFER_META_ID_LIST,
+              DEST_SENDER,
+              AMOUNT_NOT_COMPARABLE),
+
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV2", "TransferInstruction_Reject"),
+              TRANSFER_OFFER_META_ID_LIST,
               TOKEN_TRANSFER_ACCEPT_FIELDS,
               TOKEN_TRANSFER_REJECT_REVIEW_TITLE,
               TOKEN_TRANSFER_REJECT_REVIEW_FINISH,
-              TRANSFER_OFFER_META_ID_LIST),
+              TRANSFER_OFFER_META_ID_LIST,
+              DEST_SENDER,
+              AMOUNT_NOT_COMPARABLE),
 
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV1", "TransferInstruction_Withdraw"),
+              TRANSFER_OFFER_META_ID_LIST,
               TOKEN_TRANSFER_WITHDRAW_FIELDS,
               TOKEN_TRANSFER_WITHDRAW_REVIEW_TITLE,
               TOKEN_TRANSFER_WITHDRAW_REVIEW_FINISH,
-              TRANSFER_OFFER_META_ID_LIST),
+              TRANSFER_OFFER_META_ID_LIST,
+              DEST_SENDER,
+              AMOUNT_NOT_COMPARABLE),
 
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV2", "TransferInstruction_Withdraw"),
+              TRANSFER_OFFER_META_ID_LIST,
               TOKEN_TRANSFER_WITHDRAW_FIELDS,
               TOKEN_TRANSFER_WITHDRAW_REVIEW_TITLE,
               TOKEN_TRANSFER_WITHDRAW_REVIEW_FINISH,
-              TRANSFER_OFFER_META_ID_LIST),
+              TRANSFER_OFFER_META_ID_LIST,
+              DEST_SENDER,
+              AMOUNT_NOT_COMPARABLE),
 
 };
 
