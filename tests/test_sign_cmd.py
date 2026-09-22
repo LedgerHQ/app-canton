@@ -382,6 +382,48 @@ def test_sign_token_transfer(backend: BackendInterface, scenario_navigator: Navi
     )
 
 
+# Consolidating your own holdings is a transfer to yourself. It writes two holdings to the one
+# account, the amount moved and the change, so the value check has to allow that case.
+def test_sign_token_transfer_consolidate(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
+    _sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_consolidate.json",
+        custom_screen_text="Sign transaction to",
+    )
+
+
+def test_sign_token_transfer_consolidate_v2(
+    backend: BackendInterface, scenario_navigator: NavigateWithScenario
+) -> None:
+    _sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_consolidate_v2.json",
+        custom_screen_text="Sign transaction to",
+    )
+
+
+def test_sign_token_transfer_v2(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
+    _sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_v2.json",
+        custom_screen_text="Sign transaction to",
+    )
+
+
+# A Token Standard V2 transfer that creates the transfer instruction in one transaction and settles
+# it in another. The displayed action is still TransferFactory_Transfer.
+def test_sign_token_transfer_multistep_v2(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
+    _sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_multistep_v2.json",
+        custom_screen_text="Sign transaction to",
+    )
+
+
 def test_sign_token_transfer_cip107(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
     _sign_and_verify_prepared_transaction(
         backend,
@@ -443,6 +485,15 @@ def test_sign_token_transfer_accept(backend: BackendInterface, scenario_navigato
         backend,
         scenario_navigator,
         tx_json="tests/tx_examples/token_transfer_accept.json",
+        custom_screen_text="Sign transaction to",
+    )
+
+
+def test_sign_token_transfer_accept_v2(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
+    _sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_accept_v2.json",
         custom_screen_text="Sign transaction to",
     )
 
@@ -510,11 +561,29 @@ def test_sign_token_transfer_reject(backend: BackendInterface, scenario_navigato
     )
 
 
+def test_sign_token_transfer_reject_v2(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
+    _sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_reject_v2.json",
+        custom_screen_text="Sign transaction to",
+    )
+
+
 def test_sign_token_transfer_withdraw(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
     _sign_and_verify_prepared_transaction(
         backend,
         scenario_navigator,
         tx_json="tests/tx_examples/token_transfer_withdraw.json",
+        custom_screen_text="Sign transaction to",
+    )
+
+
+def test_sign_token_transfer_withdraw_v2(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
+    _sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_withdraw_v2.json",
         custom_screen_text="Sign transaction to",
     )
 
