@@ -146,9 +146,9 @@ typedef struct _com_daml_ledger_api_v2_interactive_transaction_v1_QueryByKey {
     /* Specific LF serialization version of the node
 
  Required */
-    char lf_version[1024];
+    char *lf_version;
     /* Required */
-    char package_name[1024];
+    char *package_name;
     /* The identifier uses the package-id reference format.
 
  Required */
@@ -190,13 +190,13 @@ extern "C" {
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Exercise_init_default {NULL, NULL, NULL, false, com_daml_ledger_api_v2_Identifier_init_default, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, false, com_daml_ledger_api_v2_Value_init_default, 0, 0, NULL, false, com_daml_ledger_api_v2_Value_init_default, 0, NULL, false, com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_init_default, 0}
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Create_init_default {NULL, NULL, NULL, false, com_daml_ledger_api_v2_Identifier_init_default, false, com_daml_ledger_api_v2_Value_init_default, 0, NULL, 0, NULL, false, com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_init_default}
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Rollback_init_default {0, NULL}
-#define com_daml_ledger_api_v2_interactive_transaction_v1_QueryByKey_init_default {"", "", false, com_daml_ledger_api_v2_Identifier_init_default, 0, false, com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_init_default, {{NULL}, NULL}}
+#define com_daml_ledger_api_v2_interactive_transaction_v1_QueryByKey_init_default {NULL, NULL, false, com_daml_ledger_api_v2_Identifier_init_default, 0, false, com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_init_default, {{NULL}, NULL}}
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Node_init_default {{{NULL}, NULL}, 0, {com_daml_ledger_api_v2_interactive_transaction_v1_Create_init_default}}
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Fetch_init_zero {NULL, NULL, NULL, false, com_daml_ledger_api_v2_Identifier_init_zero, 0, NULL, 0, NULL, 0, NULL, NULL, false, com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_init_zero, 0}
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Exercise_init_zero {NULL, NULL, NULL, false, com_daml_ledger_api_v2_Identifier_init_zero, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, false, com_daml_ledger_api_v2_Value_init_zero, 0, 0, NULL, false, com_daml_ledger_api_v2_Value_init_zero, 0, NULL, false, com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_init_zero, 0}
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Create_init_zero {NULL, NULL, NULL, false, com_daml_ledger_api_v2_Identifier_init_zero, false, com_daml_ledger_api_v2_Value_init_zero, 0, NULL, 0, NULL, false, com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_init_zero}
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Rollback_init_zero {0, NULL}
-#define com_daml_ledger_api_v2_interactive_transaction_v1_QueryByKey_init_zero {"", "", false, com_daml_ledger_api_v2_Identifier_init_zero, 0, false, com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_init_zero, {{NULL}, NULL}}
+#define com_daml_ledger_api_v2_interactive_transaction_v1_QueryByKey_init_zero {NULL, NULL, false, com_daml_ledger_api_v2_Identifier_init_zero, 0, false, com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_init_zero, {{NULL}, NULL}}
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Node_init_zero {{{NULL}, NULL}, 0, {com_daml_ledger_api_v2_interactive_transaction_v1_Create_init_zero}}
 
 /* Field tags (for use in manual encoding/decoding) */
@@ -311,8 +311,8 @@ X(a, POINTER,  REPEATED, STRING,   children,          1)
 #define com_daml_ledger_api_v2_interactive_transaction_v1_Rollback_DEFAULT NULL
 
 #define com_daml_ledger_api_v2_interactive_transaction_v1_QueryByKey_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, STRING,   lf_version,        1) \
-X(a, STATIC,   SINGULAR, STRING,   package_name,      2) \
+X(a, POINTER,  SINGULAR, STRING,   lf_version,        1) \
+X(a, POINTER,  SINGULAR, STRING,   package_name,      2) \
 X(a, STATIC,   OPTIONAL, MESSAGE,  template_id,       3) \
 X(a, STATIC,   SINGULAR, BOOL,     exhaustive,        4) \
 X(a, STATIC,   OPTIONAL, MESSAGE,  key,               5) \

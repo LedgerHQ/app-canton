@@ -11,7 +11,6 @@
 #endif
 
 /* Struct definitions */
-typedef PB_BYTES_ARRAY_T(1024) com_daml_ledger_api_v2_interactive_GlobalKey_hash_t;
 typedef struct _com_daml_ledger_api_v2_interactive_GlobalKey {
     /* The identifier uses the package-id reference format.
 
@@ -19,12 +18,12 @@ typedef struct _com_daml_ledger_api_v2_interactive_GlobalKey {
     bool has_template_id;
     com_daml_ledger_api_v2_Identifier template_id;
     /* Required */
-    char package_name[1024];
+    char *package_name;
     /* Required */
     bool has_key;
     com_daml_ledger_api_v2_Value key;
     /* Required: must be non-empty */
-    com_daml_ledger_api_v2_interactive_GlobalKey_hash_t hash;
+    pb_bytes_array_t *hash;
 } com_daml_ledger_api_v2_interactive_GlobalKey;
 
 typedef struct _com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers {
@@ -45,9 +44,9 @@ extern "C" {
 #endif
 
 /* Initializer values for message structs */
-#define com_daml_ledger_api_v2_interactive_GlobalKey_init_default {false, com_daml_ledger_api_v2_Identifier_init_default, "", false, com_daml_ledger_api_v2_Value_init_default, {0, {0}}}
+#define com_daml_ledger_api_v2_interactive_GlobalKey_init_default {false, com_daml_ledger_api_v2_Identifier_init_default, NULL, false, com_daml_ledger_api_v2_Value_init_default, NULL}
 #define com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_init_default {false, com_daml_ledger_api_v2_interactive_GlobalKey_init_default, {{NULL}, NULL}}
-#define com_daml_ledger_api_v2_interactive_GlobalKey_init_zero {false, com_daml_ledger_api_v2_Identifier_init_zero, "", false, com_daml_ledger_api_v2_Value_init_zero, {0, {0}}}
+#define com_daml_ledger_api_v2_interactive_GlobalKey_init_zero {false, com_daml_ledger_api_v2_Identifier_init_zero, NULL, false, com_daml_ledger_api_v2_Value_init_zero, NULL}
 #define com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_init_zero {false, com_daml_ledger_api_v2_interactive_GlobalKey_init_zero, {{NULL}, NULL}}
 
 /* Field tags (for use in manual encoding/decoding) */
@@ -61,9 +60,9 @@ extern "C" {
 /* Struct field encoding specification for nanopb */
 #define com_daml_ledger_api_v2_interactive_GlobalKey_FIELDLIST(X, a) \
 X(a, STATIC,   OPTIONAL, MESSAGE,  template_id,       1) \
-X(a, STATIC,   SINGULAR, STRING,   package_name,      2) \
+X(a, POINTER,  SINGULAR, STRING,   package_name,      2) \
 X(a, STATIC,   OPTIONAL, MESSAGE,  key,               3) \
-X(a, STATIC,   SINGULAR, BYTES,    hash,              4)
+X(a, POINTER,  SINGULAR, BYTES,    hash,              4)
 #define com_daml_ledger_api_v2_interactive_GlobalKey_CALLBACK NULL
 #define com_daml_ledger_api_v2_interactive_GlobalKey_DEFAULT NULL
 #define com_daml_ledger_api_v2_interactive_GlobalKey_template_id_MSGTYPE com_daml_ledger_api_v2_Identifier
@@ -84,11 +83,8 @@ extern const pb_msgdesc_t com_daml_ledger_api_v2_interactive_GlobalKeyWithMainta
 #define com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_fields &com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_msg
 
 /* Maximum encoded size of messages (where known) */
+/* com_daml_ledger_api_v2_interactive_GlobalKey_size depends on runtime parameters */
 /* com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers_size depends on runtime parameters */
-#if defined(com_daml_ledger_api_v2_Value_size)
-#define COM_DAML_LEDGER_API_V2_INTERACTIVE_COM_DAML_LEDGER_API_V2_INTERACTIVE_INTERACTIVE_SUBMISSION_COMMON_DATA_PB_H_MAX_SIZE com_daml_ledger_api_v2_interactive_GlobalKey_size
-#define com_daml_ledger_api_v2_interactive_GlobalKey_size (5140 + com_daml_ledger_api_v2_Value_size)
-#endif
 
 #ifdef __cplusplus
 } /* extern "C" */

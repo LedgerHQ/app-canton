@@ -349,19 +349,18 @@ typedef struct _com_digitalasset_canton_protocol_v30_SequencerSynchronizerState 
  UNIQUE(successor_physical_synchronizer_id.logical) */
 typedef struct _com_digitalasset_canton_protocol_v30_LsuAnnouncement {
     /* the physical synchronizer id of the successor synchronizer */
-    char successor_physical_synchronizer_id[1024];
+    char *successor_physical_synchronizer_id;
     /* when the upgrade happens */
     bool has_upgrade_time;
     google_protobuf_Timestamp upgrade_time;
 } com_digitalasset_canton_protocol_v30_LsuAnnouncement;
 
-typedef PB_BYTES_ARRAY_T(1024) com_digitalasset_canton_protocol_v30_LsuSequencerConnectionSuccessor_SequencerConnection_custom_trust_certificates_t;
 typedef struct _com_digitalasset_canton_protocol_v30_LsuSequencerConnectionSuccessor_SequencerConnection {
     /* connection information to sequencer (http[s]://<host>:<port>")
  all endpoints must agree on using HTTPS or HTTP */
-    pb_callback_t endpoints;
-    bool has_custom_trust_certificates;
-    com_digitalasset_canton_protocol_v30_LsuSequencerConnectionSuccessor_SequencerConnection_custom_trust_certificates_t custom_trust_certificates;
+    pb_size_t endpoints_count;
+    char **endpoints;
+    pb_bytes_array_t *custom_trust_certificates;
 } com_digitalasset_canton_protocol_v30_LsuSequencerConnectionSuccessor_SequencerConnection;
 
 /* a sequencer can announce its connections on the successor synchronizer
@@ -369,9 +368,9 @@ typedef struct _com_digitalasset_canton_protocol_v30_LsuSequencerConnectionSucce
  UNIQUE(sequencer_id, successor_physical_synchronizer_id.logical) */
 typedef struct _com_digitalasset_canton_protocol_v30_LsuSequencerConnectionSuccessor {
     /* the sequencer id */
-    char sequencer_id[1024];
+    char *sequencer_id;
     /* the physical synchronizer id of the successor synchronizer */
-    char successor_physical_synchronizer_id[1024];
+    char *successor_physical_synchronizer_id;
     /* the connection details with which members can connect to the sequencer on the successor synchronizer */
     bool has_connection;
     com_digitalasset_canton_protocol_v30_LsuSequencerConnectionSuccessor_SequencerConnection connection;
@@ -453,7 +452,7 @@ typedef struct _com_digitalasset_canton_protocol_v30_SignedTopologyTransactions 
  The transactions are validated by all members individually against their respective synchronizer store,
  including the member the submitted the broadcast. */
 typedef struct _com_digitalasset_canton_protocol_v30_TopologyTransactionsBroadcast {
-    char physical_synchronizer_id[1024];
+    char *physical_synchronizer_id;
     bool has_signed_transactions;
     com_digitalasset_canton_protocol_v30_SignedTopologyTransactions signed_transactions;
 } com_digitalasset_canton_protocol_v30_TopologyTransactionsBroadcast;
@@ -536,15 +535,15 @@ extern "C" {
 #define com_digitalasset_canton_protocol_v30_DynamicSequencingParametersState_init_default {NULL, false, com_digitalasset_canton_protocol_v30_DynamicSequencingParameters_init_default}
 #define com_digitalasset_canton_protocol_v30_MediatorSynchronizerState_init_default {NULL, 0, 0, 0, NULL, 0, NULL}
 #define com_digitalasset_canton_protocol_v30_SequencerSynchronizerState_init_default {NULL, 0, 0, NULL, 0, NULL}
-#define com_digitalasset_canton_protocol_v30_LsuAnnouncement_init_default {"", false, google_protobuf_Timestamp_init_default}
-#define com_digitalasset_canton_protocol_v30_LsuSequencerConnectionSuccessor_init_default {"", "", false, com_digitalasset_canton_protocol_v30_LsuSequencerConnectionSuccessor_SequencerConnection_init_default}
-#define com_digitalasset_canton_protocol_v30_LsuSequencerConnectionSuccessor_SequencerConnection_init_default {{{NULL}, NULL}, false, {0, {0}}}
+#define com_digitalasset_canton_protocol_v30_LsuAnnouncement_init_default {NULL, false, google_protobuf_Timestamp_init_default}
+#define com_digitalasset_canton_protocol_v30_LsuSequencerConnectionSuccessor_init_default {NULL, NULL, false, com_digitalasset_canton_protocol_v30_LsuSequencerConnectionSuccessor_SequencerConnection_init_default}
+#define com_digitalasset_canton_protocol_v30_LsuSequencerConnectionSuccessor_SequencerConnection_init_default {0, NULL, NULL}
 #define com_digitalasset_canton_protocol_v30_TopologyMapping_init_default {0, {com_digitalasset_canton_protocol_v30_NamespaceDelegation_init_default}}
 #define com_digitalasset_canton_protocol_v30_TopologyTransaction_init_default {_com_digitalasset_canton_protocol_v30_Enums_TopologyChangeOp_MIN, 0, false, com_digitalasset_canton_protocol_v30_TopologyMapping_init_default}
 #define com_digitalasset_canton_protocol_v30_MultiTransactionSignatures_init_default {{{NULL}, NULL}, {{NULL}, NULL}}
 #define com_digitalasset_canton_protocol_v30_SignedTopologyTransaction_init_default {NULL, {{NULL}, NULL}, 0, {{NULL}, NULL}}
 #define com_digitalasset_canton_protocol_v30_SignedTopologyTransactions_init_default {{{NULL}, NULL}}
-#define com_digitalasset_canton_protocol_v30_TopologyTransactionsBroadcast_init_default {"", false, com_digitalasset_canton_protocol_v30_SignedTopologyTransactions_init_default}
+#define com_digitalasset_canton_protocol_v30_TopologyTransactionsBroadcast_init_default {NULL, false, com_digitalasset_canton_protocol_v30_SignedTopologyTransactions_init_default}
 #define com_digitalasset_canton_protocol_v30_Enums_init_zero {0}
 #define com_digitalasset_canton_protocol_v30_NamespaceDelegation_init_zero {NULL, false, com_digitalasset_canton_crypto_v30_SigningPublicKey_init_zero, 0, 0, {com_digitalasset_canton_protocol_v30_NamespaceDelegation_CanSignAllMappings_init_zero}}
 #define com_digitalasset_canton_protocol_v30_NamespaceDelegation_CanSignAllMappings_init_zero {0}
@@ -565,15 +564,15 @@ extern "C" {
 #define com_digitalasset_canton_protocol_v30_DynamicSequencingParametersState_init_zero {NULL, false, com_digitalasset_canton_protocol_v30_DynamicSequencingParameters_init_zero}
 #define com_digitalasset_canton_protocol_v30_MediatorSynchronizerState_init_zero {NULL, 0, 0, 0, NULL, 0, NULL}
 #define com_digitalasset_canton_protocol_v30_SequencerSynchronizerState_init_zero {NULL, 0, 0, NULL, 0, NULL}
-#define com_digitalasset_canton_protocol_v30_LsuAnnouncement_init_zero {"", false, google_protobuf_Timestamp_init_zero}
-#define com_digitalasset_canton_protocol_v30_LsuSequencerConnectionSuccessor_init_zero {"", "", false, com_digitalasset_canton_protocol_v30_LsuSequencerConnectionSuccessor_SequencerConnection_init_zero}
-#define com_digitalasset_canton_protocol_v30_LsuSequencerConnectionSuccessor_SequencerConnection_init_zero {{{NULL}, NULL}, false, {0, {0}}}
+#define com_digitalasset_canton_protocol_v30_LsuAnnouncement_init_zero {NULL, false, google_protobuf_Timestamp_init_zero}
+#define com_digitalasset_canton_protocol_v30_LsuSequencerConnectionSuccessor_init_zero {NULL, NULL, false, com_digitalasset_canton_protocol_v30_LsuSequencerConnectionSuccessor_SequencerConnection_init_zero}
+#define com_digitalasset_canton_protocol_v30_LsuSequencerConnectionSuccessor_SequencerConnection_init_zero {0, NULL, NULL}
 #define com_digitalasset_canton_protocol_v30_TopologyMapping_init_zero {0, {com_digitalasset_canton_protocol_v30_NamespaceDelegation_init_zero}}
 #define com_digitalasset_canton_protocol_v30_TopologyTransaction_init_zero {_com_digitalasset_canton_protocol_v30_Enums_TopologyChangeOp_MIN, 0, false, com_digitalasset_canton_protocol_v30_TopologyMapping_init_zero}
 #define com_digitalasset_canton_protocol_v30_MultiTransactionSignatures_init_zero {{{NULL}, NULL}, {{NULL}, NULL}}
 #define com_digitalasset_canton_protocol_v30_SignedTopologyTransaction_init_zero {NULL, {{NULL}, NULL}, 0, {{NULL}, NULL}}
 #define com_digitalasset_canton_protocol_v30_SignedTopologyTransactions_init_zero {{{NULL}, NULL}}
-#define com_digitalasset_canton_protocol_v30_TopologyTransactionsBroadcast_init_zero {"", false, com_digitalasset_canton_protocol_v30_SignedTopologyTransactions_init_zero}
+#define com_digitalasset_canton_protocol_v30_TopologyTransactionsBroadcast_init_zero {NULL, false, com_digitalasset_canton_protocol_v30_SignedTopologyTransactions_init_zero}
 
 /* Field tags (for use in manual encoding/decoding) */
 #define com_digitalasset_canton_protocol_v30_NamespaceDelegation_CanSignSpecificMappings_mappings_tag 1
@@ -814,24 +813,24 @@ X(a, POINTER,  REPEATED, STRING,   observers,         4)
 #define com_digitalasset_canton_protocol_v30_SequencerSynchronizerState_DEFAULT NULL
 
 #define com_digitalasset_canton_protocol_v30_LsuAnnouncement_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, STRING,   successor_physical_synchronizer_id,   1) \
+X(a, POINTER,  SINGULAR, STRING,   successor_physical_synchronizer_id,   1) \
 X(a, STATIC,   OPTIONAL, MESSAGE,  upgrade_time,      2)
 #define com_digitalasset_canton_protocol_v30_LsuAnnouncement_CALLBACK NULL
 #define com_digitalasset_canton_protocol_v30_LsuAnnouncement_DEFAULT NULL
 #define com_digitalasset_canton_protocol_v30_LsuAnnouncement_upgrade_time_MSGTYPE google_protobuf_Timestamp
 
 #define com_digitalasset_canton_protocol_v30_LsuSequencerConnectionSuccessor_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, STRING,   sequencer_id,      1) \
-X(a, STATIC,   SINGULAR, STRING,   successor_physical_synchronizer_id,   2) \
+X(a, POINTER,  SINGULAR, STRING,   sequencer_id,      1) \
+X(a, POINTER,  SINGULAR, STRING,   successor_physical_synchronizer_id,   2) \
 X(a, STATIC,   OPTIONAL, MESSAGE,  connection,        3)
 #define com_digitalasset_canton_protocol_v30_LsuSequencerConnectionSuccessor_CALLBACK NULL
 #define com_digitalasset_canton_protocol_v30_LsuSequencerConnectionSuccessor_DEFAULT NULL
 #define com_digitalasset_canton_protocol_v30_LsuSequencerConnectionSuccessor_connection_MSGTYPE com_digitalasset_canton_protocol_v30_LsuSequencerConnectionSuccessor_SequencerConnection
 
 #define com_digitalasset_canton_protocol_v30_LsuSequencerConnectionSuccessor_SequencerConnection_FIELDLIST(X, a) \
-X(a, CALLBACK, REPEATED, STRING,   endpoints,         1) \
-X(a, STATIC,   OPTIONAL, BYTES,    custom_trust_certificates,   2)
-#define com_digitalasset_canton_protocol_v30_LsuSequencerConnectionSuccessor_SequencerConnection_CALLBACK pb_default_field_callback
+X(a, POINTER,  REPEATED, STRING,   endpoints,         1) \
+X(a, POINTER,  OPTIONAL, BYTES,    custom_trust_certificates,   2)
+#define com_digitalasset_canton_protocol_v30_LsuSequencerConnectionSuccessor_SequencerConnection_CALLBACK NULL
 #define com_digitalasset_canton_protocol_v30_LsuSequencerConnectionSuccessor_SequencerConnection_DEFAULT NULL
 
 #define com_digitalasset_canton_protocol_v30_TopologyMapping_FIELDLIST(X, a) \
@@ -899,7 +898,7 @@ X(a, CALLBACK, REPEATED, BYTES,    signed_transaction,   1)
 #define com_digitalasset_canton_protocol_v30_SignedTopologyTransactions_DEFAULT NULL
 
 #define com_digitalasset_canton_protocol_v30_TopologyTransactionsBroadcast_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, STRING,   physical_synchronizer_id,   1) \
+X(a, POINTER,  SINGULAR, STRING,   physical_synchronizer_id,   1) \
 X(a, STATIC,   OPTIONAL, MESSAGE,  signed_transactions,   2)
 #define com_digitalasset_canton_protocol_v30_TopologyTransactionsBroadcast_CALLBACK NULL
 #define com_digitalasset_canton_protocol_v30_TopologyTransactionsBroadcast_DEFAULT NULL
@@ -983,6 +982,7 @@ extern const pb_msgdesc_t com_digitalasset_canton_protocol_v30_TopologyTransacti
 /* com_digitalasset_canton_protocol_v30_DynamicSequencingParametersState_size depends on runtime parameters */
 /* com_digitalasset_canton_protocol_v30_MediatorSynchronizerState_size depends on runtime parameters */
 /* com_digitalasset_canton_protocol_v30_SequencerSynchronizerState_size depends on runtime parameters */
+/* com_digitalasset_canton_protocol_v30_LsuAnnouncement_size depends on runtime parameters */
 /* com_digitalasset_canton_protocol_v30_LsuSequencerConnectionSuccessor_size depends on runtime parameters */
 /* com_digitalasset_canton_protocol_v30_LsuSequencerConnectionSuccessor_SequencerConnection_size depends on runtime parameters */
 /* com_digitalasset_canton_protocol_v30_TopologyMapping_size depends on runtime parameters */
@@ -991,9 +991,8 @@ extern const pb_msgdesc_t com_digitalasset_canton_protocol_v30_TopologyTransacti
 /* com_digitalasset_canton_protocol_v30_SignedTopologyTransaction_size depends on runtime parameters */
 /* com_digitalasset_canton_protocol_v30_SignedTopologyTransactions_size depends on runtime parameters */
 /* com_digitalasset_canton_protocol_v30_TopologyTransactionsBroadcast_size depends on runtime parameters */
-#define COM_DIGITALASSET_CANTON_PROTOCOL_V30_COM_DIGITALASSET_CANTON_PROTOCOL_V30_TOPOLOGY_PB_H_MAX_SIZE com_digitalasset_canton_protocol_v30_LsuAnnouncement_size
+#define COM_DIGITALASSET_CANTON_PROTOCOL_V30_COM_DIGITALASSET_CANTON_PROTOCOL_V30_TOPOLOGY_PB_H_MAX_SIZE com_digitalasset_canton_protocol_v30_Enums_size
 #define com_digitalasset_canton_protocol_v30_Enums_size 0
-#define com_digitalasset_canton_protocol_v30_LsuAnnouncement_size 1050
 #define com_digitalasset_canton_protocol_v30_NamespaceDelegation_CanSignAllButNamespaceDelegations_size 0
 #define com_digitalasset_canton_protocol_v30_NamespaceDelegation_CanSignAllMappings_size 0
 #define com_digitalasset_canton_protocol_v30_PartyToParticipant_HostingParticipant_Onboarding_size 0
