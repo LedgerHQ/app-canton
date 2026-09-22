@@ -53,7 +53,9 @@ static const identifier_config_t NON_HOLDING_TEMPLATES[] = {
     {"Splice.Amulet", "ValidatorRewardCoupon"},
     {"Splice.Amulet", "FeaturedAppActivityMarker"},
     {"Utility.Registry.V0.Holding.Transfer", "ExecutedTransfer"},
-    {"Splice.Wallet.TransferPreapproval", "TransferPreapprovalProposal"}};
+    {"Splice.Wallet.TransferPreapproval", "TransferPreapprovalProposal"},
+    // A record of what moved, written alongside a Token Standard V2 transfer. It holds no value.
+    {"Splice.AmuletEventLog", "AmuletEventLog"}};
 
 // Sized the way pb_node_display_config.c sizes DISPLAY_CONFIGS_NB, kept file-local because the
 // tables and their only reader live here.
