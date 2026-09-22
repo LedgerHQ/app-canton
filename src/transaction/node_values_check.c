@@ -36,7 +36,10 @@ static struct {
     uint8_t destination[SHA256_HASH_LEN];  // account the value ends up with
     uint8_t amount[SHA256_HASH_LEN];       // amount shown, before formatting
     uint8_t admin[SHA256_HASH_LEN];        // instrument admin the ticker was resolved from
-    bool has_destination, has_amount, has_admin;
+    // The account the value leaves, kept whichever way round the screen reads. Only used to spot a
+    // transfer to oneself, where the sender and the destination are the same account.
+    uint8_t sender[SHA256_HASH_LEN];
+    bool has_destination, has_amount, has_admin, has_sender;
     bool bound;                       // a display configuration matched
     destination_e bound_destination;  // which account that configuration says the value goes to
 
@@ -179,6 +182,7 @@ void values_bind_from_display(const tx_field_t *fields,
     const char *shown_destination = NULL;
     const char *shown_amount = NULL;
     const char *shown_admin = NULL;
+    const char *shown_sender = NULL;
 
     LEDGER_ASSERT(fields != NULL, "NULL fields in values_bind_from_display");
 
@@ -187,6 +191,7 @@ void values_bind_from_display(const tx_field_t *fields,
     store.has_destination = false;
     store.has_amount = false;
     store.has_admin = false;
+    store.has_sender = false;
 
     for (uint8_t i = 0; i < count; i++) {
         const tx_field_t *field = &fields[i];
@@ -196,6 +201,9 @@ void values_bind_from_display(const tx_field_t *fields,
         }
         switch (field->config->shown_as) {
             case SHOWN_AS_SENDER:
+                // Kept even when the destination is the receiver, so a transfer to oneself can be
+                // told apart from a transfer to somebody else.
+                shown_sender = field->value;
                 if (destination == DEST_SENDER) {
                     shown_destination = field->value;
                 }
@@ -230,6 +238,10 @@ void values_bind_from_display(const tx_field_t *fields,
         digest(shown_admin, store.admin);
         store.has_admin = true;
     }
+    if (shown_sender != NULL) {
+        digest(shown_sender, store.sender);
+        store.has_sender = true;
+    }
     store.bound = true;
     store.bound_destination = destination;
 }
@@ -243,14 +255,27 @@ void values_bind_from_display(const tx_field_t *fields,
 // Every recorded transfer writes one holding for its destination. The change and the escrow go to
 // the sender, who is not the destination on those screens, and on the reject and withdraw screens,
 // where the sender is the destination, the returned lock is the only holding written.
+// The screen shows the value leaving and arriving at the same account, which is what consolidating
+// your own holdings looks like: the transfer machinery is used to merge several into fewer.
+MUST_CHECK static bool is_transfer_to_self(void) {
+    return store.has_sender && store.has_destination &&
+           memcmp(store.sender, store.destination, SHA256_HASH_LEN) == 0;
+}
+
 MUST_CHECK static bool destination_holds_value(void) {
-    const holding_t *held = NULL;
     uint8_t owned = 0;
+    bool amount_seen = false;
 
     for (uint8_t i = 0; i < store.holdings_count; i++) {
-        if (memcmp(store.holdings[i].owner, store.destination, SHA256_HASH_LEN) == 0) {
-            held = &store.holdings[i];
-            owned++;
+        if (memcmp(store.holdings[i].owner, store.destination, SHA256_HASH_LEN) != 0) {
+            continue;
+        }
+        owned++;
+        // Returning a locked holding hands back a fee reserve with it, so no amount was bound and
+        // the destination owning a holding is all there is to check.
+        if (!store.has_amount ||
+            memcmp(store.holdings[i].amount, store.amount, SHA256_HASH_LEN) == 0) {
+            amount_seen = true;
         }
     }
 
@@ -258,13 +283,16 @@ MUST_CHECK static bool destination_holds_value(void) {
         give_up("no holding for the account the value goes to");
         return false;
     }
-    if (owned > 1) {
+
+    // A second holding for the destination is normally value the screen never showed. Sending to
+    // yourself is the exception: the amount moved and the change both land on the one account, and
+    // no value leaves, so counting them proves nothing.
+    if (owned > 1 && !is_transfer_to_self()) {
         give_up("more than one holding for the account the value goes to");
         return false;
     }
-    // Returning a locked holding hands back a fee reserve with it, so no amount was bound and the
-    // destination owning a holding is all there is to check.
-    if (store.has_amount && memcmp(held->amount, store.amount, SHA256_HASH_LEN) != 0) {
+
+    if (!amount_seen) {
         give_up("the destination's holding has another amount");
         return false;
     }
