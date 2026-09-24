@@ -9,6 +9,7 @@
 #include "ledger_assert.h"
 #include "constants.h"
 #include "node_tree_check.h"
+#include "node_values_check.h"
 
 #define VALUE_ELEM_COUNT_NONE -1
 
