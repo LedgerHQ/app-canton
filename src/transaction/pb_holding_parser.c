@@ -26,7 +26,7 @@ typedef struct {
     const char *owner_path;   // "owner"                 -- and where inside it are the fields?
     const char *amount_path;  // "amount.initialAmount"
     const char *admin_path;   // "dso"
-    const char *id_path;      // "instrument.id"         -- NULL when the template names no instrument
+    const char *id_path;  // "instrument.id"         -- NULL when the template names no instrument
 } holding_path_config_t;
 
 // Read out of the recorded transactions in tests/tx_examples, not guessed. Paths vary per template,

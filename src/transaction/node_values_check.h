@@ -85,7 +85,8 @@ MUST_CHECK bool values_still_collecting(void);
  * @param[in] owner   Digest of the account the holding belongs to.
  * @param[in] amount  Digest of the amount written in it, as the ledger wrote it.
  * @param[in] admin       Digest of the party that issued it.
- * @param[in] instrument  Digest of the instrument id it holds, or NULL when its template names none.
+ * @param[in] instrument  Digest of the instrument id it holds, or NULL when its template names
+ * none.
  */
 void values_report_holding(const uint8_t owner[SHA256_HASH_LEN],
                            const uint8_t amount[SHA256_HASH_LEN],
