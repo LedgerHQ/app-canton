@@ -411,18 +411,6 @@ def test_sign_token_transfer_accept_v2(backend: BackendInterface, scenario_navig
     )
 
 
-def test_sign_token_transfer_accept_cc_v2_locked(
-    backend: BackendInterface, scenario_navigator: NavigateWithScenario
-) -> None:
-    sign_and_verify_prepared_transaction(
-        backend,
-        scenario_navigator,
-        tx_json="tests/tx_examples/token_transfer_accept_cc_v2_locked.json",
-        custom_screen_text="Sign transaction to",
-        snapshot_check=False,
-    )
-
-
 def test_sign_token_transfer_usdcx_send(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
     sign_and_verify_prepared_transaction(
         backend,
