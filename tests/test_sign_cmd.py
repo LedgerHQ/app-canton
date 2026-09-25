@@ -325,6 +325,20 @@ def test_sign_token_transfer_multistep_v2(backend: BackendInterface, scenario_na
     )
 
 
+# A CBTC send: the registry runs the transfer on its own factory contract and parks the money in
+# its own TransferOffer, rather than using Canton Coin's contracts. Reconstructed from a device
+# APDU log after a real transfer was refused on 3.4.0.
+def test_sign_token_transfer_cbtc_send(
+    backend: BackendInterface, scenario_navigator: NavigateWithScenario
+) -> None:
+    sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_cbtc_send.json",
+        custom_screen_text="Sign transaction to",
+    )
+
+
 def test_sign_token_transfer_cip107(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
     sign_and_verify_prepared_transaction(
         backend,
@@ -395,6 +409,38 @@ def test_sign_token_transfer_accept_v2(backend: BackendInterface, scenario_navig
         backend,
         scenario_navigator,
         tx_json="tests/tx_examples/token_transfer_accept_v2.json",
+        custom_screen_text="Sign transaction to",
+    )
+
+
+def test_sign_token_transfer_usdcx_send(
+    backend: BackendInterface, scenario_navigator: NavigateWithScenario
+) -> None:
+    sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_usdcx_send.json",
+        custom_screen_text="Sign transaction to",
+    )
+
+
+def test_sign_token_transfer_usdcx_accept(
+    backend: BackendInterface, scenario_navigator: NavigateWithScenario
+) -> None:
+    sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_usdcx_accept.json",
+        custom_screen_text="Sign transaction to",
+    )
+
+def test_sign_token_transfer_cbtc_accept(
+    backend: BackendInterface, scenario_navigator: NavigateWithScenario
+) -> None:
+    sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_cbtc_accept.json",
         custom_screen_text="Sign transaction to",
     )
 
