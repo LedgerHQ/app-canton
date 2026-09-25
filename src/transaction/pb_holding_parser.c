@@ -43,7 +43,13 @@ static const holding_path_config_t HOLDING_TEMPLATES[] = {
      "transfer.receiver",
      "transfer.amount",
      "transfer.instrumentId.admin"},
-    {"Splice.ExternalPartyAmuletRules", "TransferCommand", "receiver", "amount", "dso"}};
+    {"Splice.ExternalPartyAmuletRules", "TransferCommand", "receiver", "amount", "dso"},
+    // A registry's pending offer, the same shape as AmuletTransferInstruction above.
+    {"Utility.Registry.App.V0.Model.Transfer",
+     "TransferOffer",
+     "transfer.receiver",
+     "transfer.amount",
+     "transfer.instrumentId.admin"}};
 
 // Known, and holding no value for an account. Reward coupons and activity markers pay a validator
 // or an app the screen never names, and the pre-approval proposal moves nothing. Listed so that an

@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Clear signing for Token Standard V2 transfers: transfer, accept, reject and withdraw.
 - Clear signing for consolidating your own holdings, which is a transfer to yourself.
 
+### Fixed
+
+- Clear signing when you send a registry token such as CBTC or USDCx. The app did not know the
+  contract the registry uses to start a transfer, so it fell back to blind signing.
+
 ### Changed
 
 - Update the transaction protobuf definitions to v1.6.3.

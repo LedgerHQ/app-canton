@@ -192,8 +192,17 @@ static const identifier_config_t *META_EMPTY[] = {};
 static const identifier_config_t NODE_ID_EXTERNAL_PARTY_AMULET_RULES =
     ID("Splice.ExternalPartyAmuletRules", "ExternalPartyAmuletRules");
 
+static const identifier_config_t NODE_ID_REGISTRY_ALLOCATION_FACTORY =
+    ID("Utility.Registry.App.V0.Service.AllocationFactory", "AllocationFactory");
+
 static const identifier_config_t *const AMULET_RULES_NODE_ID_LIST[] = {
     &NODE_ID_EXTERNAL_PARTY_AMULET_RULES};
+
+// TransferFactory_Transfer is the token standard's own choice, so each registry offers it on its
+// own factory contract. Canton Coin uses Splice's, other tokens use theirs.
+static const identifier_config_t *const TRANSFER_FACTORY_NODE_ID_LIST[] = {
+    &NODE_ID_EXTERNAL_PARTY_AMULET_RULES,
+    &NODE_ID_REGISTRY_ALLOCATION_FACTORY};
 // A create's argument record is its own template, so nothing extra is needed to tie the two.
 static const identifier_config_t *NODE_ID_EMPTY[] = {};
 
@@ -220,7 +229,7 @@ static const identifier_config_t *NODE_ID_EMPTY[] = {};
 
 const display_config_t DISPLAY_CONFIGS[] = {
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV1", "TransferFactory_Transfer"),
-              AMULET_RULES_NODE_ID_LIST,
+              TRANSFER_FACTORY_NODE_ID_LIST,
               TOKEN_TRANSFER_FIELDS,
               TOKEN_TRANSFER_REVIEW_TITLE,
               TOKEN_TRANSFER_REVIEW_FINISH,
@@ -229,7 +238,7 @@ const display_config_t DISPLAY_CONFIGS[] = {
               AMOUNT_COMPARABLE),
 
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV2", "TransferFactory_Transfer"),
-              AMULET_RULES_NODE_ID_LIST,
+              TRANSFER_FACTORY_NODE_ID_LIST,
               TOKEN_TRANSFER_V2_FIELDS,
               TOKEN_TRANSFER_REVIEW_TITLE,
               TOKEN_TRANSFER_REVIEW_FINISH,
