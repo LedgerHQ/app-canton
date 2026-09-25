@@ -257,8 +257,11 @@ void values_bind_from_display(const tx_field_t *fields,
 // where the sender is the destination, the returned lock is the only holding written.
 // The screen shows the value leaving and arriving at the same account, which is what consolidating
 // your own holdings looks like: the transfer machinery is used to merge several into fewer.
+//
+// Only a screen that names a receiver can say this. On the reject and withdraw screens the sender
+// is also the destination, so the two are the same field and would always compare equal.
 MUST_CHECK static bool is_transfer_to_self(void) {
-    return store.has_sender && store.has_destination &&
+    return store.bound_destination == DEST_RECEIVER && store.has_sender && store.has_destination &&
            memcmp(store.sender, store.destination, SHA256_HASH_LEN) == 0;
 }
 
