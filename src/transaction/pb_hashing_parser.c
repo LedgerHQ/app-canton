@@ -1142,9 +1142,9 @@ MUST_CHECK static bool node_decode_callback(pb_istream_t *stream,
             return decode_rollback(stream, field, arg);
         } break;
         default:
-            LEDGER_ASSERT(false, "Unsupported node type %d", field->tag);
+            PRINTF("Unsupported node type %d\n", field->tag);
+            return false;
     }
-
     return true;
 }
 
