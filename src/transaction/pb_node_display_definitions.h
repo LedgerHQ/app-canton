@@ -74,7 +74,8 @@ typedef enum {
     SHOWN_AS_SENDER,
     SHOWN_AS_RECEIVER,
     SHOWN_AS_AMOUNT,
-    SHOWN_AS_ADMIN,  // the instrument admin the displayed ticker was resolved from
+    SHOWN_AS_ADMIN,       // the instrument admin the displayed ticker was resolved from
+    SHOWN_AS_INSTRUMENT,  // the instrument id the displayed ticker was resolved from
 } shown_as_e;
 
 /**

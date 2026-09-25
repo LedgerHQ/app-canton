@@ -36,10 +36,15 @@ static struct {
     uint8_t destination[SHA256_HASH_LEN];  // account the value ends up with
     uint8_t amount[SHA256_HASH_LEN];       // amount shown, before formatting
     uint8_t admin[SHA256_HASH_LEN];        // instrument admin the ticker was resolved from
+    uint8_t instrument[SHA256_HASH_LEN];   // instrument id the ticker was resolved from
+    // One instrument for every holding that names one. A transfer moves a single instrument, so
+    // one digest is enough, and it costs a quarter of keeping one per holding.
+    uint8_t holdings_instrument[SHA256_HASH_LEN];
     // The account the value leaves, kept whichever way round the screen reads. Only used to spot a
     // transfer to oneself, where the sender and the destination are the same account.
     uint8_t sender[SHA256_HASH_LEN];
-    bool has_destination, has_amount, has_admin, has_sender;
+    bool has_destination, has_amount, has_admin, has_sender, has_instrument;
+    bool has_holdings_instrument;
     bool bound;                       // a display configuration matched
     destination_e bound_destination;  // which account that configuration says the value goes to
 
@@ -140,7 +145,8 @@ MUST_CHECK bool values_still_collecting(void) {
 // come from a payload that writes the same value twice.
 void values_report_holding(const uint8_t owner[SHA256_HASH_LEN],
                            const uint8_t amount[SHA256_HASH_LEN],
-                           const uint8_t admin[SHA256_HASH_LEN]) {
+                           const uint8_t admin[SHA256_HASH_LEN],
+                           const uint8_t *instrument) {
     holding_t *holding = NULL;
 
     LEDGER_ASSERT(owner != NULL, "NULL owner in values_report_holding");
@@ -157,6 +163,16 @@ void values_report_holding(const uint8_t owner[SHA256_HASH_LEN],
     memmove(holding->amount, amount, SHA256_HASH_LEN);
     memmove(holding->admin, admin, SHA256_HASH_LEN);
     store.holdings_count++;
+
+    if (instrument == NULL) {
+        return;
+    }
+    if (!store.has_holdings_instrument) {
+        memmove(store.holdings_instrument, instrument, SHA256_HASH_LEN);
+        store.has_holdings_instrument = true;
+    } else if (memcmp(store.holdings_instrument, instrument, SHA256_HASH_LEN) != 0) {
+        give_up("the holdings are of different instruments");
+    }
 }
 
 void values_report_unknown_template(void) {
@@ -183,6 +199,7 @@ void values_bind_from_display(const tx_field_t *fields,
     const char *shown_amount = NULL;
     const char *shown_admin = NULL;
     const char *shown_sender = NULL;
+    const char *shown_instrument = NULL;
 
     LEDGER_ASSERT(fields != NULL, "NULL fields in values_bind_from_display");
 
@@ -192,6 +209,7 @@ void values_bind_from_display(const tx_field_t *fields,
     store.has_amount = false;
     store.has_admin = false;
     store.has_sender = false;
+    store.has_instrument = false;
 
     for (uint8_t i = 0; i < count; i++) {
         const tx_field_t *field = &fields[i];
@@ -221,6 +239,9 @@ void values_bind_from_display(const tx_field_t *fields,
             case SHOWN_AS_ADMIN:
                 shown_admin = field->value;
                 break;
+            case SHOWN_AS_INSTRUMENT:
+                shown_instrument = field->value;
+                break;
             default:
                 break;
         }
@@ -241,6 +262,10 @@ void values_bind_from_display(const tx_field_t *fields,
     if (shown_sender != NULL) {
         digest(shown_sender, store.sender);
         store.has_sender = true;
+    }
+    if (shown_instrument != NULL) {
+        digest(shown_instrument, store.instrument);
+        store.has_instrument = true;
     }
     store.bound = true;
     store.bound_destination = destination;
@@ -323,6 +348,18 @@ MUST_CHECK static bool holdings_match_displayed_instrument(void) {
     return true;
 }
 
+// One issuer can run several instruments, so matching the admin alone lets a screen name one of
+// them while the holdings move another. Canton Coin holdings name no instrument, so there is
+// nothing to compare for them.
+MUST_CHECK static bool holdings_match_displayed_id(void) {
+    if (store.has_instrument && store.has_holdings_instrument &&
+        memcmp(store.holdings_instrument, store.instrument, SHA256_HASH_LEN) != 0) {
+        give_up("the holdings are of another instrument than the one shown");
+        return false;
+    }
+    return true;
+}
+
 MUST_CHECK bool values_can_clear_sign(void) {
     if (!store.ok) {
         return false;
@@ -356,6 +393,10 @@ MUST_CHECK bool values_can_clear_sign(void) {
     }
 
     if (store.has_admin && !holdings_match_displayed_instrument()) {
+        return false;
+    }
+
+    if (!holdings_match_displayed_id()) {
         return false;
     }
 

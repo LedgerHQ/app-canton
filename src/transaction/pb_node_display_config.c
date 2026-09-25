@@ -98,9 +98,9 @@ const size_t INSTRUMENT_TO_TICKER_MAPPING_NB =
 /* -------------------------------------------------------------------------- */
 
 const field_config_t INSTRUMENT_ID_FIELD =
-    FLD("transfer.instrumentId.id", "Token", NULL, true, SHOWN_AS_OTHER);
+    FLD("transfer.instrumentId.id", "Token", NULL, true, SHOWN_AS_INSTRUMENT);
 const field_config_t PROXY_INSTRUMENT_ID_FIELD =
-    FLD("proxyArg.choiceArg.transfer.instrumentId.id", "Token", NULL, true, SHOWN_AS_OTHER);
+    FLD("proxyArg.choiceArg.transfer.instrumentId.id", "Token", NULL, true, SHOWN_AS_INSTRUMENT);
 const field_config_t INSTRUMENT_ID_ADMIN_FIELD =
     FLD("transfer.instrumentId.admin", NULL, NULL, true, SHOWN_AS_ADMIN);
 const field_config_t INSTRUMENT_ID_PROXY_ADMIN_FIELD =
@@ -121,7 +121,7 @@ static const field_config_t TOKEN_TRANSFER_FIELDS[] = {
     FLD("transfer.sender", "From", NULL, true, SHOWN_AS_SENDER),
     FLD("transfer.amount", "Amount", format_token_amount_field, true, SHOWN_AS_AMOUNT),
     FLD("transfer.receiver", "To", NULL, true, SHOWN_AS_RECEIVER),
-    FLD("transfer.instrumentId.id", "Token", NULL, true, SHOWN_AS_OTHER),
+    FLD("transfer.instrumentId.id", "Token", NULL, true, SHOWN_AS_INSTRUMENT),
     FLD("transfer.instrumentId.admin", NULL, NULL, true, SHOWN_AS_ADMIN),
     FLD("transfer.meta.values.splice\\.lfdecentralizedtrust\\.org/reason",
         "Memo",
@@ -133,7 +133,7 @@ static const field_config_t TOKEN_TRANSFER_V2_FIELDS[] = {
     FLD("transfer.sender.owner", "From", NULL, true, SHOWN_AS_SENDER),
     FLD("transfer.amount", "Amount", format_token_amount_field, true, SHOWN_AS_AMOUNT),
     FLD("transfer.receiver.owner", "To", NULL, true, SHOWN_AS_RECEIVER),
-    FLD("transfer.instrumentId.id", "Token", NULL, true, SHOWN_AS_OTHER),
+    FLD("transfer.instrumentId.id", "Token", NULL, true, SHOWN_AS_INSTRUMENT),
     FLD("transfer.instrumentId.admin", NULL, NULL, true, SHOWN_AS_ADMIN),
     FLD("transfer.meta.values.splice\\.lfdecentralizedtrust\\.org/reason",
         "Memo",
@@ -145,7 +145,7 @@ static const field_config_t TOKEN_TRANSFER_ACCEPT_FIELDS[] = {
     FLD("transfer.sender", "From", NULL, true, SHOWN_AS_SENDER),
     FLD("transfer.amount", "Amount", format_token_amount_field, true, SHOWN_AS_AMOUNT),
     FLD("transfer.receiver", "To", NULL, true, SHOWN_AS_RECEIVER),
-    FLD("transfer.instrumentId.id", "Token", NULL, true, SHOWN_AS_OTHER),
+    FLD("transfer.instrumentId.id", "Token", NULL, true, SHOWN_AS_INSTRUMENT),
     FLD("transfer.instrumentId.admin", NULL, NULL, true, SHOWN_AS_ADMIN),
     FLD("transfer.executeBefore", "Expiration time", format_timestamp_field, true, SHOWN_AS_OTHER),
     FLD("transfer.meta.values.splice\\.lfdecentralizedtrust\\.org/reason",
@@ -157,7 +157,7 @@ static const field_config_t TOKEN_TRANSFER_ACCEPT_FIELDS[] = {
 static const field_config_t TOKEN_TRANSFER_WITHDRAW_FIELDS[] = {
     FLD("transfer.sender", "Withdraw to", NULL, true, SHOWN_AS_SENDER),
     FLD("transfer.amount", "Amount", format_token_amount_field, true, SHOWN_AS_AMOUNT),
-    FLD("transfer.instrumentId.id", "Token", NULL, true, SHOWN_AS_OTHER),
+    FLD("transfer.instrumentId.id", "Token", NULL, true, SHOWN_AS_INSTRUMENT),
     FLD("transfer.instrumentId.admin", NULL, NULL, true, SHOWN_AS_ADMIN)};
 
 static const field_config_t NATIVE_COIN_TRANSFER_FIELDS[] = {

@@ -599,6 +599,10 @@ def test_sign_token_transfer_wrong_token_id_blind_signing_enabled(
         # bob still gets 20 CC, but the change goes to carol instead of alice. The screen names only
         # alice and bob, so a holding for anyone else is value the user was never shown.
         "values_err_third_party_holding",
+        # token_transfer_cbtc_send.json with every created holding set to instrument CBTX while the
+        # screen still says CBTC. Both come from the same issuer, so only the instrument id tells
+        # them apart.
+        "values_err_holding_instrument",
     ],
 )
 def test_sign_values_mismatch_blind_signing_disabled(backend: BackendInterface, tx_name: str) -> None:
