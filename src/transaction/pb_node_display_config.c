@@ -155,7 +155,7 @@ static const field_config_t TOKEN_TRANSFER_ACCEPT_FIELDS[] = {
         SHOWN_AS_OTHER)};
 
 static const field_config_t TOKEN_TRANSFER_WITHDRAW_FIELDS[] = {
-    FLD("transfer.sender", "Withdraw to", format_token_amount_field, true, SHOWN_AS_SENDER),
+    FLD("transfer.sender", "Withdraw to", NULL, true, SHOWN_AS_SENDER),
     FLD("transfer.amount", "Amount", format_token_amount_field, true, SHOWN_AS_AMOUNT),
     FLD("transfer.instrumentId.id", "Token", NULL, true, SHOWN_AS_OTHER),
     FLD("transfer.instrumentId.admin", NULL, NULL, true, SHOWN_AS_ADMIN)};
