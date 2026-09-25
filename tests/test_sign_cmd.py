@@ -596,6 +596,9 @@ def test_sign_token_transfer_wrong_token_id_blind_signing_enabled(
         # The same decoys, this time behind a label too long to fit in the path. A label that cannot
         # be written down can never equal a configured path, so the holding has to read as unknown.
         "values_err_overlong_label",
+        # bob still gets 20 CC, but the change goes to carol instead of alice. The screen names only
+        # alice and bob, so a holding for anyone else is value the user was never shown.
+        "values_err_third_party_holding",
     ],
 )
 def test_sign_values_mismatch_blind_signing_disabled(backend: BackendInterface, tx_name: str) -> None:

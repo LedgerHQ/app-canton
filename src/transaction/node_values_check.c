@@ -271,6 +271,13 @@ MUST_CHECK static bool destination_holds_value(void) {
 
     for (uint8_t i = 0; i < store.holdings_count; i++) {
         if (memcmp(store.holdings[i].owner, store.destination, SHA256_HASH_LEN) != 0) {
+            // Change and escrow go back to the sender. Any other owner is an account the screen
+            // never names, receiving value the user was never shown.
+            if (!store.has_sender ||
+                memcmp(store.holdings[i].owner, store.sender, SHA256_HASH_LEN) != 0) {
+                give_up("a holding goes to an account the screen does not show");
+                return false;
+            }
             continue;
         }
         owned++;
