@@ -18,17 +18,21 @@ typedef PB_BYTES_ARRAY_T(1024) com_daml_ledger_api_v2_Transaction_external_trans
 typedef struct _com_daml_ledger_api_v2_Transaction {
     /* Assigned by the server. Useful for correlating logs.
  Must be a valid LedgerString (as described in ``value.proto``).
+
  Required */
     char update_id[1024];
     /* The ID of the command which resulted in this transaction. Missing for everyone except the submitting party.
  Must be a valid LedgerString (as described in ``value.proto``).
+
  Optional */
     char command_id[1024];
     /* The workflow ID used in command submission.
  Must be a valid LedgerString (as described in ``value.proto``).
+
  Optional */
     char workflow_id[1024];
     /* Ledger effective time.
+
  Required */
     bool has_effective_at;
     google_protobuf_Timestamp effective_at;
@@ -38,16 +42,19 @@ typedef struct _com_daml_ledger_api_v2_Transaction {
  - ``CreatedEvent`` or ``ArchivedEvent`` in case of ACS_DELTA transaction shape
  - ``CreatedEvent`` or ``ExercisedEvent`` in case of LEDGER_EFFECTS transaction shape
 
- Required */
+ Required: must be non-empty */
     pb_callback_t events;
     /* The absolute offset. The details of this field are described in ``community/ledger-api/README.md``.
- Required, it is a valid absolute offset (positive integer). */
+ It is a valid absolute offset (positive integer).
+
+ Required */
     int64_t offset;
     /* A valid synchronizer id.
  Identifies the synchronizer that synchronized the transaction.
+
  Required */
     char synchronizer_id[1024];
-    /* Optional; ledger API trace context
+    /* Ledger API trace context
 
  The trace context transported in this message corresponds to the trace context supplied
  by the client application in a HTTP2 header of the original command submission.
@@ -55,19 +62,35 @@ typedef struct _com_daml_ledger_api_v2_Transaction {
  body, because it is used in gRPC streams which do not support per message headers.
  This field will be populated with the trace context contained in the original submission.
  If that was not provided, a unique ledger-api-server generated trace context will be used
- instead. */
+ instead.
+
+ Optional */
     bool has_trace_context;
     com_daml_ledger_api_v2_TraceContext trace_context;
     /* The time at which the transaction was recorded. The record time refers to the synchronizer
  which synchronized the transaction.
+
  Required */
     bool has_record_time;
     google_protobuf_Timestamp record_time;
     /* For transaction externally signed, contains the external transaction hash
  signed by the external party. Can be used to correlate an external submission with a committed transaction.
- Optional */
+
+ Optional: can be empty */
     bool has_external_transaction_hash;
     com_daml_ledger_api_v2_Transaction_external_transaction_hash_t external_transaction_hash;
+    /* The traffic cost that this participant node paid for the confirmation
+ request for this transaction.
+
+ Not set for transactions that were
+ - initiated by another participant
+ - initiated offline via the repair service
+ - processed before the participant started serving traffic cost on the Ledger API
+ - returned as part of a query filtering for a non submitting party
+
+ Optional */
+    bool has_paid_traffic_cost;
+    int64_t paid_traffic_cost;
 } com_daml_ledger_api_v2_Transaction;
 
 
@@ -76,8 +99,8 @@ extern "C" {
 #endif
 
 /* Initializer values for message structs */
-#define com_daml_ledger_api_v2_Transaction_init_default {"", "", "", false, google_protobuf_Timestamp_init_default, {{NULL}, NULL}, 0, "", false, com_daml_ledger_api_v2_TraceContext_init_default, false, google_protobuf_Timestamp_init_default, false, {0, {0}}}
-#define com_daml_ledger_api_v2_Transaction_init_zero {"", "", "", false, google_protobuf_Timestamp_init_zero, {{NULL}, NULL}, 0, "", false, com_daml_ledger_api_v2_TraceContext_init_zero, false, google_protobuf_Timestamp_init_zero, false, {0, {0}}}
+#define com_daml_ledger_api_v2_Transaction_init_default {"", "", "", false, google_protobuf_Timestamp_init_default, {{NULL}, NULL}, 0, "", false, com_daml_ledger_api_v2_TraceContext_init_default, false, google_protobuf_Timestamp_init_default, false, {0, {0}}, false, 0}
+#define com_daml_ledger_api_v2_Transaction_init_zero {"", "", "", false, google_protobuf_Timestamp_init_zero, {{NULL}, NULL}, 0, "", false, com_daml_ledger_api_v2_TraceContext_init_zero, false, google_protobuf_Timestamp_init_zero, false, {0, {0}}, false, 0}
 
 /* Field tags (for use in manual encoding/decoding) */
 #define com_daml_ledger_api_v2_Transaction_update_id_tag 1
@@ -90,6 +113,7 @@ extern "C" {
 #define com_daml_ledger_api_v2_Transaction_trace_context_tag 8
 #define com_daml_ledger_api_v2_Transaction_record_time_tag 9
 #define com_daml_ledger_api_v2_Transaction_external_transaction_hash_tag 10
+#define com_daml_ledger_api_v2_Transaction_paid_traffic_cost_tag 11
 
 /* Struct field encoding specification for nanopb */
 #define com_daml_ledger_api_v2_Transaction_FIELDLIST(X, a) \
@@ -102,7 +126,8 @@ X(a, STATIC,   SINGULAR, INT64,    offset,            6) \
 X(a, STATIC,   SINGULAR, STRING,   synchronizer_id,   7) \
 X(a, STATIC,   OPTIONAL, MESSAGE,  trace_context,     8) \
 X(a, STATIC,   OPTIONAL, MESSAGE,  record_time,       9) \
-X(a, STATIC,   OPTIONAL, BYTES,    external_transaction_hash,  10)
+X(a, STATIC,   OPTIONAL, BYTES,    external_transaction_hash,  10) \
+X(a, STATIC,   OPTIONAL, INT64,    paid_traffic_cost,  11)
 #define com_daml_ledger_api_v2_Transaction_CALLBACK pb_default_field_callback
 #define com_daml_ledger_api_v2_Transaction_DEFAULT NULL
 #define com_daml_ledger_api_v2_Transaction_effective_at_MSGTYPE google_protobuf_Timestamp

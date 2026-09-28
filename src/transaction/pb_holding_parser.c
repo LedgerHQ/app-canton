@@ -26,24 +26,44 @@ typedef struct {
     const char *owner_path;   // "owner"                 -- and where inside it are the fields?
     const char *amount_path;  // "amount.initialAmount"
     const char *admin_path;   // "dso"
+    const char *id_path;  // "instrument.id"         -- NULL when the template names no instrument
 } holding_path_config_t;
 
 // Read out of the recorded transactions in tests/tx_examples, not guessed. Paths vary per template,
 // which is the point: LockedAmulet wraps its Amulet, and the registry Holding has no dso field.
 static const holding_path_config_t HOLDING_TEMPLATES[] = {
-    {"Splice.Amulet", "Amulet", "owner", "amount.initialAmount", "dso"},
-    {"Splice.Amulet", "LockedAmulet", "amulet.owner", "amulet.amount.initialAmount", "amulet.dso"},
+    // Canton Coin holdings name no instrument id: the DSO issues one instrument only.
+    {"Splice.Amulet", "Amulet", "owner", "amount.initialAmount", "dso", NULL},
+    {"Splice.Amulet",
+     "LockedAmulet",
+     "amulet.owner",
+     "amulet.amount.initialAmount",
+     "amulet.dso",
+     NULL},
     // instrument.source carries the registrar that issued this holding. Inferred from the CBTC and
     // SBC fixtures, not read from Splice's Daml source.
-    {"Utility.Registry.Holding.V0.Holding", "Holding", "owner", "amount", "instrument.source"},
+    {"Utility.Registry.Holding.V0.Holding",
+     "Holding",
+     "owner",
+     "amount",
+     "instrument.source",
+     "instrument.id"},
     // A transfer instruction is a pending offer nobody holds yet, so the account it is destined for
     // counts as its owner. Also an inference.
     {"Splice.AmuletTransferInstruction",
      "AmuletTransferInstruction",
      "transfer.receiver",
      "transfer.amount",
-     "transfer.instrumentId.admin"},
-    {"Splice.ExternalPartyAmuletRules", "TransferCommand", "receiver", "amount", "dso"}};
+     "transfer.instrumentId.admin",
+     "transfer.instrumentId.id"},
+    {"Splice.ExternalPartyAmuletRules", "TransferCommand", "receiver", "amount", "dso", NULL},
+    // A registry's pending offer, the same shape as AmuletTransferInstruction above.
+    {"Utility.Registry.App.V0.Model.Transfer",
+     "TransferOffer",
+     "transfer.receiver",
+     "transfer.amount",
+     "transfer.instrumentId.admin",
+     "transfer.instrumentId.id"}};
 
 // Known, and holding no value for an account. Reward coupons and activity markers pay a validator
 // or an app the screen never names, and the pre-approval proposal moves nothing. Listed so that an
@@ -53,7 +73,9 @@ static const identifier_config_t NON_HOLDING_TEMPLATES[] = {
     {"Splice.Amulet", "ValidatorRewardCoupon"},
     {"Splice.Amulet", "FeaturedAppActivityMarker"},
     {"Utility.Registry.V0.Holding.Transfer", "ExecutedTransfer"},
-    {"Splice.Wallet.TransferPreapproval", "TransferPreapprovalProposal"}};
+    {"Splice.Wallet.TransferPreapproval", "TransferPreapprovalProposal"},
+    // A record of what moved, written alongside a Token Standard V2 transfer. It holds no value.
+    {"Splice.AmuletEventLog", "AmuletEventLog"}};
 
 // Sized the way pb_node_display_config.c sizes DISPLAY_CONFIGS_NB, kept file-local because the
 // tables and their only reader live here.
@@ -75,7 +97,8 @@ static struct {
     uint8_t owner[SHA256_HASH_LEN];
     uint8_t amount[SHA256_HASH_LEN];
     uint8_t admin[SHA256_HASH_LEN];
-    bool has_owner, has_amount, has_admin;
+    uint8_t instrument[SHA256_HASH_LEN];
+    bool has_owner, has_amount, has_admin, has_instrument;
 } ctx;
 
 MUST_CHECK static bool decode_value(pb_istream_t *stream, const pb_field_t *field, void **arg);
@@ -152,6 +175,17 @@ static void set_field_value(uint8_t slot[SHA256_HASH_LEN], const char *text) {
 static void find_holding_field(const cbValue *value) {
     const char *text = NULL;
     if (ctx.cfg == NULL) {
+        return;
+    }
+    // The instrument id is text, like "CBTC". Owner and amount are never text: owner is a party
+    // id, amount is a number. So this text check runs first, and returns, before the owner/amount
+    // check below ever sees it.
+    if (value->which_sum == com_daml_ledger_api_v2_cb_Value_text_tag) {
+        if (!ctx.has_instrument && value->text != NULL && PIC(ctx.cfg->id_path) != NULL &&
+            path_is(ctx.cfg->id_path)) {
+            set_field_value(ctx.instrument, value->text);
+            ctx.has_instrument = true;
+        }
         return;
     }
     if (value->which_sum == com_daml_ledger_api_v2_cb_Value_party_tag) {
@@ -284,14 +318,20 @@ MUST_CHECK static bool decode_create(pb_istream_t *stream) {
     ctx.has_owner = false;
     ctx.has_amount = false;
     ctx.has_admin = false;
+    ctx.has_instrument = false;
     create.argument.funcs.decode = &decode_argument;
     ok = pb_decode(stream,
                    com_daml_ledger_api_v2_interactive_transaction_v1_cb_Create_fields,
                    &create);
     pb_release(com_daml_ledger_api_v2_interactive_transaction_v1_cb_Create_fields, &create);
     if (ok) {
-        if (ctx.has_owner && ctx.has_amount && ctx.has_admin) {
-            values_report_holding(ctx.owner, ctx.amount, ctx.admin);
+        bool names_instrument = PIC(cfg->id_path) != NULL;
+        if (ctx.has_owner && ctx.has_amount && ctx.has_admin &&
+            (!names_instrument || ctx.has_instrument)) {
+            values_report_holding(ctx.owner,
+                                  ctx.amount,
+                                  ctx.admin,
+                                  names_instrument ? ctx.instrument : NULL);
         } else {
             // The template is listed but a path did not resolve, so the table no longer describes
             // this contract and what it holds is unknown.

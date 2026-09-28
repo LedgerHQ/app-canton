@@ -36,7 +36,15 @@ static struct {
     uint8_t destination[SHA256_HASH_LEN];  // account the value ends up with
     uint8_t amount[SHA256_HASH_LEN];       // amount shown, before formatting
     uint8_t admin[SHA256_HASH_LEN];        // instrument admin the ticker was resolved from
-    bool has_destination, has_amount, has_admin;
+    uint8_t instrument[SHA256_HASH_LEN];   // instrument id the ticker was resolved from
+    // One instrument for every holding that names one. A transfer moves a single instrument, so
+    // one digest is enough, and it costs a quarter of keeping one per holding.
+    uint8_t holdings_instrument[SHA256_HASH_LEN];
+    // The account the value leaves, kept whichever way round the screen reads. Only used to spot a
+    // transfer to oneself, where the sender and the destination are the same account.
+    uint8_t sender[SHA256_HASH_LEN];
+    bool has_destination, has_amount, has_admin, has_sender, has_instrument;
+    bool has_holdings_instrument;
     bool bound;                       // a display configuration matched
     destination_e bound_destination;  // which account that configuration says the value goes to
 
@@ -137,7 +145,8 @@ MUST_CHECK bool values_still_collecting(void) {
 // come from a payload that writes the same value twice.
 void values_report_holding(const uint8_t owner[SHA256_HASH_LEN],
                            const uint8_t amount[SHA256_HASH_LEN],
-                           const uint8_t admin[SHA256_HASH_LEN]) {
+                           const uint8_t admin[SHA256_HASH_LEN],
+                           const uint8_t *instrument) {
     holding_t *holding = NULL;
 
     LEDGER_ASSERT(owner != NULL, "NULL owner in values_report_holding");
@@ -154,6 +163,16 @@ void values_report_holding(const uint8_t owner[SHA256_HASH_LEN],
     memmove(holding->amount, amount, SHA256_HASH_LEN);
     memmove(holding->admin, admin, SHA256_HASH_LEN);
     store.holdings_count++;
+
+    if (instrument == NULL) {
+        return;
+    }
+    if (!store.has_holdings_instrument) {
+        memmove(store.holdings_instrument, instrument, SHA256_HASH_LEN);
+        store.has_holdings_instrument = true;
+    } else if (memcmp(store.holdings_instrument, instrument, SHA256_HASH_LEN) != 0) {
+        give_up("the holdings are of different instruments");
+    }
 }
 
 void values_report_unknown_template(void) {
@@ -179,6 +198,8 @@ void values_bind_from_display(const tx_field_t *fields,
     const char *shown_destination = NULL;
     const char *shown_amount = NULL;
     const char *shown_admin = NULL;
+    const char *shown_sender = NULL;
+    const char *shown_instrument = NULL;
 
     LEDGER_ASSERT(fields != NULL, "NULL fields in values_bind_from_display");
 
@@ -187,6 +208,8 @@ void values_bind_from_display(const tx_field_t *fields,
     store.has_destination = false;
     store.has_amount = false;
     store.has_admin = false;
+    store.has_sender = false;
+    store.has_instrument = false;
 
     for (uint8_t i = 0; i < count; i++) {
         const tx_field_t *field = &fields[i];
@@ -196,6 +219,9 @@ void values_bind_from_display(const tx_field_t *fields,
         }
         switch (field->config->shown_as) {
             case SHOWN_AS_SENDER:
+                // Kept even when the destination is the receiver, so a transfer to oneself can be
+                // told apart from a transfer to somebody else.
+                shown_sender = field->value;
                 if (destination == DEST_SENDER) {
                     shown_destination = field->value;
                 }
@@ -212,6 +238,9 @@ void values_bind_from_display(const tx_field_t *fields,
                 break;
             case SHOWN_AS_ADMIN:
                 shown_admin = field->value;
+                break;
+            case SHOWN_AS_INSTRUMENT:
+                shown_instrument = field->value;
                 break;
             default:
                 break;
@@ -230,6 +259,14 @@ void values_bind_from_display(const tx_field_t *fields,
         digest(shown_admin, store.admin);
         store.has_admin = true;
     }
+    if (shown_sender != NULL) {
+        digest(shown_sender, store.sender);
+        store.has_sender = true;
+    }
+    if (shown_instrument != NULL) {
+        digest(shown_instrument, store.instrument);
+        store.has_instrument = true;
+    }
     store.bound = true;
     store.bound_destination = destination;
 }
@@ -243,14 +280,37 @@ void values_bind_from_display(const tx_field_t *fields,
 // Every recorded transfer writes one holding for its destination. The change and the escrow go to
 // the sender, who is not the destination on those screens, and on the reject and withdraw screens,
 // where the sender is the destination, the returned lock is the only holding written.
+// The screen shows the value leaving and arriving at the same account, which is what consolidating
+// your own holdings looks like: the transfer machinery is used to merge several into fewer.
+//
+// Only a screen that names a receiver can say this. On the reject and withdraw screens the sender
+// is also the destination, so the two are the same field and would always compare equal.
+MUST_CHECK static bool is_transfer_to_self(void) {
+    return store.bound_destination == DEST_RECEIVER && store.has_sender && store.has_destination &&
+           memcmp(store.sender, store.destination, SHA256_HASH_LEN) == 0;
+}
+
 MUST_CHECK static bool destination_holds_value(void) {
-    const holding_t *held = NULL;
     uint8_t owned = 0;
+    bool amount_seen = false;
 
     for (uint8_t i = 0; i < store.holdings_count; i++) {
-        if (memcmp(store.holdings[i].owner, store.destination, SHA256_HASH_LEN) == 0) {
-            held = &store.holdings[i];
-            owned++;
+        if (memcmp(store.holdings[i].owner, store.destination, SHA256_HASH_LEN) != 0) {
+            // Change and escrow go back to the sender. Any other owner is an account the screen
+            // never names, receiving value the user was never shown.
+            if (!store.has_sender ||
+                memcmp(store.holdings[i].owner, store.sender, SHA256_HASH_LEN) != 0) {
+                give_up("a holding goes to an account the screen does not show");
+                return false;
+            }
+            continue;
+        }
+        owned++;
+        // Returning a locked holding hands back a fee reserve with it, so no amount was bound and
+        // the destination owning a holding is all there is to check.
+        if (!store.has_amount ||
+            memcmp(store.holdings[i].amount, store.amount, SHA256_HASH_LEN) == 0) {
+            amount_seen = true;
         }
     }
 
@@ -258,13 +318,21 @@ MUST_CHECK static bool destination_holds_value(void) {
         give_up("no holding for the account the value goes to");
         return false;
     }
+
+    // Self-transfers may write a second holding (the change). Real consolidations write at most
+    // two, so cap it there.
     if (owned > 1) {
-        give_up("more than one holding for the account the value goes to");
-        return false;
+        if (!is_transfer_to_self()) {
+            give_up("more than one holding for the account the value goes to");
+            return false;
+        }
+        if (owned > 2) {
+            give_up("more holdings for the account than a consolidation creates");
+            return false;
+        }
     }
-    // Returning a locked holding hands back a fee reserve with it, so no amount was bound and the
-    // destination owning a holding is all there is to check.
-    if (store.has_amount && memcmp(held->amount, store.amount, SHA256_HASH_LEN) != 0) {
+
+    if (!amount_seen) {
         give_up("the destination's holding has another amount");
         return false;
     }
@@ -281,6 +349,24 @@ MUST_CHECK static bool holdings_match_displayed_instrument(void) {
             give_up("a holding was issued by another party");
             return false;
         }
+    }
+    return true;
+}
+
+// One issuer can run several instruments, so matching the admin alone lets a screen name one of
+// them while the holdings move another. Canton Coin holdings name no instrument, so there is
+// nothing to compare for them.
+//
+// A native-coin screen shows no Token field, so a holding that names one is already wrong.
+MUST_CHECK static bool holdings_match_displayed_id(void) {
+    if (store.has_holdings_instrument && !store.has_instrument) {
+        give_up("a holding names an instrument the screen does not show");
+        return false;
+    }
+    if (store.has_instrument && store.has_holdings_instrument &&
+        memcmp(store.holdings_instrument, store.instrument, SHA256_HASH_LEN) != 0) {
+        give_up("the holdings are of another instrument than the one shown");
+        return false;
     }
     return true;
 }
@@ -318,6 +404,10 @@ MUST_CHECK bool values_can_clear_sign(void) {
     }
 
     if (store.has_admin && !holdings_match_displayed_instrument()) {
+        return false;
+    }
+
+    if (!holdings_match_displayed_id()) {
         return false;
     }
 

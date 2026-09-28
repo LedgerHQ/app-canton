@@ -1,7 +1,8 @@
 from com.daml.ledger.api.v2 import value_pb2 as _value_pb2
+from google.protobuf.internal import containers as _containers
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
-from typing import ClassVar as _ClassVar, Mapping as _Mapping, Optional as _Optional, Union as _Union
+from typing import ClassVar as _ClassVar, Iterable as _Iterable, Mapping as _Mapping, Optional as _Optional, Union as _Union
 
 DESCRIPTOR: _descriptor.FileDescriptor
 
@@ -16,3 +17,11 @@ class GlobalKey(_message.Message):
     key: _value_pb2.Value
     hash: bytes
     def __init__(self, template_id: _Optional[_Union[_value_pb2.Identifier, _Mapping]] = ..., package_name: _Optional[str] = ..., key: _Optional[_Union[_value_pb2.Value, _Mapping]] = ..., hash: _Optional[bytes] = ...) -> None: ...
+
+class GlobalKeyWithMaintainers(_message.Message):
+    __slots__ = ("key", "maintainers")
+    KEY_FIELD_NUMBER: _ClassVar[int]
+    MAINTAINERS_FIELD_NUMBER: _ClassVar[int]
+    key: GlobalKey
+    maintainers: _containers.RepeatedScalarFieldContainer[str]
+    def __init__(self, key: _Optional[_Union[GlobalKey, _Mapping]] = ..., maintainers: _Optional[_Iterable[str]] = ...) -> None: ...

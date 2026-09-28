@@ -9,4 +9,7 @@
 PB_BIND(com_daml_ledger_api_v2_interactive_GlobalKey, com_daml_ledger_api_v2_interactive_GlobalKey, 4)
 
 
+PB_BIND(com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers, com_daml_ledger_api_v2_interactive_GlobalKeyWithMaintainers, 4)
+
+
 

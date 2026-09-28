@@ -52,6 +52,7 @@ typedef struct _com_digitalasset_canton_protocol_v30_DynamicSynchronizerParamete
     google_protobuf_Duration reconciliation_interval;
     bool has_mediator_deduplication_timeout;
     google_protobuf_Duration mediator_deduplication_timeout;
+    /* when updated, the new value is effective only after a restart */
     uint32_t max_request_size;
     /* topology related validation parameters
  permissioned synchronizer: if true, only participants which have been explicitly
@@ -162,7 +163,7 @@ extern const pb_msgdesc_t com_digitalasset_canton_protocol_v30_DynamicSynchroniz
 /* Maximum encoded size of messages (where known) */
 #define COM_DIGITALASSET_CANTON_PROTOCOL_V30_COM_DIGITALASSET_CANTON_PROTOCOL_V30_SYNCHRONIZER_PARAMETERS_PB_H_MAX_SIZE com_digitalasset_canton_protocol_v30_DynamicSynchronizerParameters_size
 #define com_digitalasset_canton_protocol_v30_AcsCommitmentsCatchUpConfig_size 12
-#define com_digitalasset_canton_protocol_v30_DynamicSynchronizerParameters_size 305
+#define com_digitalasset_canton_protocol_v30_DynamicSynchronizerParameters_size 307
 #define com_digitalasset_canton_protocol_v30_ParticipantSynchronizerLimits_size 6
 
 #ifdef __cplusplus

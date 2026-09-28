@@ -98,9 +98,9 @@ const size_t INSTRUMENT_TO_TICKER_MAPPING_NB =
 /* -------------------------------------------------------------------------- */
 
 const field_config_t INSTRUMENT_ID_FIELD =
-    FLD("transfer.instrumentId.id", "Token", NULL, true, SHOWN_AS_OTHER);
+    FLD("transfer.instrumentId.id", "Token", NULL, true, SHOWN_AS_INSTRUMENT);
 const field_config_t PROXY_INSTRUMENT_ID_FIELD =
-    FLD("proxyArg.choiceArg.transfer.instrumentId.id", "Token", NULL, true, SHOWN_AS_OTHER);
+    FLD("proxyArg.choiceArg.transfer.instrumentId.id", "Token", NULL, true, SHOWN_AS_INSTRUMENT);
 const field_config_t INSTRUMENT_ID_ADMIN_FIELD =
     FLD("transfer.instrumentId.admin", NULL, NULL, true, SHOWN_AS_ADMIN);
 const field_config_t INSTRUMENT_ID_PROXY_ADMIN_FIELD =
@@ -121,7 +121,19 @@ static const field_config_t TOKEN_TRANSFER_FIELDS[] = {
     FLD("transfer.sender", "From", NULL, true, SHOWN_AS_SENDER),
     FLD("transfer.amount", "Amount", format_token_amount_field, true, SHOWN_AS_AMOUNT),
     FLD("transfer.receiver", "To", NULL, true, SHOWN_AS_RECEIVER),
-    FLD("transfer.instrumentId.id", "Token", NULL, true, SHOWN_AS_OTHER),
+    FLD("transfer.instrumentId.id", "Token", NULL, true, SHOWN_AS_INSTRUMENT),
+    FLD("transfer.instrumentId.admin", NULL, NULL, true, SHOWN_AS_ADMIN),
+    FLD("transfer.meta.values.splice\\.lfdecentralizedtrust\\.org/reason",
+        "Memo",
+        NULL,
+        false,
+        SHOWN_AS_OTHER)};
+
+static const field_config_t TOKEN_TRANSFER_V2_FIELDS[] = {
+    FLD("transfer.sender.owner", "From", NULL, true, SHOWN_AS_SENDER),
+    FLD("transfer.amount", "Amount", format_token_amount_field, true, SHOWN_AS_AMOUNT),
+    FLD("transfer.receiver.owner", "To", NULL, true, SHOWN_AS_RECEIVER),
+    FLD("transfer.instrumentId.id", "Token", NULL, true, SHOWN_AS_INSTRUMENT),
     FLD("transfer.instrumentId.admin", NULL, NULL, true, SHOWN_AS_ADMIN),
     FLD("transfer.meta.values.splice\\.lfdecentralizedtrust\\.org/reason",
         "Memo",
@@ -133,7 +145,7 @@ static const field_config_t TOKEN_TRANSFER_ACCEPT_FIELDS[] = {
     FLD("transfer.sender", "From", NULL, true, SHOWN_AS_SENDER),
     FLD("transfer.amount", "Amount", format_token_amount_field, true, SHOWN_AS_AMOUNT),
     FLD("transfer.receiver", "To", NULL, true, SHOWN_AS_RECEIVER),
-    FLD("transfer.instrumentId.id", "Token", NULL, true, SHOWN_AS_OTHER),
+    FLD("transfer.instrumentId.id", "Token", NULL, true, SHOWN_AS_INSTRUMENT),
     FLD("transfer.instrumentId.admin", NULL, NULL, true, SHOWN_AS_ADMIN),
     FLD("transfer.executeBefore", "Expiration time", format_timestamp_field, true, SHOWN_AS_OTHER),
     FLD("transfer.meta.values.splice\\.lfdecentralizedtrust\\.org/reason",
@@ -143,9 +155,9 @@ static const field_config_t TOKEN_TRANSFER_ACCEPT_FIELDS[] = {
         SHOWN_AS_OTHER)};
 
 static const field_config_t TOKEN_TRANSFER_WITHDRAW_FIELDS[] = {
-    FLD("transfer.sender", "Withdraw to", format_token_amount_field, true, SHOWN_AS_SENDER),
+    FLD("transfer.sender", "Withdraw to", NULL, true, SHOWN_AS_SENDER),
     FLD("transfer.amount", "Amount", format_token_amount_field, true, SHOWN_AS_AMOUNT),
-    FLD("transfer.instrumentId.id", "Token", NULL, true, SHOWN_AS_OTHER),
+    FLD("transfer.instrumentId.id", "Token", NULL, true, SHOWN_AS_INSTRUMENT),
     FLD("transfer.instrumentId.admin", NULL, NULL, true, SHOWN_AS_ADMIN)};
 
 static const field_config_t NATIVE_COIN_TRANSFER_FIELDS[] = {
@@ -180,8 +192,17 @@ static const identifier_config_t *META_EMPTY[] = {};
 static const identifier_config_t NODE_ID_EXTERNAL_PARTY_AMULET_RULES =
     ID("Splice.ExternalPartyAmuletRules", "ExternalPartyAmuletRules");
 
+static const identifier_config_t NODE_ID_REGISTRY_ALLOCATION_FACTORY =
+    ID("Utility.Registry.App.V0.Service.AllocationFactory", "AllocationFactory");
+
 static const identifier_config_t *const AMULET_RULES_NODE_ID_LIST[] = {
     &NODE_ID_EXTERNAL_PARTY_AMULET_RULES};
+
+// TransferFactory_Transfer is the token standard's own choice, so each registry offers it on its
+// own factory contract. Canton Coin uses Splice's, other tokens use theirs.
+static const identifier_config_t *const TRANSFER_FACTORY_NODE_ID_LIST[] = {
+    &NODE_ID_EXTERNAL_PARTY_AMULET_RULES,
+    &NODE_ID_REGISTRY_ALLOCATION_FACTORY};
 // A create's argument record is its own template, so nothing extra is needed to tie the two.
 static const identifier_config_t *NODE_ID_EMPTY[] = {};
 
@@ -208,8 +229,17 @@ static const identifier_config_t *NODE_ID_EMPTY[] = {};
 
 const display_config_t DISPLAY_CONFIGS[] = {
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV1", "TransferFactory_Transfer"),
-              AMULET_RULES_NODE_ID_LIST,
+              TRANSFER_FACTORY_NODE_ID_LIST,
               TOKEN_TRANSFER_FIELDS,
+              TOKEN_TRANSFER_REVIEW_TITLE,
+              TOKEN_TRANSFER_REVIEW_FINISH,
+              META_EMPTY,
+              DEST_RECEIVER,
+              AMOUNT_COMPARABLE),
+
+    CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV2", "TransferFactory_Transfer"),
+              TRANSFER_FACTORY_NODE_ID_LIST,
+              TOKEN_TRANSFER_V2_FIELDS,
               TOKEN_TRANSFER_REVIEW_TITLE,
               TOKEN_TRANSFER_REVIEW_FINISH,
               META_EMPTY,
@@ -244,6 +274,15 @@ const display_config_t DISPLAY_CONFIGS[] = {
               DEST_RECEIVER,
               AMOUNT_COMPARABLE),
 
+    CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV2", "TransferInstruction_Accept"),
+              TRANSFER_OFFER_META_ID_LIST,
+              TOKEN_TRANSFER_ACCEPT_FIELDS,
+              TOKEN_TRANSFER_ACCEPT_REVIEW_TITLE,
+              TOKEN_TRANSFER_ACCEPT_REVIEW_FINISH,
+              TRANSFER_OFFER_META_ID_LIST,
+              DEST_RECEIVER,
+              AMOUNT_COMPARABLE),
+
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV1", "TransferInstruction_Reject"),
               TRANSFER_OFFER_META_ID_LIST,
               TOKEN_TRANSFER_ACCEPT_FIELDS,
@@ -253,7 +292,25 @@ const display_config_t DISPLAY_CONFIGS[] = {
               DEST_SENDER,
               AMOUNT_NOT_COMPARABLE),
 
+    CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV2", "TransferInstruction_Reject"),
+              TRANSFER_OFFER_META_ID_LIST,
+              TOKEN_TRANSFER_ACCEPT_FIELDS,
+              TOKEN_TRANSFER_REJECT_REVIEW_TITLE,
+              TOKEN_TRANSFER_REJECT_REVIEW_FINISH,
+              TRANSFER_OFFER_META_ID_LIST,
+              DEST_SENDER,
+              AMOUNT_NOT_COMPARABLE),
+
     CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV1", "TransferInstruction_Withdraw"),
+              TRANSFER_OFFER_META_ID_LIST,
+              TOKEN_TRANSFER_WITHDRAW_FIELDS,
+              TOKEN_TRANSFER_WITHDRAW_REVIEW_TITLE,
+              TOKEN_TRANSFER_WITHDRAW_REVIEW_FINISH,
+              TRANSFER_OFFER_META_ID_LIST,
+              DEST_SENDER,
+              AMOUNT_NOT_COMPARABLE),
+
+    CFG_ENTRY(ID("Splice.Api.Token.TransferInstructionV2", "TransferInstruction_Withdraw"),
               TRANSFER_OFFER_META_ID_LIST,
               TOKEN_TRANSFER_WITHDRAW_FIELDS,
               TOKEN_TRANSFER_WITHDRAW_REVIEW_TITLE,

@@ -20,7 +20,7 @@ OUTPUT_DIR="./"
 NANOPB_GENERATOR="../vendor/nanopb/generator/protoc-gen-nanopb"
 PROTOC="../vendor/nanopb/generator/protoc"
 PROTO_SOURCE_REPO_URL="git@github.com:LedgerHQ/canton-protos-scala.git"
-PROTO_SOURCE_REPO_REF="v1.4.0"
+PROTO_SOURCE_REPO_REF="v1.6.3"
 
 # Download utility
 download_if_not_exists() {
@@ -131,6 +131,9 @@ com.daml.ledger.api.v2.interactive.transaction.v1.Fetch.acting_parties type:FT_P
 com.daml.ledger.api.v2.interactive.transaction.v1.Fetch.interface_id type:FT_POINTER
 com.daml.ledger.api.v2.interactive.transaction.v1.Exercise.interface_id type:FT_POINTER
 com.daml.ledger.api.v2.interactive.transaction.v1.Rollback.children type:FT_POINTER
+# QueryByKey sits in the Node union, so its fields grow every node.
+com.daml.ledger.api.v2.interactive.transaction.v1.QueryByKey.lf_version type:FT_POINTER
+com.daml.ledger.api.v2.interactive.transaction.v1.QueryByKey.package_name type:FT_POINTER
 com.daml.ledger.api.v2.interactive.transaction.v1.Node submsg_callback:true
 EOF
 
@@ -240,6 +243,14 @@ com.daml.ledger.api.v2.interactive.transaction.v1.cb.ExerciseDisplay.chosen_valu
 com.daml.ledger.api.v2.interactive.transaction.v1.cb.NodeDisplay submsg_callback:true
 EOF
 
+echo "interactive_submission_common_data.options file..."
+cat > interactive_submission_common_data.options << 'EOF'
+* anonymous_oneof:true
+# GlobalKey is held by value inside QueryByKey, so it sizes every node too.
+com.daml.ledger.api.v2.interactive.GlobalKey.package_name type:FT_POINTER
+com.daml.ledger.api.v2.interactive.GlobalKey.hash type:FT_POINTER
+EOF
+
 echo "untyped_versioned_message.options file..."
 cat > untyped_versioned_message.options << 'EOF'
 * anonymous_oneof:true
@@ -297,13 +308,17 @@ com.digitalasset.canton.protocol.v30.PartyToKeyMapping.party type:FT_POINTER
 com.digitalasset.canton.protocol.v30.PartyToKeyMapping.signing_keys type:FT_POINTER
 com.digitalasset.canton.protocol.v30.PartyToKeyMapping.signing_keys max_count:8
 
-com.digitalasset.canton.protocol.v30.SynchronizerUpgradeAnnouncement.successor_physical_synchronizer_id type:FT_POINTER
+# Renamed in v1.6.3. An entry for a message that no longer exists is ignored without warning.
+com.digitalasset.canton.protocol.v30.LsuAnnouncement.successor_physical_synchronizer_id type:FT_POINTER
 
-com.digitalasset.canton.protocol.v30.SequencerConnectionSuccessor.sequencer_id type:FT_POINTER
-com.digitalasset.canton.protocol.v30.SequencerConnectionSuccessor.synchronizer_id type:FT_POINTER
-com.digitalasset.canton.protocol.v30.SequencerConnectionSuccessor.SequencerConnection.Grpc.endpoints type:FT_POINTER
-com.digitalasset.canton.protocol.v30.SequencerConnectionSuccessor.SequencerConnection.Grpc.endpoints max_count:8
-com.digitalasset.canton.protocol.v30.SequencerConnectionSuccessor.SequencerConnection.Grpc.custom_trust_certificates type:FT_POINTER
+com.digitalasset.canton.protocol.v30.LsuSequencerConnectionSuccessor.sequencer_id type:FT_POINTER
+com.digitalasset.canton.protocol.v30.LsuSequencerConnectionSuccessor.successor_physical_synchronizer_id type:FT_POINTER
+# The Grpc level is gone in v1.6.3.
+com.digitalasset.canton.protocol.v30.LsuSequencerConnectionSuccessor.SequencerConnection.endpoints type:FT_POINTER
+com.digitalasset.canton.protocol.v30.LsuSequencerConnectionSuccessor.SequencerConnection.endpoints max_count:8
+com.digitalasset.canton.protocol.v30.LsuSequencerConnectionSuccessor.SequencerConnection.custom_trust_certificates type:FT_POINTER
+
+com.digitalasset.canton.protocol.v30.TopologyTransactionsBroadcast.physical_synchronizer_id type:FT_POINTER
 
 com.digitalasset.canton.protocol.v30.DynamicSequencingParametersState.synchronizer_id type:FT_POINTER
 

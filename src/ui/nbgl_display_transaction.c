@@ -61,7 +61,7 @@ MUST_CHECK int ui_display_transaction_bs_choice(bool is_blind_signed) {
     }
 
     if (is_blind_signed) {
-        PRINTF("Hash: %.*H\n", sizeof(G_context.tx_info.m_hash), G_context.tx_info.m_hash);
+        PRINTF("Transaction Hash: %.*H\n", G_context.tx_info.m_hash_len, G_context.tx_info.m_hash);
         // Setup data to display
         size_t hex_hash_length = 2 * G_context.tx_info.m_hash_len + 1;
         G_context.tx_info.pairs =
@@ -106,7 +106,7 @@ MUST_CHECK int ui_display_transaction_bs_choice(bool is_blind_signed) {
             PRINTF("Pair %d: %s: %s\n", i, pairList.pairs[i].item, pairList.pairs[i].value);
         }
 
-        PRINTF("Hash : %.*H\n", G_context.tx_info.m_hash_len, G_context.tx_info.m_hash);
+        PRINTF("Transaction Hash: %.*H\n", G_context.tx_info.m_hash_len, G_context.tx_info.m_hash);
 
         // Start review flow
         nbgl_useCaseReview(TYPE_TRANSACTION,

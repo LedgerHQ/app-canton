@@ -25,23 +25,31 @@ typedef struct _com_daml_ledger_api_v2_PackageReference {
  modelled after ``VettedPackage`` in `topology.proto <https://github.com/digital-asset/canton/blob/main/community/base/src/main/protobuf/com/digitalasset/canton/protocol/v30/topology.proto#L206>`_,
  enriched with the package name and version. */
 typedef struct _com_daml_ledger_api_v2_VettedPackage {
-    /* Package ID of this package. Always present. */
+    /* Package ID of this package
+
+ Required */
     char package_id[1024];
     /* The time from which this package is vetted. Empty if vetting time has no
- lower bound. */
+ lower bound.
+
+ Optional */
     bool has_valid_from_inclusive;
     google_protobuf_Timestamp valid_from_inclusive;
     /* The time until which this package is vetted. Empty if vetting time has no
- upper bound. */
+ upper bound.
+
+ Optional */
     bool has_valid_until_exclusive;
     google_protobuf_Timestamp valid_until_exclusive;
     /* Name of this package.
  Only available if the package has been uploaded to the current participant.
- If unavailable, is empty string. */
+
+ Optional */
     char package_name[1024];
     /* Version of this package.
  Only available if the package has been uploaded to the current participant.
- If unavailable, is empty string. */
+
+ Optional */
     char package_version[1024];
 } com_daml_ledger_api_v2_VettedPackage;
 
@@ -51,14 +59,22 @@ typedef struct _com_daml_ledger_api_v2_VettedPackage {
  originated it. */
 typedef struct _com_daml_ledger_api_v2_VettedPackages {
     /* Sorted by package_name and package_version where known, and package_id as a
- last resort. */
+ last resort.
+
+ Required: must be non-empty */
     pb_callback_t packages;
-    /* Participant on which these packages are vetted. Always present. */
+    /* Participant on which these packages are vetted.
+
+ Required */
     char participant_id[1024];
-    /* Synchronizer on which these packages are vetted. Always present. */
+    /* Synchronizer on which these packages are vetted.
+
+ Required */
     char synchronizer_id[1024];
     /* Serial of last ``VettedPackages`` topology transaction of this participant
- and on this synchronizer. Always present. */
+ and on this synchronizer.
+
+ Required */
     uint32_t topology_serial;
 } com_daml_ledger_api_v2_VettedPackages;
 

@@ -18,7 +18,7 @@ from google.protobuf import duration_pb2 as google_dot_protobuf_dot_duration__pb
 from google.rpc import status_pb2 as google_dot_rpc_dot_status__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\'com/daml/ledger/api/v2/completion.proto\x12\x16\x63om.daml.ledger.api.v2\x1a.com/daml/ledger/api/v2/offset_checkpoint.proto\x1a*com/daml/ledger/api/v2/trace_context.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x17google/rpc/status.proto\"\x96\x03\n\nCompletion\x12\x12\n\ncommand_id\x18\x01 \x01(\t\x12\"\n\x06status\x18\x02 \x01(\x0b\x32\x12.google.rpc.Status\x12\x11\n\tupdate_id\x18\x03 \x01(\t\x12\x0f\n\x07user_id\x18\x04 \x01(\t\x12\x0e\n\x06\x61\x63t_as\x18\x05 \x03(\t\x12\x15\n\rsubmission_id\x18\x06 \x01(\t\x12\x1e\n\x14\x64\x65\x64uplication_offset\x18\x07 \x01(\x03H\x00\x12;\n\x16\x64\x65\x64uplication_duration\x18\x08 \x01(\x0b\x32\x19.google.protobuf.DurationH\x00\x12;\n\rtrace_context\x18\t \x01(\x0b\x32$.com.daml.ledger.api.v2.TraceContext\x12\x0e\n\x06offset\x18\n \x01(\x03\x12\x43\n\x11synchronizer_time\x18\x0b \x01(\x0b\x32(.com.daml.ledger.api.v2.SynchronizerTimeB\x16\n\x14\x64\x65\x64uplication_periodBG\n\x16\x63om.daml.ledger.api.v2B\x14\x43ompletionOuterClass\xaa\x02\x16\x43om.Daml.Ledger.Api.V2b\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\'com/daml/ledger/api/v2/completion.proto\x12\x16\x63om.daml.ledger.api.v2\x1a.com/daml/ledger/api/v2/offset_checkpoint.proto\x1a*com/daml/ledger/api/v2/trace_context.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x17google/rpc/status.proto\"\xb1\x03\n\nCompletion\x12\x12\n\ncommand_id\x18\x01 \x01(\t\x12\"\n\x06status\x18\x02 \x01(\x0b\x32\x12.google.rpc.Status\x12\x11\n\tupdate_id\x18\x03 \x01(\t\x12\x0f\n\x07user_id\x18\x04 \x01(\t\x12\x0e\n\x06\x61\x63t_as\x18\x05 \x03(\t\x12\x15\n\rsubmission_id\x18\x06 \x01(\t\x12\x1e\n\x14\x64\x65\x64uplication_offset\x18\x07 \x01(\x03H\x00\x12;\n\x16\x64\x65\x64uplication_duration\x18\x08 \x01(\x0b\x32\x19.google.protobuf.DurationH\x00\x12;\n\rtrace_context\x18\t \x01(\x0b\x32$.com.daml.ledger.api.v2.TraceContext\x12\x0e\n\x06offset\x18\n \x01(\x03\x12\x43\n\x11synchronizer_time\x18\x0b \x01(\x0b\x32(.com.daml.ledger.api.v2.SynchronizerTime\x12\x19\n\x11paid_traffic_cost\x18\x0c \x01(\x03\x42\x16\n\x14\x64\x65\x64uplication_periodBG\n\x16\x63om.daml.ledger.api.v2B\x14\x43ompletionOuterClass\xaa\x02\x16\x43om.Daml.Ledger.Api.V2b\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -27,5 +27,5 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _globals['DESCRIPTOR']._options = None
   _globals['DESCRIPTOR']._serialized_options = b'\n\026com.daml.ledger.api.v2B\024CompletionOuterClass\252\002\026Com.Daml.Ledger.Api.V2'
   _globals['_COMPLETION']._serialized_start=217
-  _globals['_COMPLETION']._serialized_end=623
+  _globals['_COMPLETION']._serialized_end=650
 # @@protoc_insertion_point(module_scope)
