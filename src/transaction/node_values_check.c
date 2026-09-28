@@ -356,7 +356,13 @@ MUST_CHECK static bool holdings_match_displayed_instrument(void) {
 // One issuer can run several instruments, so matching the admin alone lets a screen name one of
 // them while the holdings move another. Canton Coin holdings name no instrument, so there is
 // nothing to compare for them.
+//
+// A native-coin screen shows no Token field, so a holding that names one is already wrong.
 MUST_CHECK static bool holdings_match_displayed_id(void) {
+    if (store.has_holdings_instrument && !store.has_instrument) {
+        give_up("a holding names an instrument the screen does not show");
+        return false;
+    }
     if (store.has_instrument && store.has_holdings_instrument &&
         memcmp(store.holdings_instrument, store.instrument, SHA256_HASH_LEN) != 0) {
         give_up("the holdings are of another instrument than the one shown");

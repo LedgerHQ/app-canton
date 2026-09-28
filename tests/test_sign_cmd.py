@@ -605,6 +605,8 @@ def test_sign_token_transfer_wrong_token_id_blind_signing_enabled(
         "values_err_holding_instrument",
         # A third holding, same owner, different amount, on top of a real consolidation
         "values_err_consolidate_extra_holding",
+        # A native CC transfer with an extra token holding spliced in for the same receiver
+        "values_err_native_hides_token_holding",
     ],
 )
 def test_sign_values_mismatch_blind_signing_disabled(backend: BackendInterface, tx_name: str) -> None:
