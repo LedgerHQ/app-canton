@@ -603,6 +603,8 @@ def test_sign_token_transfer_wrong_token_id_blind_signing_enabled(
         # screen still says CBTC. Both come from the same issuer, so only the instrument id tells
         # them apart.
         "values_err_holding_instrument",
+        # A third holding, same owner, different amount, on top of a real consolidation
+        "values_err_consolidate_extra_holding",
     ],
 )
 def test_sign_values_mismatch_blind_signing_disabled(backend: BackendInterface, tx_name: str) -> None:

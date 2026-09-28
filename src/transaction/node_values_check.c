@@ -319,12 +319,17 @@ MUST_CHECK static bool destination_holds_value(void) {
         return false;
     }
 
-    // A second holding for the destination is normally value the screen never showed. Sending to
-    // yourself is the exception: the amount moved and the change both land on the one account, and
-    // no value leaves, so counting them proves nothing.
-    if (owned > 1 && !is_transfer_to_self()) {
-        give_up("more than one holding for the account the value goes to");
-        return false;
+    // Self-transfers may write a second holding (the change). Real consolidations write at most
+    // two, so cap it there.
+    if (owned > 1) {
+        if (!is_transfer_to_self()) {
+            give_up("more than one holding for the account the value goes to");
+            return false;
+        }
+        if (owned > 2) {
+            give_up("more holdings for the account than a consolidation creates");
+            return false;
+        }
     }
 
     if (!amount_seen) {
