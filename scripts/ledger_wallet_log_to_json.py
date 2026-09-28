@@ -239,6 +239,8 @@ def main() -> int:
                         help="64 hex chars of the expected transaction hash. Refused when the log "
                              "holds several transactions, since it would fit only one of them.")
     args = parser.parse_args()
+    if args.tx_hash and re.fullmatch(r"[0-9a-fA-F]{64}", args.tx_hash) is None:
+        parser.error("--hash must be exactly 64 hexadecimal characters")
 
     base = args.output or args.logfile.with_suffix(".json")
 
