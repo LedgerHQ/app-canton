@@ -13,8 +13,8 @@ The script needs two packages that are not part of tests/requirements.txt:
     pip install rich rich-argparse
 
 Examples:
-    python3 scripts/apdu_to_fixture.py USDCxAcceptReceive.log
-    python3 scripts/apdu_to_fixture.py apdu_fail.txt -o /tmp/fixture.json --hash <64 hex chars>
+    python3 scripts/ledger_wallet_log_to_json.py USDCxAcceptReceive.log
+    python3 scripts/ledger_wallet_log_to_json.py apdu_fail.txt -o /tmp/fixture.json --hash <64 hex chars>
 """
 
 import argparse
