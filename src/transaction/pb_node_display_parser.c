@@ -148,6 +148,7 @@ void format_token_amount_field(pb_callback_context_t *ctx, tx_field_t *field) {
             char *new_value = (char *) app_mem_alloc(new_len);
             if (new_value == NULL) {
                 PRINTF("Memory allocation failed in format_token_amount_field\n");
+                field->store_failed = true;
                 return;
             }
             SNPRINTF(new_value, new_len, "%s %s", field->value, ticker);
@@ -187,6 +188,7 @@ void format_native_amount_field(pb_callback_context_t *ctx, tx_field_t *field) {
     char *new_value = (char *) app_mem_alloc(new_len);
     if (new_value == NULL) {
         PRINTF("Memory allocation failed in format_native_amount_field\n");
+        field->store_failed = true;
         return;
     }
     // Format the new value
@@ -211,6 +213,7 @@ void format_timestamp_field(pb_callback_context_t *ctx, tx_field_t *field) {
     time_t timestamp = (time_t) (ts_micros / 1000000ULL);  // Convert microseconds to seconds
     struct tm tm_info;
     if (gmtime_r(&timestamp, &tm_info) == NULL) {
+        field->store_failed = true;
         return;
     }
 
@@ -224,6 +227,7 @@ void format_timestamp_field(pb_callback_context_t *ctx, tx_field_t *field) {
     char *new_value = (char *) app_mem_alloc(buffer_size);
     if (new_value == NULL) {
         PRINTF("Memory allocation failed in format_timestamp_field\n");
+        field->store_failed = true;
         return;
     }
 
@@ -995,6 +999,13 @@ MUST_CHECK int format_and_populate_display_items(pb_callback_context_t *ctx) {
             if (callback != NULL) {
                 callback(ctx, state);
             }
+        }
+
+        // The raw value is left in place, and it is not text the screen can show.
+        if (state->store_failed) {
+            G_context.tx_info.clear_signing_available = false;
+            cleanup_display_items();
+            goto cleanup;
         }
 
         // If token cannot be identified, return : tx will be blind signed (if allowed in settings)
