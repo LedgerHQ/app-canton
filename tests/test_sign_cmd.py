@@ -420,6 +420,15 @@ def test_sign_token_transfer_usdcx_send(backend: BackendInterface, scenario_navi
     )
 
 
+# A memo too long to copy for the screen must stop clear signing, not vanish from the screen.
+# 700 characters decodes but does not fit the copy; retune if heap use changes.
+def test_sign_memo_too_long_blind_signing_disabled(backend: BackendInterface) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(
+        "tests/tx_examples/token_transfer_memo_too_long.json"
+    )
+    _check_blind_signing_rejection(backend, serialized_parts)
+
+
 def test_sign_token_transfer_usdcx_accept(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
     sign_and_verify_prepared_transaction(
         backend,

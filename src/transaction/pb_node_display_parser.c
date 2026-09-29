@@ -329,11 +329,14 @@ static void set_field_value(tx_field_t *field_state, const void *value, pb_size_
     }
 
     field_state->value = (char *) app_mem_alloc(len);
-    if (field_state->value != NULL) {
-        memcpy(field_state->value, src, len);
-        field_state->value_len = len;
-        field_state->found = true;
+    if (field_state->value == NULL) {
+        PRINTF("No room to store %s\n", (char *) PIC(field_state->config->path));
+        field_state->store_failed = true;
+        return;
     }
+    memcpy(field_state->value, src, len);
+    field_state->value_len = len;
+    field_state->found = true;
 }
 
 // Helper function to set display configuration
@@ -356,6 +359,7 @@ static void set_display_config(pb_callback_context_t *ctx, const display_config_
         tx_fields[i].config = &source[i];
         tx_fields[i].found = false;
         tx_fields[i].display = true;
+        tx_fields[i].store_failed = false;
     }
 
     ctx->tx_fields = tx_fields;
@@ -960,6 +964,13 @@ MUST_CHECK int format_and_populate_display_items(pb_callback_context_t *ctx) {
     for (size_t i = 0; i < ctx->nb_fields; i++) {
         tx_field_t *state = &ctx->tx_fields[i];
         const field_config_t *cfg = state->config;
+
+        // A value the screen cannot show must stop clear signing, not vanish or read as missing.
+        if (state->store_failed) {
+            G_context.tx_info.clear_signing_available = false;
+            cleanup_display_items();
+            goto cleanup;
+        }
 
         // Mandatory field check
         if (cfg->mandatory && !state->found) {

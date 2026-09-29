@@ -116,6 +116,7 @@ struct tx_field_t {
     const field_config_t *config;
     bool found;
     bool display;
+    bool store_failed;  // found, but the heap had no room to keep its value
 };
 
 typedef struct {
