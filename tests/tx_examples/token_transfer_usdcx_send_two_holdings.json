@@ -1,0 +1,2166 @@
+{
+  "json": {
+    "transaction": {
+      "version": "2.1",
+      "roots": [
+        "0"
+      ],
+      "nodeSeeds": [
+        {
+          "seed": "34+/FfxMo6ohi5+qRRK5TGCtgtzrH1dFSEgk/bV+dto="
+        },
+        {
+          "nodeId": 1,
+          "seed": "9i0LCd4E0NqscpZZMLw6i4gs3Rchhvq41Bk/EvMOCIM="
+        },
+        {
+          "nodeId": 5,
+          "seed": "lS+B1aBnzFmHFkaql3NjfLmXYHZhCiLH1rD4MbACNvM="
+        },
+        {
+          "nodeId": 6,
+          "seed": "AlSu4WkzReKUc9UAeCchrKonJefpQIdISsu3RiPyRB8="
+        },
+        {
+          "nodeId": 7,
+          "seed": "PRW3cNArwnlD2ZQS6kHekopho0EHUfM6yd+ofyOQ0oA="
+        },
+        {
+          "nodeId": 8,
+          "seed": "n7UB2FMMpRvcIq6iIuHG5RNceFbQFk9ckkGfCNHXoSM="
+        },
+        {
+          "nodeId": 9,
+          "seed": "6WfPqLbvSbkN1bB4tQdaqXYjpf/YItcqRDkboyXdyTk="
+        },
+        {
+          "nodeId": 10,
+          "seed": "k0XL1L4lmVMQwPbapR4H2e9g/DzEXfeIdreYc2eoOr4="
+        }
+      ],
+      "nodes": [
+        {
+          "nodeId": "0",
+          "v1": {
+            "exercise": {
+              "lfVersion": "2.1",
+              "contractId": "006289e882123613ea96d71fad9cc38a529e613a8d4b550ef6a0422383e1925934ca11122003bc3af7d468f09465fa72db6182b63e349804e430a81eeeffa9076f5099f796",
+              "packageName": "utility-registry-app-v0",
+              "templateId": {
+                "packageId": "1eddd268bdd50d6e262722bea799c9455da032b3f94489e589975151b274b8c0",
+                "moduleName": "Utility.Registry.App.V0.Service.AllocationFactory",
+                "entityName": "AllocationFactory"
+              },
+              "signatories": [
+                "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f",
+                "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef"
+              ],
+              "stakeholders": [
+                "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f",
+                "auth0_007c6643538f2eadd3e573dd05b9::12205bcc106efa0eaa7f18dc491e5c6f5fb9b0cc68dc110ae66f4ed6467475d7c78e",
+                "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef"
+              ],
+              "actingParties": [
+                "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+              ],
+              "interfaceId": {
+                "packageId": "55ba4deb0ad4662c4168b39859738a0e91388d252286480c7331b3f71a517281",
+                "moduleName": "Splice.Api.Token.TransferInstructionV1",
+                "entityName": "TransferFactory"
+              },
+              "choiceId": "TransferFactory_Transfer",
+              "chosenValue": {
+                "record": {
+                  "recordId": {
+                    "packageId": "55ba4deb0ad4662c4168b39859738a0e91388d252286480c7331b3f71a517281",
+                    "moduleName": "Splice.Api.Token.TransferInstructionV1",
+                    "entityName": "TransferFactory_Transfer"
+                  },
+                  "fields": [
+                    {
+                      "label": "expectedAdmin",
+                      "value": {
+                        "party": "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef"
+                      }
+                    },
+                    {
+                      "label": "transfer",
+                      "value": {
+                        "record": {
+                          "recordId": {
+                            "packageId": "55ba4deb0ad4662c4168b39859738a0e91388d252286480c7331b3f71a517281",
+                            "moduleName": "Splice.Api.Token.TransferInstructionV1",
+                            "entityName": "Transfer"
+                          },
+                          "fields": [
+                            {
+                              "label": "sender",
+                              "value": {
+                                "party": "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+                              }
+                            },
+                            {
+                              "label": "receiver",
+                              "value": {
+                                "party": "ldg::12200ade43ddf3e107fa07387a0cd2681cd2a3ac67eeaca2290049ddf4ecee7f4e4a"
+                              }
+                            },
+                            {
+                              "label": "amount",
+                              "value": {
+                                "numeric": "0.0100000000"
+                              }
+                            },
+                            {
+                              "label": "instrumentId",
+                              "value": {
+                                "record": {
+                                  "recordId": {
+                                    "packageId": "718a0f77e505a8de22f188bd4c87fe74101274e9d4cb1bfac7d09aec7158d35b",
+                                    "moduleName": "Splice.Api.Token.HoldingV1",
+                                    "entityName": "InstrumentId"
+                                  },
+                                  "fields": [
+                                    {
+                                      "label": "admin",
+                                      "value": {
+                                        "party": "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef"
+                                      }
+                                    },
+                                    {
+                                      "label": "id",
+                                      "value": {
+                                        "text": "USDCx"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            },
+                            {
+                              "label": "requestedAt",
+                              "value": {
+                                "timestamp": "1790690894110560"
+                              }
+                            },
+                            {
+                              "label": "executeBefore",
+                              "value": {
+                                "timestamp": "1790777295110525"
+                              }
+                            },
+                            {
+                              "label": "inputHoldingCids",
+                              "value": {
+                                "list": {
+                                  "elements": [
+                                    {
+                                      "contractId": "0024fd3fa11fd0f4ac25a76c388dcb4e576243e7f47fc03a2a177f098cf775ea39ca121220627ef096de589245bf1dae3aff2603bed1b5629bf014b23bd3417b88713b70e5"
+                                    },
+                                    {
+                                      "contractId": "00fe1e631ed067b60d3489e48e375cc908110b461bf89500ab2fa9f59c6b8eaa26ca1212204013280cffd6ddbfa324e1dc2ade18c3e2bc807425f380b07ab086dc1767f7e4"
+                                    }
+                                  ]
+                                }
+                              }
+                            },
+                            {
+                              "label": "meta",
+                              "value": {
+                                "record": {
+                                  "recordId": {
+                                    "packageId": "4ded6b668cb3b64f7a88a30874cd41c75829f5e064b3fbbadf41ec7e8363354f",
+                                    "moduleName": "Splice.Api.Token.MetadataV1",
+                                    "entityName": "Metadata"
+                                  },
+                                  "fields": [
+                                    {
+                                      "label": "values",
+                                      "value": {
+                                        "textMap": {}
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "label": "extraArgs",
+                      "value": {
+                        "record": {
+                          "recordId": {
+                            "packageId": "4ded6b668cb3b64f7a88a30874cd41c75829f5e064b3fbbadf41ec7e8363354f",
+                            "moduleName": "Splice.Api.Token.MetadataV1",
+                            "entityName": "ExtraArgs"
+                          },
+                          "fields": [
+                            {
+                              "label": "context",
+                              "value": {
+                                "record": {
+                                  "recordId": {
+                                    "packageId": "4ded6b668cb3b64f7a88a30874cd41c75829f5e064b3fbbadf41ec7e8363354f",
+                                    "moduleName": "Splice.Api.Token.MetadataV1",
+                                    "entityName": "ChoiceContext"
+                                  },
+                                  "fields": [
+                                    {
+                                      "label": "values",
+                                      "value": {
+                                        "textMap": {
+                                          "entries": [
+                                            {
+                                              "key": "utility.digitalasset.com/instrument-configuration",
+                                              "value": {
+                                                "variant": {
+                                                  "variantId": {
+                                                    "packageId": "4ded6b668cb3b64f7a88a30874cd41c75829f5e064b3fbbadf41ec7e8363354f",
+                                                    "moduleName": "Splice.Api.Token.MetadataV1",
+                                                    "entityName": "AnyValue"
+                                                  },
+                                                  "constructor": "AV_ContractId",
+                                                  "value": {
+                                                    "contractId": "002a23aed42edb51940f74f6fc5f7b8267c9192ab8e72296673420ffc4c4f22debca1112201d94617a63f11a4ce245498930752e56313d200b6a0976ee621f6add2788ba1b"
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            {
+                                              "key": "utility.digitalasset.com/sender-credentials",
+                                              "value": {
+                                                "variant": {
+                                                  "variantId": {
+                                                    "packageId": "4ded6b668cb3b64f7a88a30874cd41c75829f5e064b3fbbadf41ec7e8363354f",
+                                                    "moduleName": "Splice.Api.Token.MetadataV1",
+                                                    "entityName": "AnyValue"
+                                                  },
+                                                  "constructor": "AV_List",
+                                                  "value": {
+                                                    "list": {}
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            },
+                            {
+                              "label": "meta",
+                              "value": {
+                                "record": {
+                                  "recordId": {
+                                    "packageId": "4ded6b668cb3b64f7a88a30874cd41c75829f5e064b3fbbadf41ec7e8363354f",
+                                    "moduleName": "Splice.Api.Token.MetadataV1",
+                                    "entityName": "Metadata"
+                                  },
+                                  "fields": [
+                                    {
+                                      "label": "values",
+                                      "value": {
+                                        "textMap": {}
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "children": [
+                "1"
+              ],
+              "exerciseResult": {
+                "record": {
+                  "recordId": {
+                    "packageId": "55ba4deb0ad4662c4168b39859738a0e91388d252286480c7331b3f71a517281",
+                    "moduleName": "Splice.Api.Token.TransferInstructionV1",
+                    "entityName": "TransferInstructionResult"
+                  },
+                  "fields": [
+                    {
+                      "label": "output",
+                      "value": {
+                        "variant": {
+                          "variantId": {
+                            "packageId": "55ba4deb0ad4662c4168b39859738a0e91388d252286480c7331b3f71a517281",
+                            "moduleName": "Splice.Api.Token.TransferInstructionV1",
+                            "entityName": "TransferInstructionResult_Output"
+                          },
+                          "constructor": "TransferInstructionResult_Pending",
+                          "value": {
+                            "record": {
+                              "recordId": {
+                                "packageId": "55ba4deb0ad4662c4168b39859738a0e91388d252286480c7331b3f71a517281",
+                                "moduleName": "Splice.Api.Token.TransferInstructionV1",
+                                "entityName": "TransferInstructionResult_Output.TransferInstructionResult_Pending"
+                              },
+                              "fields": [
+                                {
+                                  "label": "transferInstructionCid",
+                                  "value": {
+                                    "contractId": "00f4638863b3335772c6f52e7e8866119f521be242b44902651cb1483619097bbd"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "label": "senderChangeCids",
+                      "value": {
+                        "list": {
+                          "elements": [
+                            {
+                              "contractId": "009573cf1cf811a3c26120ca25ac946af894cc1fcef9eb4836684ddb247d9bbfa2"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "label": "meta",
+                      "value": {
+                        "record": {
+                          "recordId": {
+                            "packageId": "4ded6b668cb3b64f7a88a30874cd41c75829f5e064b3fbbadf41ec7e8363354f",
+                            "moduleName": "Splice.Api.Token.MetadataV1",
+                            "entityName": "Metadata"
+                          },
+                          "fields": [
+                            {
+                              "label": "values",
+                              "value": {
+                                "textMap": {}
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "nodeId": "1",
+          "v1": {
+            "exercise": {
+              "lfVersion": "2.1",
+              "contractId": "006289e882123613ea96d71fad9cc38a529e613a8d4b550ef6a0422383e1925934ca11122003bc3af7d468f09465fa72db6182b63e349804e430a81eeeffa9076f5099f796",
+              "packageName": "utility-registry-app-v0",
+              "templateId": {
+                "packageId": "1eddd268bdd50d6e262722bea799c9455da032b3f94489e589975151b274b8c0",
+                "moduleName": "Utility.Registry.App.V0.Service.AllocationFactory",
+                "entityName": "AllocationFactory"
+              },
+              "signatories": [
+                "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f",
+                "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef"
+              ],
+              "stakeholders": [
+                "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f",
+                "auth0_007c6643538f2eadd3e573dd05b9::12205bcc106efa0eaa7f18dc491e5c6f5fb9b0cc68dc110ae66f4ed6467475d7c78e",
+                "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef"
+              ],
+              "actingParties": [
+                "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f",
+                "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef",
+                "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+              ],
+              "choiceId": "AllocationFactory_TransferInternal",
+              "chosenValue": {
+                "record": {
+                  "recordId": {
+                    "packageId": "1eddd268bdd50d6e262722bea799c9455da032b3f94489e589975151b274b8c0",
+                    "moduleName": "Utility.Registry.App.V0.Service.AllocationFactory",
+                    "entityName": "AllocationFactory_TransferInternal"
+                  },
+                  "fields": [
+                    {
+                      "label": "payload",
+                      "value": {
+                        "record": {
+                          "recordId": {
+                            "packageId": "55ba4deb0ad4662c4168b39859738a0e91388d252286480c7331b3f71a517281",
+                            "moduleName": "Splice.Api.Token.TransferInstructionV1",
+                            "entityName": "TransferFactory_Transfer"
+                          },
+                          "fields": [
+                            {
+                              "label": "expectedAdmin",
+                              "value": {
+                                "party": "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef"
+                              }
+                            },
+                            {
+                              "label": "transfer",
+                              "value": {
+                                "record": {
+                                  "recordId": {
+                                    "packageId": "55ba4deb0ad4662c4168b39859738a0e91388d252286480c7331b3f71a517281",
+                                    "moduleName": "Splice.Api.Token.TransferInstructionV1",
+                                    "entityName": "Transfer"
+                                  },
+                                  "fields": [
+                                    {
+                                      "label": "sender",
+                                      "value": {
+                                        "party": "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+                                      }
+                                    },
+                                    {
+                                      "label": "receiver",
+                                      "value": {
+                                        "party": "ldg::12200ade43ddf3e107fa07387a0cd2681cd2a3ac67eeaca2290049ddf4ecee7f4e4a"
+                                      }
+                                    },
+                                    {
+                                      "label": "amount",
+                                      "value": {
+                                        "numeric": "0.0100000000"
+                                      }
+                                    },
+                                    {
+                                      "label": "instrumentId",
+                                      "value": {
+                                        "record": {
+                                          "recordId": {
+                                            "packageId": "718a0f77e505a8de22f188bd4c87fe74101274e9d4cb1bfac7d09aec7158d35b",
+                                            "moduleName": "Splice.Api.Token.HoldingV1",
+                                            "entityName": "InstrumentId"
+                                          },
+                                          "fields": [
+                                            {
+                                              "label": "admin",
+                                              "value": {
+                                                "party": "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef"
+                                              }
+                                            },
+                                            {
+                                              "label": "id",
+                                              "value": {
+                                                "text": "USDCx"
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    },
+                                    {
+                                      "label": "requestedAt",
+                                      "value": {
+                                        "timestamp": "1790690894110560"
+                                      }
+                                    },
+                                    {
+                                      "label": "executeBefore",
+                                      "value": {
+                                        "timestamp": "1790777295110525"
+                                      }
+                                    },
+                                    {
+                                      "label": "inputHoldingCids",
+                                      "value": {
+                                        "list": {
+                                          "elements": [
+                                            {
+                                              "contractId": "0024fd3fa11fd0f4ac25a76c388dcb4e576243e7f47fc03a2a177f098cf775ea39ca121220627ef096de589245bf1dae3aff2603bed1b5629bf014b23bd3417b88713b70e5"
+                                            },
+                                            {
+                                              "contractId": "00fe1e631ed067b60d3489e48e375cc908110b461bf89500ab2fa9f59c6b8eaa26ca1212204013280cffd6ddbfa324e1dc2ade18c3e2bc807425f380b07ab086dc1767f7e4"
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    },
+                                    {
+                                      "label": "meta",
+                                      "value": {
+                                        "record": {
+                                          "recordId": {
+                                            "packageId": "4ded6b668cb3b64f7a88a30874cd41c75829f5e064b3fbbadf41ec7e8363354f",
+                                            "moduleName": "Splice.Api.Token.MetadataV1",
+                                            "entityName": "Metadata"
+                                          },
+                                          "fields": [
+                                            {
+                                              "label": "values",
+                                              "value": {
+                                                "textMap": {}
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            },
+                            {
+                              "label": "extraArgs",
+                              "value": {
+                                "record": {
+                                  "recordId": {
+                                    "packageId": "4ded6b668cb3b64f7a88a30874cd41c75829f5e064b3fbbadf41ec7e8363354f",
+                                    "moduleName": "Splice.Api.Token.MetadataV1",
+                                    "entityName": "ExtraArgs"
+                                  },
+                                  "fields": [
+                                    {
+                                      "label": "context",
+                                      "value": {
+                                        "record": {
+                                          "recordId": {
+                                            "packageId": "4ded6b668cb3b64f7a88a30874cd41c75829f5e064b3fbbadf41ec7e8363354f",
+                                            "moduleName": "Splice.Api.Token.MetadataV1",
+                                            "entityName": "ChoiceContext"
+                                          },
+                                          "fields": [
+                                            {
+                                              "label": "values",
+                                              "value": {
+                                                "textMap": {
+                                                  "entries": [
+                                                    {
+                                                      "key": "utility.digitalasset.com/instrument-configuration",
+                                                      "value": {
+                                                        "variant": {
+                                                          "variantId": {
+                                                            "packageId": "4ded6b668cb3b64f7a88a30874cd41c75829f5e064b3fbbadf41ec7e8363354f",
+                                                            "moduleName": "Splice.Api.Token.MetadataV1",
+                                                            "entityName": "AnyValue"
+                                                          },
+                                                          "constructor": "AV_ContractId",
+                                                          "value": {
+                                                            "contractId": "002a23aed42edb51940f74f6fc5f7b8267c9192ab8e72296673420ffc4c4f22debca1112201d94617a63f11a4ce245498930752e56313d200b6a0976ee621f6add2788ba1b"
+                                                          }
+                                                        }
+                                                      }
+                                                    },
+                                                    {
+                                                      "key": "utility.digitalasset.com/sender-credentials",
+                                                      "value": {
+                                                        "variant": {
+                                                          "variantId": {
+                                                            "packageId": "4ded6b668cb3b64f7a88a30874cd41c75829f5e064b3fbbadf41ec7e8363354f",
+                                                            "moduleName": "Splice.Api.Token.MetadataV1",
+                                                            "entityName": "AnyValue"
+                                                          },
+                                                          "constructor": "AV_List",
+                                                          "value": {
+                                                            "list": {}
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  ]
+                                                }
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    },
+                                    {
+                                      "label": "meta",
+                                      "value": {
+                                        "record": {
+                                          "recordId": {
+                                            "packageId": "4ded6b668cb3b64f7a88a30874cd41c75829f5e064b3fbbadf41ec7e8363354f",
+                                            "moduleName": "Splice.Api.Token.MetadataV1",
+                                            "entityName": "Metadata"
+                                          },
+                                          "fields": [
+                                            {
+                                              "label": "values",
+                                              "value": {
+                                                "textMap": {}
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "children": [
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "10"
+              ],
+              "exerciseResult": {
+                "record": {
+                  "recordId": {
+                    "packageId": "55ba4deb0ad4662c4168b39859738a0e91388d252286480c7331b3f71a517281",
+                    "moduleName": "Splice.Api.Token.TransferInstructionV1",
+                    "entityName": "TransferInstructionResult"
+                  },
+                  "fields": [
+                    {
+                      "label": "output",
+                      "value": {
+                        "variant": {
+                          "variantId": {
+                            "packageId": "55ba4deb0ad4662c4168b39859738a0e91388d252286480c7331b3f71a517281",
+                            "moduleName": "Splice.Api.Token.TransferInstructionV1",
+                            "entityName": "TransferInstructionResult_Output"
+                          },
+                          "constructor": "TransferInstructionResult_Pending",
+                          "value": {
+                            "record": {
+                              "recordId": {
+                                "packageId": "55ba4deb0ad4662c4168b39859738a0e91388d252286480c7331b3f71a517281",
+                                "moduleName": "Splice.Api.Token.TransferInstructionV1",
+                                "entityName": "TransferInstructionResult_Output.TransferInstructionResult_Pending"
+                              },
+                              "fields": [
+                                {
+                                  "label": "transferInstructionCid",
+                                  "value": {
+                                    "contractId": "00f4638863b3335772c6f52e7e8866119f521be242b44902651cb1483619097bbd"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "label": "senderChangeCids",
+                      "value": {
+                        "list": {
+                          "elements": [
+                            {
+                              "contractId": "009573cf1cf811a3c26120ca25ac946af894cc1fcef9eb4836684ddb247d9bbfa2"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "label": "meta",
+                      "value": {
+                        "record": {
+                          "recordId": {
+                            "packageId": "4ded6b668cb3b64f7a88a30874cd41c75829f5e064b3fbbadf41ec7e8363354f",
+                            "moduleName": "Splice.Api.Token.MetadataV1",
+                            "entityName": "Metadata"
+                          },
+                          "fields": [
+                            {
+                              "label": "values",
+                              "value": {
+                                "textMap": {}
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "choiceObservers": [
+                "auth0_007c6643538f2eadd3e573dd05b9::12205bcc106efa0eaa7f18dc491e5c6f5fb9b0cc68dc110ae66f4ed6467475d7c78e",
+                "ldg::12200ade43ddf3e107fa07387a0cd2681cd2a3ac67eeaca2290049ddf4ecee7f4e4a"
+              ]
+            }
+          }
+        },
+        {
+          "nodeId": "2",
+          "v1": {
+            "fetch": {
+              "lfVersion": "2.1",
+              "contractId": "002a23aed42edb51940f74f6fc5f7b8267c9192ab8e72296673420ffc4c4f22debca1112201d94617a63f11a4ce245498930752e56313d200b6a0976ee621f6add2788ba1b",
+              "packageName": "utility-registry-v0",
+              "templateId": {
+                "packageId": "8c654487d9f5fb195fbcdd7b44cd8e365b1ea39c15ae62ce6c7a48343f1210dd",
+                "moduleName": "Utility.Registry.V0.Configuration.Instrument",
+                "entityName": "InstrumentConfiguration"
+              },
+              "signatories": [
+                "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f",
+                "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef"
+              ],
+              "stakeholders": [
+                "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f",
+                "auth0_007c6643538f2eadd3e573dd05b9::12205bcc106efa0eaa7f18dc491e5c6f5fb9b0cc68dc110ae66f4ed6467475d7c78e",
+                "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef"
+              ],
+              "actingParties": [
+                "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f",
+                "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef"
+              ]
+            }
+          }
+        },
+        {
+          "nodeId": "3",
+          "v1": {
+            "fetch": {
+              "lfVersion": "2.1",
+              "contractId": "0024fd3fa11fd0f4ac25a76c388dcb4e576243e7f47fc03a2a177f098cf775ea39ca121220627ef096de589245bf1dae3aff2603bed1b5629bf014b23bd3417b88713b70e5",
+              "packageName": "utility-registry-holding-v0",
+              "templateId": {
+                "packageId": "415a1ec96a9e2839453e9aa1c5c71b6511c008c79511cb6f873e0b7393fe3b92",
+                "moduleName": "Utility.Registry.Holding.V0.Holding",
+                "entityName": "Holding"
+              },
+              "signatories": [
+                "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef",
+                "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+              ],
+              "stakeholders": [
+                "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f",
+                "auth0_007c6643538f2eadd3e573dd05b9::12205bcc106efa0eaa7f18dc491e5c6f5fb9b0cc68dc110ae66f4ed6467475d7c78e",
+                "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef",
+                "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+              ],
+              "actingParties": [
+                "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f",
+                "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef",
+                "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+              ]
+            }
+          }
+        },
+        {
+          "nodeId": "4",
+          "v1": {
+            "fetch": {
+              "lfVersion": "2.1",
+              "contractId": "00fe1e631ed067b60d3489e48e375cc908110b461bf89500ab2fa9f59c6b8eaa26ca1212204013280cffd6ddbfa324e1dc2ade18c3e2bc807425f380b07ab086dc1767f7e4",
+              "packageName": "utility-registry-holding-v0",
+              "templateId": {
+                "packageId": "415a1ec96a9e2839453e9aa1c5c71b6511c008c79511cb6f873e0b7393fe3b92",
+                "moduleName": "Utility.Registry.Holding.V0.Holding",
+                "entityName": "Holding"
+              },
+              "signatories": [
+                "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef",
+                "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+              ],
+              "stakeholders": [
+                "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f",
+                "auth0_007c6643538f2eadd3e573dd05b9::12205bcc106efa0eaa7f18dc491e5c6f5fb9b0cc68dc110ae66f4ed6467475d7c78e",
+                "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef",
+                "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+              ],
+              "actingParties": [
+                "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f",
+                "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef",
+                "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+              ]
+            }
+          }
+        },
+        {
+          "nodeId": "5",
+          "v1": {
+            "create": {
+              "lfVersion": "2.1",
+              "contractId": "007335ddc1a9a66646ce2af0ad29ee04d50bf6cd2f236f35a7414db2f65fd43a4d",
+              "packageName": "utility-registry-holding-v0",
+              "templateId": {
+                "packageId": "415a1ec96a9e2839453e9aa1c5c71b6511c008c79511cb6f873e0b7393fe3b92",
+                "moduleName": "Utility.Registry.Holding.V0.Holding",
+                "entityName": "Holding"
+              },
+              "argument": {
+                "record": {
+                  "recordId": {
+                    "packageId": "415a1ec96a9e2839453e9aa1c5c71b6511c008c79511cb6f873e0b7393fe3b92",
+                    "moduleName": "Utility.Registry.Holding.V0.Holding",
+                    "entityName": "Holding"
+                  },
+                  "fields": [
+                    {
+                      "label": "operator",
+                      "value": {
+                        "party": "auth0_007c6643538f2eadd3e573dd05b9::12205bcc106efa0eaa7f18dc491e5c6f5fb9b0cc68dc110ae66f4ed6467475d7c78e"
+                      }
+                    },
+                    {
+                      "label": "provider",
+                      "value": {
+                        "party": "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f"
+                      }
+                    },
+                    {
+                      "label": "registrar",
+                      "value": {
+                        "party": "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef"
+                      }
+                    },
+                    {
+                      "label": "owner",
+                      "value": {
+                        "party": "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+                      }
+                    },
+                    {
+                      "label": "instrument",
+                      "value": {
+                        "record": {
+                          "recordId": {
+                            "packageId": "415a1ec96a9e2839453e9aa1c5c71b6511c008c79511cb6f873e0b7393fe3b92",
+                            "moduleName": "Utility.Registry.Holding.V0.Types",
+                            "entityName": "InstrumentIdentifier"
+                          },
+                          "fields": [
+                            {
+                              "label": "source",
+                              "value": {
+                                "party": "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef"
+                              }
+                            },
+                            {
+                              "label": "id",
+                              "value": {
+                                "text": "USDCx"
+                              }
+                            },
+                            {
+                              "label": "scheme",
+                              "value": {
+                                "text": "RegistrarInternalScheme"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "label": "label",
+                      "value": {
+                        "text": ""
+                      }
+                    },
+                    {
+                      "label": "amount",
+                      "value": {
+                        "numeric": "0.0100000000"
+                      }
+                    },
+                    {
+                      "label": "lock",
+                      "value": {
+                        "optional": {
+                          "value": {
+                            "record": {
+                              "recordId": {
+                                "packageId": "415a1ec96a9e2839453e9aa1c5c71b6511c008c79511cb6f873e0b7393fe3b92",
+                                "moduleName": "Utility.Registry.Holding.V0.Holding",
+                                "entityName": "Lock"
+                              },
+                              "fields": [
+                                {
+                                  "label": "lockers",
+                                  "value": {
+                                    "record": {
+                                      "recordId": {
+                                        "packageId": "c3bb0c5d04799b3f11bad7c3c102963e115cf53da3e4afcbcfd9f06ebd82b4ff",
+                                        "moduleName": "DA.Set.Types",
+                                        "entityName": "Set"
+                                      },
+                                      "fields": [
+                                        {
+                                          "label": "map",
+                                          "value": {
+                                            "genMap": {
+                                              "entries": [
+                                                {
+                                                  "key": {
+                                                    "party": "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef"
+                                                  },
+                                                  "value": {
+                                                    "unit": {}
+                                                  }
+                                                }
+                                              ]
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                },
+                                {
+                                  "label": "context",
+                                  "value": {
+                                    "text": ""
+                                  }
+                                },
+                                {
+                                  "label": "observers",
+                                  "value": {
+                                    "optional": {
+                                      "value": {
+                                        "record": {
+                                          "recordId": {
+                                            "packageId": "c3bb0c5d04799b3f11bad7c3c102963e115cf53da3e4afcbcfd9f06ebd82b4ff",
+                                            "moduleName": "DA.Set.Types",
+                                            "entityName": "Set"
+                                          },
+                                          "fields": [
+                                            {
+                                              "label": "map",
+                                              "value": {
+                                                "genMap": {
+                                                  "entries": [
+                                                    {
+                                                      "key": {
+                                                        "party": "ldg::12200ade43ddf3e107fa07387a0cd2681cd2a3ac67eeaca2290049ddf4ecee7f4e4a"
+                                                      },
+                                                      "value": {
+                                                        "unit": {}
+                                                      }
+                                                    }
+                                                  ]
+                                                }
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "signatories": [
+                "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef",
+                "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+              ],
+              "stakeholders": [
+                "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f",
+                "auth0_007c6643538f2eadd3e573dd05b9::12205bcc106efa0eaa7f18dc491e5c6f5fb9b0cc68dc110ae66f4ed6467475d7c78e",
+                "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef",
+                "ldg::12200ade43ddf3e107fa07387a0cd2681cd2a3ac67eeaca2290049ddf4ecee7f4e4a",
+                "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+              ]
+            }
+          }
+        },
+        {
+          "nodeId": "6",
+          "v1": {
+            "create": {
+              "lfVersion": "2.1",
+              "contractId": "009573cf1cf811a3c26120ca25ac946af894cc1fcef9eb4836684ddb247d9bbfa2",
+              "packageName": "utility-registry-holding-v0",
+              "templateId": {
+                "packageId": "415a1ec96a9e2839453e9aa1c5c71b6511c008c79511cb6f873e0b7393fe3b92",
+                "moduleName": "Utility.Registry.Holding.V0.Holding",
+                "entityName": "Holding"
+              },
+              "argument": {
+                "record": {
+                  "recordId": {
+                    "packageId": "415a1ec96a9e2839453e9aa1c5c71b6511c008c79511cb6f873e0b7393fe3b92",
+                    "moduleName": "Utility.Registry.Holding.V0.Holding",
+                    "entityName": "Holding"
+                  },
+                  "fields": [
+                    {
+                      "label": "operator",
+                      "value": {
+                        "party": "auth0_007c6643538f2eadd3e573dd05b9::12205bcc106efa0eaa7f18dc491e5c6f5fb9b0cc68dc110ae66f4ed6467475d7c78e"
+                      }
+                    },
+                    {
+                      "label": "provider",
+                      "value": {
+                        "party": "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f"
+                      }
+                    },
+                    {
+                      "label": "registrar",
+                      "value": {
+                        "party": "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef"
+                      }
+                    },
+                    {
+                      "label": "owner",
+                      "value": {
+                        "party": "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+                      }
+                    },
+                    {
+                      "label": "instrument",
+                      "value": {
+                        "record": {
+                          "recordId": {
+                            "packageId": "415a1ec96a9e2839453e9aa1c5c71b6511c008c79511cb6f873e0b7393fe3b92",
+                            "moduleName": "Utility.Registry.Holding.V0.Types",
+                            "entityName": "InstrumentIdentifier"
+                          },
+                          "fields": [
+                            {
+                              "label": "source",
+                              "value": {
+                                "party": "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef"
+                              }
+                            },
+                            {
+                              "label": "id",
+                              "value": {
+                                "text": "USDCx"
+                              }
+                            },
+                            {
+                              "label": "scheme",
+                              "value": {
+                                "text": "RegistrarInternalScheme"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "label": "label",
+                      "value": {
+                        "text": ""
+                      }
+                    },
+                    {
+                      "label": "amount",
+                      "value": {
+                        "numeric": "0.0800000000"
+                      }
+                    }
+                  ]
+                }
+              },
+              "signatories": [
+                "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef",
+                "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+              ],
+              "stakeholders": [
+                "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f",
+                "auth0_007c6643538f2eadd3e573dd05b9::12205bcc106efa0eaa7f18dc491e5c6f5fb9b0cc68dc110ae66f4ed6467475d7c78e",
+                "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef",
+                "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+              ]
+            }
+          }
+        },
+        {
+          "nodeId": "7",
+          "v1": {
+            "exercise": {
+              "lfVersion": "2.1",
+              "contractId": "009573cf1cf811a3c26120ca25ac946af894cc1fcef9eb4836684ddb247d9bbfa2",
+              "packageName": "utility-registry-holding-v0",
+              "templateId": {
+                "packageId": "415a1ec96a9e2839453e9aa1c5c71b6511c008c79511cb6f873e0b7393fe3b92",
+                "moduleName": "Utility.Registry.Holding.V0.Holding",
+                "entityName": "Holding"
+              },
+              "signatories": [
+                "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef",
+                "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+              ],
+              "stakeholders": [
+                "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f",
+                "auth0_007c6643538f2eadd3e573dd05b9::12205bcc106efa0eaa7f18dc491e5c6f5fb9b0cc68dc110ae66f4ed6467475d7c78e",
+                "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef",
+                "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+              ],
+              "actingParties": [
+                "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef"
+              ],
+              "interfaceId": {
+                "packageId": "5c1097a9bad0af4bcfe6d3fb0fe55112d3d11f18eae57ddfb14c20836fee226c",
+                "moduleName": "Splice.Api.Token.TransferEventsV2",
+                "entityName": "EventLog"
+              },
+              "choiceId": "EventLog_HoldingsChange",
+              "chosenValue": {
+                "record": {
+                  "recordId": {
+                    "packageId": "5c1097a9bad0af4bcfe6d3fb0fe55112d3d11f18eae57ddfb14c20836fee226c",
+                    "moduleName": "Splice.Api.Token.TransferEventsV2",
+                    "entityName": "EventLog_HoldingsChange"
+                  },
+                  "fields": [
+                    {
+                      "label": "admin",
+                      "value": {
+                        "party": "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef"
+                      }
+                    },
+                    {
+                      "label": "account",
+                      "value": {
+                        "record": {
+                          "recordId": {
+                            "packageId": "4b7ecfc366d79ccc5ed07c80f26fe489cf2dfd43ce2856c06a78e6a048db7032",
+                            "moduleName": "Splice.Api.Token.HoldingV2",
+                            "entityName": "Account"
+                          },
+                          "fields": [
+                            {
+                              "label": "owner",
+                              "value": {
+                                "optional": {
+                                  "value": {
+                                    "party": "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "label": "provider",
+                              "value": {
+                                "optional": {}
+                              }
+                            },
+                            {
+                              "label": "id",
+                              "value": {
+                                "text": ""
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "label": "inputHoldingCids",
+                      "value": {
+                        "list": {
+                          "elements": [
+                            {
+                              "contractId": "0024fd3fa11fd0f4ac25a76c388dcb4e576243e7f47fc03a2a177f098cf775ea39ca121220627ef096de589245bf1dae3aff2603bed1b5629bf014b23bd3417b88713b70e5"
+                            },
+                            {
+                              "contractId": "00fe1e631ed067b60d3489e48e375cc908110b461bf89500ab2fa9f59c6b8eaa26ca1212204013280cffd6ddbfa324e1dc2ade18c3e2bc807425f380b07ab086dc1767f7e4"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "label": "transferLegSides",
+                      "value": {
+                        "list": {
+                          "elements": [
+                            {
+                              "record": {
+                                "recordId": {
+                                  "packageId": "5c1097a9bad0af4bcfe6d3fb0fe55112d3d11f18eae57ddfb14c20836fee226c",
+                                  "moduleName": "Splice.Api.Token.TransferEventsV2",
+                                  "entityName": "TransferLegSide"
+                                },
+                                "fields": [
+                                  {
+                                    "label": "transferLegId",
+                                    "value": {
+                                      "text": ""
+                                    }
+                                  },
+                                  {
+                                    "label": "side",
+                                    "value": {
+                                      "enum": {
+                                        "enumId": {
+                                          "packageId": "5c1097a9bad0af4bcfe6d3fb0fe55112d3d11f18eae57ddfb14c20836fee226c",
+                                          "moduleName": "Splice.Api.Token.TransferEventsV2",
+                                          "entityName": "TransferSide"
+                                        },
+                                        "constructor": "SenderSide"
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "label": "otherside",
+                                    "value": {
+                                      "record": {
+                                        "recordId": {
+                                          "packageId": "4b7ecfc366d79ccc5ed07c80f26fe489cf2dfd43ce2856c06a78e6a048db7032",
+                                          "moduleName": "Splice.Api.Token.HoldingV2",
+                                          "entityName": "Account"
+                                        },
+                                        "fields": [
+                                          {
+                                            "label": "owner",
+                                            "value": {
+                                              "optional": {
+                                                "value": {
+                                                  "party": "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+                                                }
+                                              }
+                                            }
+                                          },
+                                          {
+                                            "label": "provider",
+                                            "value": {
+                                              "optional": {}
+                                            }
+                                          },
+                                          {
+                                            "label": "id",
+                                            "value": {
+                                              "text": ""
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "label": "amount",
+                                    "value": {
+                                      "numeric": "0.0900000000"
+                                    }
+                                  },
+                                  {
+                                    "label": "instrumentId",
+                                    "value": {
+                                      "text": "USDCx"
+                                    }
+                                  },
+                                  {
+                                    "label": "meta",
+                                    "value": {
+                                      "record": {
+                                        "recordId": {
+                                          "packageId": "4ded6b668cb3b64f7a88a30874cd41c75829f5e064b3fbbadf41ec7e8363354f",
+                                          "moduleName": "Splice.Api.Token.MetadataV1",
+                                          "entityName": "Metadata"
+                                        },
+                                        "fields": [
+                                          {
+                                            "label": "values",
+                                            "value": {
+                                              "textMap": {}
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "record": {
+                                "recordId": {
+                                  "packageId": "5c1097a9bad0af4bcfe6d3fb0fe55112d3d11f18eae57ddfb14c20836fee226c",
+                                  "moduleName": "Splice.Api.Token.TransferEventsV2",
+                                  "entityName": "TransferLegSide"
+                                },
+                                "fields": [
+                                  {
+                                    "label": "transferLegId",
+                                    "value": {
+                                      "text": ""
+                                    }
+                                  },
+                                  {
+                                    "label": "side",
+                                    "value": {
+                                      "enum": {
+                                        "enumId": {
+                                          "packageId": "5c1097a9bad0af4bcfe6d3fb0fe55112d3d11f18eae57ddfb14c20836fee226c",
+                                          "moduleName": "Splice.Api.Token.TransferEventsV2",
+                                          "entityName": "TransferSide"
+                                        },
+                                        "constructor": "ReceiverSide"
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "label": "otherside",
+                                    "value": {
+                                      "record": {
+                                        "recordId": {
+                                          "packageId": "4b7ecfc366d79ccc5ed07c80f26fe489cf2dfd43ce2856c06a78e6a048db7032",
+                                          "moduleName": "Splice.Api.Token.HoldingV2",
+                                          "entityName": "Account"
+                                        },
+                                        "fields": [
+                                          {
+                                            "label": "owner",
+                                            "value": {
+                                              "optional": {
+                                                "value": {
+                                                  "party": "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+                                                }
+                                              }
+                                            }
+                                          },
+                                          {
+                                            "label": "provider",
+                                            "value": {
+                                              "optional": {}
+                                            }
+                                          },
+                                          {
+                                            "label": "id",
+                                            "value": {
+                                              "text": ""
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "label": "amount",
+                                    "value": {
+                                      "numeric": "0.0900000000"
+                                    }
+                                  },
+                                  {
+                                    "label": "instrumentId",
+                                    "value": {
+                                      "text": "USDCx"
+                                    }
+                                  },
+                                  {
+                                    "label": "meta",
+                                    "value": {
+                                      "record": {
+                                        "recordId": {
+                                          "packageId": "4ded6b668cb3b64f7a88a30874cd41c75829f5e064b3fbbadf41ec7e8363354f",
+                                          "moduleName": "Splice.Api.Token.MetadataV1",
+                                          "entityName": "Metadata"
+                                        },
+                                        "fields": [
+                                          {
+                                            "label": "values",
+                                            "value": {
+                                              "textMap": {}
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "label": "outputHoldingCids",
+                      "value": {
+                        "list": {
+                          "elements": [
+                            {
+                              "contractId": "009573cf1cf811a3c26120ca25ac946af894cc1fcef9eb4836684ddb247d9bbfa2"
+                            },
+                            {
+                              "contractId": "007335ddc1a9a66646ce2af0ad29ee04d50bf6cd2f236f35a7414db2f65fd43a4d"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "label": "observers",
+                      "value": {
+                        "list": {
+                          "elements": [
+                            {
+                              "party": "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "label": "extraArgs",
+                      "value": {
+                        "record": {
+                          "recordId": {
+                            "packageId": "4ded6b668cb3b64f7a88a30874cd41c75829f5e064b3fbbadf41ec7e8363354f",
+                            "moduleName": "Splice.Api.Token.MetadataV1",
+                            "entityName": "ExtraArgs"
+                          },
+                          "fields": [
+                            {
+                              "label": "context",
+                              "value": {
+                                "record": {
+                                  "recordId": {
+                                    "packageId": "4ded6b668cb3b64f7a88a30874cd41c75829f5e064b3fbbadf41ec7e8363354f",
+                                    "moduleName": "Splice.Api.Token.MetadataV1",
+                                    "entityName": "ChoiceContext"
+                                  },
+                                  "fields": [
+                                    {
+                                      "label": "values",
+                                      "value": {
+                                        "textMap": {}
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            },
+                            {
+                              "label": "meta",
+                              "value": {
+                                "record": {
+                                  "recordId": {
+                                    "packageId": "4ded6b668cb3b64f7a88a30874cd41c75829f5e064b3fbbadf41ec7e8363354f",
+                                    "moduleName": "Splice.Api.Token.MetadataV1",
+                                    "entityName": "Metadata"
+                                  },
+                                  "fields": [
+                                    {
+                                      "label": "values",
+                                      "value": {
+                                        "textMap": {
+                                          "entries": [
+                                            {
+                                              "key": "splice.lfdecentralizedtrust.org/reason",
+                                              "value": {
+                                                "text": "lock holdings for transfer offer"
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "exerciseResult": {
+                "record": {
+                  "recordId": {
+                    "packageId": "5c1097a9bad0af4bcfe6d3fb0fe55112d3d11f18eae57ddfb14c20836fee226c",
+                    "moduleName": "Splice.Api.Token.TransferEventsV2",
+                    "entityName": "EventLog_HoldingsChangeResult"
+                  }
+                }
+              },
+              "choiceObservers": [
+                "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+              ]
+            }
+          }
+        },
+        {
+          "nodeId": "8",
+          "v1": {
+            "exercise": {
+              "lfVersion": "2.1",
+              "contractId": "0024fd3fa11fd0f4ac25a76c388dcb4e576243e7f47fc03a2a177f098cf775ea39ca121220627ef096de589245bf1dae3aff2603bed1b5629bf014b23bd3417b88713b70e5",
+              "packageName": "utility-registry-holding-v0",
+              "templateId": {
+                "packageId": "415a1ec96a9e2839453e9aa1c5c71b6511c008c79511cb6f873e0b7393fe3b92",
+                "moduleName": "Utility.Registry.Holding.V0.Holding",
+                "entityName": "Holding"
+              },
+              "signatories": [
+                "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef",
+                "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+              ],
+              "stakeholders": [
+                "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f",
+                "auth0_007c6643538f2eadd3e573dd05b9::12205bcc106efa0eaa7f18dc491e5c6f5fb9b0cc68dc110ae66f4ed6467475d7c78e",
+                "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef",
+                "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+              ],
+              "actingParties": [
+                "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef",
+                "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+              ],
+              "choiceId": "Archive",
+              "chosenValue": {
+                "record": {
+                  "recordId": {
+                    "packageId": "9e70a8b3510d617f8a136213f33d6a903a10ca0eeec76bb06ba55d1ed9680f69",
+                    "moduleName": "DA.Internal.Template",
+                    "entityName": "Archive"
+                  }
+                }
+              },
+              "consuming": true,
+              "exerciseResult": {
+                "unit": {}
+              }
+            }
+          }
+        },
+        {
+          "nodeId": "9",
+          "v1": {
+            "exercise": {
+              "lfVersion": "2.1",
+              "contractId": "00fe1e631ed067b60d3489e48e375cc908110b461bf89500ab2fa9f59c6b8eaa26ca1212204013280cffd6ddbfa324e1dc2ade18c3e2bc807425f380b07ab086dc1767f7e4",
+              "packageName": "utility-registry-holding-v0",
+              "templateId": {
+                "packageId": "415a1ec96a9e2839453e9aa1c5c71b6511c008c79511cb6f873e0b7393fe3b92",
+                "moduleName": "Utility.Registry.Holding.V0.Holding",
+                "entityName": "Holding"
+              },
+              "signatories": [
+                "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef",
+                "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+              ],
+              "stakeholders": [
+                "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f",
+                "auth0_007c6643538f2eadd3e573dd05b9::12205bcc106efa0eaa7f18dc491e5c6f5fb9b0cc68dc110ae66f4ed6467475d7c78e",
+                "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef",
+                "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+              ],
+              "actingParties": [
+                "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef",
+                "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+              ],
+              "choiceId": "Archive",
+              "chosenValue": {
+                "record": {
+                  "recordId": {
+                    "packageId": "9e70a8b3510d617f8a136213f33d6a903a10ca0eeec76bb06ba55d1ed9680f69",
+                    "moduleName": "DA.Internal.Template",
+                    "entityName": "Archive"
+                  }
+                }
+              },
+              "consuming": true,
+              "exerciseResult": {
+                "unit": {}
+              }
+            }
+          }
+        },
+        {
+          "nodeId": "10",
+          "v1": {
+            "create": {
+              "lfVersion": "2.1",
+              "contractId": "00f4638863b3335772c6f52e7e8866119f521be242b44902651cb1483619097bbd",
+              "packageName": "utility-registry-app-v0",
+              "templateId": {
+                "packageId": "1eddd268bdd50d6e262722bea799c9455da032b3f94489e589975151b274b8c0",
+                "moduleName": "Utility.Registry.App.V0.Model.Transfer",
+                "entityName": "TransferOffer"
+              },
+              "argument": {
+                "record": {
+                  "recordId": {
+                    "packageId": "1eddd268bdd50d6e262722bea799c9455da032b3f94489e589975151b274b8c0",
+                    "moduleName": "Utility.Registry.App.V0.Model.Transfer",
+                    "entityName": "TransferOffer"
+                  },
+                  "fields": [
+                    {
+                      "label": "operator",
+                      "value": {
+                        "party": "auth0_007c6643538f2eadd3e573dd05b9::12205bcc106efa0eaa7f18dc491e5c6f5fb9b0cc68dc110ae66f4ed6467475d7c78e"
+                      }
+                    },
+                    {
+                      "label": "provider",
+                      "value": {
+                        "party": "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f"
+                      }
+                    },
+                    {
+                      "label": "transfer",
+                      "value": {
+                        "record": {
+                          "recordId": {
+                            "packageId": "55ba4deb0ad4662c4168b39859738a0e91388d252286480c7331b3f71a517281",
+                            "moduleName": "Splice.Api.Token.TransferInstructionV1",
+                            "entityName": "Transfer"
+                          },
+                          "fields": [
+                            {
+                              "label": "sender",
+                              "value": {
+                                "party": "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+                              }
+                            },
+                            {
+                              "label": "receiver",
+                              "value": {
+                                "party": "ldg::12200ade43ddf3e107fa07387a0cd2681cd2a3ac67eeaca2290049ddf4ecee7f4e4a"
+                              }
+                            },
+                            {
+                              "label": "amount",
+                              "value": {
+                                "numeric": "0.0100000000"
+                              }
+                            },
+                            {
+                              "label": "instrumentId",
+                              "value": {
+                                "record": {
+                                  "recordId": {
+                                    "packageId": "718a0f77e505a8de22f188bd4c87fe74101274e9d4cb1bfac7d09aec7158d35b",
+                                    "moduleName": "Splice.Api.Token.HoldingV1",
+                                    "entityName": "InstrumentId"
+                                  },
+                                  "fields": [
+                                    {
+                                      "label": "admin",
+                                      "value": {
+                                        "party": "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef"
+                                      }
+                                    },
+                                    {
+                                      "label": "id",
+                                      "value": {
+                                        "text": "USDCx"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            },
+                            {
+                              "label": "requestedAt",
+                              "value": {
+                                "timestamp": "1790690894110560"
+                              }
+                            },
+                            {
+                              "label": "executeBefore",
+                              "value": {
+                                "timestamp": "1790777295110525"
+                              }
+                            },
+                            {
+                              "label": "inputHoldingCids",
+                              "value": {
+                                "list": {
+                                  "elements": [
+                                    {
+                                      "contractId": "007335ddc1a9a66646ce2af0ad29ee04d50bf6cd2f236f35a7414db2f65fd43a4d"
+                                    }
+                                  ]
+                                }
+                              }
+                            },
+                            {
+                              "label": "meta",
+                              "value": {
+                                "record": {
+                                  "recordId": {
+                                    "packageId": "4ded6b668cb3b64f7a88a30874cd41c75829f5e064b3fbbadf41ec7e8363354f",
+                                    "moduleName": "Splice.Api.Token.MetadataV1",
+                                    "entityName": "Metadata"
+                                  },
+                                  "fields": [
+                                    {
+                                      "label": "values",
+                                      "value": {
+                                        "textMap": {}
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "signatories": [
+                "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f",
+                "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef",
+                "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+              ],
+              "stakeholders": [
+                "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f",
+                "auth0_007c6643538f2eadd3e573dd05b9::12205bcc106efa0eaa7f18dc491e5c6f5fb9b0cc68dc110ae66f4ed6467475d7c78e",
+                "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef",
+                "ldg::12200ade43ddf3e107fa07387a0cd2681cd2a3ac67eeaca2290049ddf4ecee7f4e4a",
+                "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "metadata": {
+      "submitterInfo": {
+        "actAs": [
+          "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+        ],
+        "commandId": "8538b460-122f-4b42-9b7a-dfcdae6d791a"
+      },
+      "synchronizerId": "global-domain::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc::35-5",
+      "transactionUuid": "5e196195-f4b0-4c13-a098-b31783447b98",
+      "preparationTime": "1790175749339128",
+      "minLedgerEffectiveTime": "1790175748137950",
+      "maxLedgerEffectiveTime": "1790262149137920",
+      "inputContracts": [
+        {
+          "v1": {
+            "lfVersion": "2.1",
+            "contractId": "002a23aed42edb51940f74f6fc5f7b8267c9192ab8e72296673420ffc4c4f22debca1112201d94617a63f11a4ce245498930752e56313d200b6a0976ee621f6add2788ba1b",
+            "packageName": "utility-registry-v0",
+            "templateId": {
+              "packageId": "b4ae77b8c0c7faa8bc8bb048f035dfe3d85d3e36d4bafaa4cf59631ec635ddb2",
+              "moduleName": "Utility.Registry.V0.Configuration.Instrument",
+              "entityName": "InstrumentConfiguration"
+            },
+            "argument": {
+              "record": {
+                "recordId": {
+                  "packageId": "8c654487d9f5fb195fbcdd7b44cd8e365b1ea39c15ae62ce6c7a48343f1210dd",
+                  "moduleName": "Utility.Registry.V0.Configuration.Instrument",
+                  "entityName": "InstrumentConfiguration"
+                },
+                "fields": [
+                  {
+                    "label": "operator",
+                    "value": {
+                      "party": "auth0_007c6643538f2eadd3e573dd05b9::12205bcc106efa0eaa7f18dc491e5c6f5fb9b0cc68dc110ae66f4ed6467475d7c78e"
+                    }
+                  },
+                  {
+                    "label": "provider",
+                    "value": {
+                      "party": "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f"
+                    }
+                  },
+                  {
+                    "label": "registrar",
+                    "value": {
+                      "party": "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef"
+                    }
+                  },
+                  {
+                    "label": "defaultIdentifier",
+                    "value": {
+                      "record": {
+                        "recordId": {
+                          "packageId": "415a1ec96a9e2839453e9aa1c5c71b6511c008c79511cb6f873e0b7393fe3b92",
+                          "moduleName": "Utility.Registry.Holding.V0.Types",
+                          "entityName": "InstrumentIdentifier"
+                        },
+                        "fields": [
+                          {
+                            "label": "source",
+                            "value": {
+                              "party": "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef"
+                            }
+                          },
+                          {
+                            "label": "id",
+                            "value": {
+                              "text": "USDCx"
+                            }
+                          },
+                          {
+                            "label": "scheme",
+                            "value": {
+                              "text": "RegistrarInternalScheme"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "label": "additionalIdentifiers",
+                    "value": {
+                      "list": {}
+                    }
+                  },
+                  {
+                    "label": "issuerRequirements",
+                    "value": {
+                      "list": {
+                        "elements": [
+                          {
+                            "record": {
+                              "recordId": {
+                                "packageId": "044be226f82e81609111569fb7253421cdb86b2bf0ecab781f46a58003e69574",
+                                "moduleName": "Utility.Credential.V0.Credential",
+                                "entityName": "PartyCredentialRequirement"
+                              },
+                              "fields": [
+                                {
+                                  "label": "issuer",
+                                  "value": {
+                                    "party": "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f"
+                                  }
+                                },
+                                {
+                                  "label": "requiredClaims",
+                                  "value": {
+                                    "list": {
+                                      "elements": [
+                                        {
+                                          "record": {
+                                            "recordId": {
+                                              "packageId": "5aee9b21b8e9a4c4975b5f4c4198e6e6e8469df49e2010820e792f393db870f4",
+                                              "moduleName": "DA.Types",
+                                              "entityName": "Tuple2"
+                                            },
+                                            "fields": [
+                                              {
+                                                "label": "_1",
+                                                "value": {
+                                                  "text": "IsIssuerOf"
+                                                }
+                                              },
+                                              {
+                                                "label": "_2",
+                                                "value": {
+                                                  "text": "USDCx"
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "label": "holderRequirements",
+                    "value": {
+                      "list": {}
+                    }
+                  }
+                ]
+              }
+            },
+            "signatories": [
+              "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f",
+              "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef"
+            ],
+            "stakeholders": [
+              "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f",
+              "auth0_007c6643538f2eadd3e573dd05b9::12205bcc106efa0eaa7f18dc491e5c6f5fb9b0cc68dc110ae66f4ed6467475d7c78e",
+              "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef"
+            ]
+          },
+          "createdAt": "1760990825570895"
+        },
+        {
+          "v1": {
+            "lfVersion": "2.1",
+            "contractId": "00fe1e631ed067b60d3489e48e375cc908110b461bf89500ab2fa9f59c6b8eaa26ca1212204013280cffd6ddbfa324e1dc2ade18c3e2bc807425f380b07ab086dc1767f7e4",
+            "packageName": "utility-registry-holding-v0",
+            "templateId": {
+              "packageId": "415a1ec96a9e2839453e9aa1c5c71b6511c008c79511cb6f873e0b7393fe3b92",
+              "moduleName": "Utility.Registry.Holding.V0.Holding",
+              "entityName": "Holding"
+            },
+            "argument": {
+              "record": {
+                "recordId": {
+                  "packageId": "415a1ec96a9e2839453e9aa1c5c71b6511c008c79511cb6f873e0b7393fe3b92",
+                  "moduleName": "Utility.Registry.Holding.V0.Holding",
+                  "entityName": "Holding"
+                },
+                "fields": [
+                  {
+                    "label": "operator",
+                    "value": {
+                      "party": "auth0_007c6643538f2eadd3e573dd05b9::12205bcc106efa0eaa7f18dc491e5c6f5fb9b0cc68dc110ae66f4ed6467475d7c78e"
+                    }
+                  },
+                  {
+                    "label": "provider",
+                    "value": {
+                      "party": "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f"
+                    }
+                  },
+                  {
+                    "label": "registrar",
+                    "value": {
+                      "party": "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef"
+                    }
+                  },
+                  {
+                    "label": "owner",
+                    "value": {
+                      "party": "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+                    }
+                  },
+                  {
+                    "label": "instrument",
+                    "value": {
+                      "record": {
+                        "recordId": {
+                          "packageId": "415a1ec96a9e2839453e9aa1c5c71b6511c008c79511cb6f873e0b7393fe3b92",
+                          "moduleName": "Utility.Registry.Holding.V0.Types",
+                          "entityName": "InstrumentIdentifier"
+                        },
+                        "fields": [
+                          {
+                            "label": "source",
+                            "value": {
+                              "party": "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef"
+                            }
+                          },
+                          {
+                            "label": "id",
+                            "value": {
+                              "text": "USDCx"
+                            }
+                          },
+                          {
+                            "label": "scheme",
+                            "value": {
+                              "text": "RegistrarInternalScheme"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "label": "label",
+                    "value": {
+                      "text": ""
+                    }
+                  },
+                  {
+                    "label": "amount",
+                    "value": {
+                      "numeric": "0.0500000000"
+                    }
+                  }
+                ]
+              }
+            },
+            "signatories": [
+              "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef",
+              "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+            ],
+            "stakeholders": [
+              "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f",
+              "auth0_007c6643538f2eadd3e573dd05b9::12205bcc106efa0eaa7f18dc491e5c6f5fb9b0cc68dc110ae66f4ed6467475d7c78e",
+              "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef",
+              "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+            ]
+          },
+          "createdAt": "1790162133529272"
+        },
+        {
+          "v1": {
+            "lfVersion": "2.1",
+            "contractId": "0024fd3fa11fd0f4ac25a76c388dcb4e576243e7f47fc03a2a177f098cf775ea39ca121220627ef096de589245bf1dae3aff2603bed1b5629bf014b23bd3417b88713b70e5",
+            "packageName": "utility-registry-holding-v0",
+            "templateId": {
+              "packageId": "415a1ec96a9e2839453e9aa1c5c71b6511c008c79511cb6f873e0b7393fe3b92",
+              "moduleName": "Utility.Registry.Holding.V0.Holding",
+              "entityName": "Holding"
+            },
+            "argument": {
+              "record": {
+                "recordId": {
+                  "packageId": "415a1ec96a9e2839453e9aa1c5c71b6511c008c79511cb6f873e0b7393fe3b92",
+                  "moduleName": "Utility.Registry.Holding.V0.Holding",
+                  "entityName": "Holding"
+                },
+                "fields": [
+                  {
+                    "label": "operator",
+                    "value": {
+                      "party": "auth0_007c6643538f2eadd3e573dd05b9::12205bcc106efa0eaa7f18dc491e5c6f5fb9b0cc68dc110ae66f4ed6467475d7c78e"
+                    }
+                  },
+                  {
+                    "label": "provider",
+                    "value": {
+                      "party": "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f"
+                    }
+                  },
+                  {
+                    "label": "registrar",
+                    "value": {
+                      "party": "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef"
+                    }
+                  },
+                  {
+                    "label": "owner",
+                    "value": {
+                      "party": "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+                    }
+                  },
+                  {
+                    "label": "instrument",
+                    "value": {
+                      "record": {
+                        "recordId": {
+                          "packageId": "415a1ec96a9e2839453e9aa1c5c71b6511c008c79511cb6f873e0b7393fe3b92",
+                          "moduleName": "Utility.Registry.Holding.V0.Types",
+                          "entityName": "InstrumentIdentifier"
+                        },
+                        "fields": [
+                          {
+                            "label": "source",
+                            "value": {
+                              "party": "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef"
+                            }
+                          },
+                          {
+                            "label": "id",
+                            "value": {
+                              "text": "USDCx"
+                            }
+                          },
+                          {
+                            "label": "scheme",
+                            "value": {
+                              "text": "RegistrarInternalScheme"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "label": "label",
+                    "value": {
+                      "text": ""
+                    }
+                  },
+                  {
+                    "label": "amount",
+                    "value": {
+                      "numeric": "0.0400000000"
+                    }
+                  }
+                ]
+              }
+            },
+            "signatories": [
+              "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef",
+              "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+            ],
+            "stakeholders": [
+              "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f",
+              "auth0_007c6643538f2eadd3e573dd05b9::12205bcc106efa0eaa7f18dc491e5c6f5fb9b0cc68dc110ae66f4ed6467475d7c78e",
+              "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef",
+              "ldg::12207436d5d38b5e2575912c79102b9e54f452e7a42567519ca2eabb10882c61def6"
+            ]
+          },
+          "createdAt": "1790162133529272"
+        },
+        {
+          "v1": {
+            "lfVersion": "2.1",
+            "contractId": "006289e882123613ea96d71fad9cc38a529e613a8d4b550ef6a0422383e1925934ca11122003bc3af7d468f09465fa72db6182b63e349804e430a81eeeffa9076f5099f796",
+            "packageName": "utility-registry-app-v0",
+            "templateId": {
+              "packageId": "8c335bb7d522489d71faf3eef046ad1a56f091b55b4f2d3086c7266afca1d647",
+              "moduleName": "Utility.Registry.App.V0.Service.AllocationFactory",
+              "entityName": "AllocationFactory"
+            },
+            "argument": {
+              "record": {
+                "recordId": {
+                  "packageId": "1eddd268bdd50d6e262722bea799c9455da032b3f94489e589975151b274b8c0",
+                  "moduleName": "Utility.Registry.App.V0.Service.AllocationFactory",
+                  "entityName": "AllocationFactory"
+                },
+                "fields": [
+                  {
+                    "label": "provider",
+                    "value": {
+                      "party": "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f"
+                    }
+                  },
+                  {
+                    "label": "registrar",
+                    "value": {
+                      "party": "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef"
+                    }
+                  },
+                  {
+                    "label": "operator",
+                    "value": {
+                      "party": "auth0_007c6643538f2eadd3e573dd05b9::12205bcc106efa0eaa7f18dc491e5c6f5fb9b0cc68dc110ae66f4ed6467475d7c78e"
+                    }
+                  }
+                ]
+              }
+            },
+            "signatories": [
+              "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f",
+              "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef"
+            ],
+            "stakeholders": [
+              "Bridge-Operator::1220c8448890a70e65f6906bd48d797ee6551f094e9e6a53e329fd5b2b549334f13f",
+              "auth0_007c6643538f2eadd3e573dd05b9::12205bcc106efa0eaa7f18dc491e5c6f5fb9b0cc68dc110ae66f4ed6467475d7c78e",
+              "decentralized-usdc-interchain-rep::12208115f1e168dd7e792320be9c4ca720c751a02a3053c7606e1c1cd3dad9bf60ef"
+            ]
+          },
+          "createdAt": "1760990825570895"
+        }
+      ]
+    }
+  },
+  "hash": "01845a3cf4f3463450ddaf9097531895fd454eb59b764263e3c2eaa9d5b58d62"
+}

@@ -420,6 +420,19 @@ def test_sign_token_transfer_usdcx_send(backend: BackendInterface, scenario_navi
     )
 
 
+# A USDCx send that merges two holdings. The nodes come from a Ledger Wallet log whose root node the
+# device refused with 0xB005; the two input holdings are crafted, since the log stops before them.
+def test_sign_token_transfer_usdcx_send_two_holdings(
+    backend: BackendInterface, scenario_navigator: NavigateWithScenario
+) -> None:
+    sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_usdcx_send_two_holdings.json",
+        custom_screen_text="Sign transaction to",
+    )
+
+
 # A memo too long to copy for the screen must stop clear signing, not vanish from the screen.
 # 700 characters decodes but does not fit the copy; retune if heap use changes.
 def test_sign_memo_too_long_blind_signing_disabled(backend: BackendInterface) -> None:
