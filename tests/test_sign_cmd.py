@@ -442,6 +442,15 @@ def test_sign_memo_too_long_blind_signing_disabled(backend: BackendInterface) ->
     _check_blind_signing_rejection(backend, serialized_parts)
 
 
+# The memo key appears twice with different texts. The screen cannot tell which one the ledger
+# uses, so clear signing must stop.
+def test_sign_memo_repeated_blind_signing_disabled(backend: BackendInterface) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(
+        "tests/tx_examples/token_transfer_memo_repeated.json"
+    )
+    _check_blind_signing_rejection(backend, serialized_parts)
+
+
 def test_sign_token_transfer_usdcx_accept(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
     sign_and_verify_prepared_transaction(
         backend,

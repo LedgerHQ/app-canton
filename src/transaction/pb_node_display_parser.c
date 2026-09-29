@@ -308,6 +308,14 @@ static void set_field_value(tx_field_t *field_state, const void *value, pb_size_
     LEDGER_ASSERT(field_state != NULL, "NULL field state passed to set_field_value");
     LEDGER_ASSERT(value != NULL, "NULL value passed to set_field_value");
 
+    // A second match would leak the first value, and the screen could show the one the ledger
+    // ignores.
+    if (field_state->found) {
+        PRINTF("%s matched twice\n", (char *) PIC(field_state->config->path));
+        field_state->store_failed = true;
+        return;
+    }
+
     const void *src = NULL;
     size_t len = 0;
     uint8_t ts_buf[8];
@@ -371,7 +379,6 @@ static void set_display_config(pb_callback_context_t *ctx, const display_config_
     if (strcmp((const char *) PIC(ctx->review_title), PREAPPROVAL_PROPOSAL_REVIEW_TITLE) == 0) {
         tx_field_t *field_state = &ctx->tx_fields[PREAPPROVAL_ASSET_FIELD_INDEX];
         field_state->config = (const field_config_t *) PIC(&PREAPPROVAL_ASSET_FIELD);
-        field_state->found = true;
         set_field_value(field_state, PREAPPROVAL_ASSET_FIELD_VALUE, VALUE_TEXT_TAG);
     }
 
