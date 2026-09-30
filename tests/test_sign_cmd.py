@@ -451,6 +451,14 @@ def test_sign_memo_repeated_blind_signing_disabled(backend: BackendInterface) ->
     _check_blind_signing_rejection(backend, serialized_parts)
 
 
+# An empty first memo must still count as a match, so the second one is refused.
+def test_sign_memo_empty_then_set_blind_signing_disabled(backend: BackendInterface) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(
+        "tests/tx_examples/token_transfer_memo_empty_then_set.json"
+    )
+    _check_blind_signing_rejection(backend, serialized_parts)
+
+
 def test_sign_token_transfer_usdcx_accept(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
     sign_and_verify_prepared_transaction(
         backend,

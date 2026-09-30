@@ -314,11 +314,12 @@ static void set_field_value(tx_field_t *field_state, const void *value, pb_size_
 
     // A second match would leak the first value, and the screen could show the one the ledger
     // ignores.
-    if (field_state->found) {
+    if (field_state->matched) {
         PRINTF("%s matched twice\n", (char *) PIC(field_state->config->path));
         field_state->store_failed = true;
         return;
     }
+    field_state->matched = true;
 
     const void *src = NULL;
     size_t len = 0;
