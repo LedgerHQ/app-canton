@@ -585,8 +585,12 @@ static void find_tx_field(pb_callback_context_t *ctx, cbValue *value) {
                     // PRINTF("Setting timestamp value: %lld\n", (long long) value->timestamp);
                     set_field_value(state, (void *) &value->timestamp, value->which_sum);
                     break;
+                case VALUE_OPTIONAL_TAG:
+                    // Its inner value was already handled on the same path.
+                    break;
                 default:
                     PRINTF("Field type not handled for display: %d\n", value->which_sum);
+                    state->store_failed = true;
                     break;
             }
         }

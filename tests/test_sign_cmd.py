@@ -459,6 +459,14 @@ def test_sign_memo_empty_then_set_blind_signing_disabled(backend: BackendInterfa
     _check_blind_signing_rejection(backend, serialized_parts)
 
 
+# A memo of a type the screen cannot show, then a text memo. The first one must still count.
+def test_sign_memo_bool_then_text_blind_signing_disabled(backend: BackendInterface) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(
+        "tests/tx_examples/token_transfer_memo_bool_then_text.json"
+    )
+    _check_blind_signing_rejection(backend, serialized_parts)
+
+
 # A child node with a repeated memo fails first. The root that follows must not turn clear signing
 # back on.
 def test_sign_memo_repeated_in_child_blind_signing_disabled(backend: BackendInterface) -> None:
