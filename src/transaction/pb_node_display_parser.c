@@ -128,8 +128,8 @@ void format_token_amount_field(pb_callback_context_t *ctx, tx_field_t *field) {
         }
     }
 
-    if (instrument_field == NULL || !instrument_field->found || instrument_field->value == NULL ||
-        admin_field == NULL || !admin_field->found || admin_field->value == NULL) {
+    if (instrument_field == NULL || instrument_field->value == NULL || admin_field == NULL ||
+        admin_field->value == NULL) {
         return;
     }
 
@@ -314,12 +314,12 @@ static void set_field_value(tx_field_t *field_state, const void *value, pb_size_
 
     // A second match would leak the first value, and the screen could show the one the ledger
     // ignores.
-    if (field_state->found) {
+    if (field_state->matched) {
         PRINTF("%s matched twice\n", (char *) PIC(field_state->config->path));
         field_state->store_failed = true;
         return;
     }
-    field_state->found = true;
+    field_state->matched = true;
 
     const void *src = NULL;
     size_t len = 0;
@@ -369,7 +369,7 @@ static void set_display_config(pb_callback_context_t *ctx, const display_config_
     // Initialize field states
     for (size_t i = 0; i < ctx->nb_fields; i++) {
         tx_fields[i].config = &source[i];
-        tx_fields[i].found = false;
+        tx_fields[i].matched = false;
         tx_fields[i].display = true;
         tx_fields[i].store_failed = false;
     }
@@ -1027,8 +1027,7 @@ MUST_CHECK int format_and_populate_display_items(pb_callback_context_t *ctx) {
     ctx->tx_info->pairs_count = 0;
     for (size_t i = 0; i < ctx->nb_fields; i++) {
         tx_field_t *state = &ctx->tx_fields[i];
-        if (state->found && state->display && state->value_len > 0 &&
-            PIC(state->config->item_name) != NULL) {
+        if (state->display && state->value_len > 0 && PIC(state->config->item_name) != NULL) {
             ctx->tx_info->pairs[idx].value = app_mem_alloc(state->value_len);
             if (ctx->tx_info->pairs[idx].value == NULL) {
                 G_context.tx_info.clear_signing_available = false;

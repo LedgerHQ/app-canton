@@ -214,7 +214,7 @@ void values_bind_from_display(const tx_field_t *fields,
     for (uint8_t i = 0; i < count; i++) {
         const tx_field_t *field = &fields[i];
 
-        if (!field->found || field->value == NULL || field->config == NULL) {
+        if (field->value == NULL || field->config == NULL) {
             continue;
         }
         switch (field->config->shown_as) {
