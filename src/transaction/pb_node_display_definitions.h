@@ -114,8 +114,7 @@ struct tx_field_t {
     char *value;
     size_t value_len;
     const field_config_t *config;
-    bool found;
-    bool matched;  // the path was seen, even with an empty value
+    bool found;  // the path was seen, even with an empty value
     bool display;
     bool store_failed;  // no room to keep its value, or the path matched twice
 };

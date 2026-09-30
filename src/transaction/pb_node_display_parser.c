@@ -314,12 +314,12 @@ static void set_field_value(tx_field_t *field_state, const void *value, pb_size_
 
     // A second match would leak the first value, and the screen could show the one the ledger
     // ignores.
-    if (field_state->matched) {
+    if (field_state->found) {
         PRINTF("%s matched twice\n", (char *) PIC(field_state->config->path));
         field_state->store_failed = true;
         return;
     }
-    field_state->matched = true;
+    field_state->found = true;
 
     const void *src = NULL;
     size_t len = 0;
@@ -349,7 +349,6 @@ static void set_field_value(tx_field_t *field_state, const void *value, pb_size_
     }
     memcpy(field_state->value, src, len);
     field_state->value_len = len;
-    field_state->found = true;
 }
 
 // Helper function to set display configuration
@@ -986,7 +985,7 @@ MUST_CHECK int format_and_populate_display_items(pb_callback_context_t *ctx) {
         }
 
         // Mandatory field check
-        if (cfg->mandatory && !state->found) {
+        if (cfg->mandatory && state->value == NULL) {
             PRINTF("Mandatory field not found: %s\n", (char *) PIC(cfg->path));
             G_context.tx_info.clear_signing_available = false;
             cleanup_display_items();
@@ -995,7 +994,7 @@ MUST_CHECK int format_and_populate_display_items(pb_callback_context_t *ctx) {
         }
 
         // Execute formatting callback if applicable
-        if (state->found && state->display) {
+        if (state->value != NULL && state->display) {
             field_format_callback_t callback =
                 (field_format_callback_t) PIC(ctx->tx_fields[i].config->format_callback);
             if (callback != NULL) {
