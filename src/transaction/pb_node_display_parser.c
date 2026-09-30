@@ -980,6 +980,7 @@ MUST_CHECK int format_and_populate_display_items(pb_callback_context_t *ctx) {
         // A value the screen cannot show must stop clear signing, not vanish or read as missing.
         if (state->store_failed) {
             G_context.tx_info.clear_signing_available = false;
+            G_context.tx_info.display_failed = true;
             cleanup_display_items();
             goto cleanup;
         }
@@ -1005,6 +1006,7 @@ MUST_CHECK int format_and_populate_display_items(pb_callback_context_t *ctx) {
         // The raw value is left in place, and it is not text the screen can show.
         if (state->store_failed) {
             G_context.tx_info.clear_signing_available = false;
+            G_context.tx_info.display_failed = true;
             cleanup_display_items();
             goto cleanup;
         }
@@ -1015,6 +1017,7 @@ MUST_CHECK int format_and_populate_display_items(pb_callback_context_t *ctx) {
         if (ctx->unknown_token) {
             PRINTF("Unknown token detected, aborting display population\n");
             G_context.tx_info.clear_signing_available = false;
+            G_context.tx_info.display_failed = true;
             cleanup_display_items();
             goto cleanup;
         }
@@ -1148,7 +1151,7 @@ MUST_CHECK static int process_display_parsing(buffer_t *buf,
 MUST_CHECK int parse_node_for_display(buffer_t *buf) {
     LEDGER_ASSERT(buf != NULL, "NULL buffer passed to parse_node_for_display");
 
-    if (G_context.tx_info.clear_signing_available ||
+    if (G_context.tx_info.clear_signing_available || G_context.tx_info.display_failed ||
         global_tx_metadata_contract_identifiers != NULL) {
         return 0;
     }
@@ -1165,7 +1168,7 @@ MUST_CHECK int parse_node_for_display(buffer_t *buf) {
 MUST_CHECK int parse_input_contract_for_display(buffer_t *buf) {
     LEDGER_ASSERT(buf != NULL, "NULL buf in parse_input_contract_for_display");
 
-    if (G_context.tx_info.clear_signing_available ||
+    if (G_context.tx_info.clear_signing_available || G_context.tx_info.display_failed ||
         global_tx_metadata_contract_identifiers == NULL) {
         return 0;
     }
