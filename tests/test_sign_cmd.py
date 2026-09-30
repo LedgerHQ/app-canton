@@ -420,6 +420,62 @@ def test_sign_token_transfer_usdcx_send(backend: BackendInterface, scenario_navi
     )
 
 
+# A USDCx send that merges two holdings. The nodes come from a Ledger Wallet log whose root node the
+# device refused with 0xB005; the two input holdings are crafted, since the log stops before them.
+def test_sign_token_transfer_usdcx_send_two_holdings(
+    backend: BackendInterface, scenario_navigator: NavigateWithScenario
+) -> None:
+    sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_usdcx_send_two_holdings.json",
+        custom_screen_text="Sign transaction to",
+    )
+
+
+# A memo too long to copy for the screen must stop clear signing, not vanish from the screen.
+# 700 characters decodes but does not fit the copy; retune if heap use changes.
+def test_sign_memo_too_long_blind_signing_disabled(backend: BackendInterface) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(
+        "tests/tx_examples/token_transfer_memo_too_long.json"
+    )
+    _check_blind_signing_rejection(backend, serialized_parts)
+
+
+# The memo key appears twice with different texts. The screen cannot tell which one the ledger
+# uses, so clear signing must stop.
+def test_sign_memo_repeated_blind_signing_disabled(backend: BackendInterface) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(
+        "tests/tx_examples/token_transfer_memo_repeated.json"
+    )
+    _check_blind_signing_rejection(backend, serialized_parts)
+
+
+# An empty first memo must still count as a match, so the second one is refused.
+def test_sign_memo_empty_then_set_blind_signing_disabled(backend: BackendInterface) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(
+        "tests/tx_examples/token_transfer_memo_empty_then_set.json"
+    )
+    _check_blind_signing_rejection(backend, serialized_parts)
+
+
+# A memo of a type the screen cannot show, then a text memo. The first one must still count.
+def test_sign_memo_bool_then_text_blind_signing_disabled(backend: BackendInterface) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(
+        "tests/tx_examples/token_transfer_memo_bool_then_text.json"
+    )
+    _check_blind_signing_rejection(backend, serialized_parts)
+
+
+# A child node with a repeated memo fails first. The root that follows must not turn clear signing
+# back on.
+def test_sign_memo_repeated_in_child_blind_signing_disabled(backend: BackendInterface) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(
+        "tests/tx_examples/token_transfer_memo_repeated_in_child.json"
+    )
+    _check_blind_signing_rejection(backend, serialized_parts)
+
+
 def test_sign_token_transfer_usdcx_accept(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
     sign_and_verify_prepared_transaction(
         backend,

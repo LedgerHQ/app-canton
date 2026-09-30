@@ -32,29 +32,12 @@ typedef struct _com_daml_ledger_api_v2_interactive_transaction_v1_cb_Fetch {
 
 /* Exercise node */
 typedef struct _com_daml_ledger_api_v2_interactive_transaction_v1_cb_ExerciseDisplay {
-    /* Specific LF version of the node */
-    char *lf_version;
     char *contract_id;
-    char *package_name;
     /* The identifier uses the package-id reference format. */
     struct _com_daml_ledger_api_v2_cb_Identifier *template_id;
-    pb_size_t signatories_count;
-    char **signatories;
-    pb_size_t stakeholders_count;
-    char **stakeholders;
-    pb_size_t acting_parties_count;
-    char **acting_parties;
-    /* The identifier uses the package-id reference format. */
-    struct _com_daml_ledger_api_v2_cb_Identifier *interface_id;
     char *choice_id;
     bool has_chosen_value;
     com_daml_ledger_api_v2_cb_Value chosen_value;
-    bool *consuming;
-    pb_size_t children_count;
-    char **children;
-    struct _com_daml_ledger_api_v2_cb_Value *exercise_result;
-    pb_size_t choice_observers_count;
-    char **choice_observers;
 } com_daml_ledger_api_v2_interactive_transaction_v1_cb_ExerciseDisplay;
 
 /* Exercise node */
@@ -86,18 +69,11 @@ typedef struct _com_daml_ledger_api_v2_interactive_transaction_v1_cb_Exercise {
 
 /* Another copy of Create node for display parsing. */
 typedef struct _com_daml_ledger_api_v2_interactive_transaction_v1_cb_CreateDisplay {
-    /* Specific LF version of the node */
-    char *lf_version;
     char *contract_id;
-    char *package_name;
     /* The identifier uses the package-id reference format. */
     struct _com_daml_ledger_api_v2_cb_Identifier *template_id;
     bool has_argument;
     com_daml_ledger_api_v2_cb_Value argument;
-    pb_size_t signatories_count;
-    char **signatories;
-    pb_size_t stakeholders_count;
-    char **stakeholders;
 } com_daml_ledger_api_v2_interactive_transaction_v1_cb_CreateDisplay;
 
 /* Create Node */
@@ -151,17 +127,17 @@ extern "C" {
 
 /* Initializer values for message structs */
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_Fetch_init_default {NULL, NULL, NULL, false, com_daml_ledger_api_v2_cb_Identifier_init_default, 0, NULL, 0, NULL, 0, NULL, NULL}
-#define com_daml_ledger_api_v2_interactive_transaction_v1_cb_ExerciseDisplay_init_default {NULL, NULL, NULL, NULL, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, false, com_daml_ledger_api_v2_cb_Value_init_default, NULL, 0, NULL, NULL, 0, NULL}
+#define com_daml_ledger_api_v2_interactive_transaction_v1_cb_ExerciseDisplay_init_default {NULL, NULL, NULL, false, com_daml_ledger_api_v2_cb_Value_init_default}
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_Exercise_init_default {NULL, NULL, NULL, false, com_daml_ledger_api_v2_cb_Identifier_init_default, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, {{NULL}, NULL}, 0, 0, NULL, {{NULL}, NULL}, 0, NULL}
-#define com_daml_ledger_api_v2_interactive_transaction_v1_cb_CreateDisplay_init_default {NULL, NULL, NULL, NULL, false, com_daml_ledger_api_v2_cb_Value_init_default, 0, NULL, 0, NULL}
+#define com_daml_ledger_api_v2_interactive_transaction_v1_cb_CreateDisplay_init_default {NULL, NULL, false, com_daml_ledger_api_v2_cb_Value_init_default}
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_Create_init_default {NULL, NULL, NULL, false, com_daml_ledger_api_v2_cb_Identifier_init_default, {{NULL}, NULL}, 0, NULL, 0, NULL}
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_Rollback_init_default {0, NULL}
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_Node_init_default {{{NULL}, NULL}, 0, {com_daml_ledger_api_v2_interactive_transaction_v1_cb_Create_init_default}}
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_NodeDisplay_init_default {{{NULL}, NULL}, 0, {com_daml_ledger_api_v2_interactive_transaction_v1_cb_CreateDisplay_init_default}}
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_Fetch_init_zero {NULL, NULL, NULL, false, com_daml_ledger_api_v2_cb_Identifier_init_zero, 0, NULL, 0, NULL, 0, NULL, NULL}
-#define com_daml_ledger_api_v2_interactive_transaction_v1_cb_ExerciseDisplay_init_zero {NULL, NULL, NULL, NULL, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, false, com_daml_ledger_api_v2_cb_Value_init_zero, NULL, 0, NULL, NULL, 0, NULL}
+#define com_daml_ledger_api_v2_interactive_transaction_v1_cb_ExerciseDisplay_init_zero {NULL, NULL, NULL, false, com_daml_ledger_api_v2_cb_Value_init_zero}
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_Exercise_init_zero {NULL, NULL, NULL, false, com_daml_ledger_api_v2_cb_Identifier_init_zero, 0, NULL, 0, NULL, 0, NULL, NULL, NULL, {{NULL}, NULL}, 0, 0, NULL, {{NULL}, NULL}, 0, NULL}
-#define com_daml_ledger_api_v2_interactive_transaction_v1_cb_CreateDisplay_init_zero {NULL, NULL, NULL, NULL, false, com_daml_ledger_api_v2_cb_Value_init_zero, 0, NULL, 0, NULL}
+#define com_daml_ledger_api_v2_interactive_transaction_v1_cb_CreateDisplay_init_zero {NULL, NULL, false, com_daml_ledger_api_v2_cb_Value_init_zero}
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_Create_init_zero {NULL, NULL, NULL, false, com_daml_ledger_api_v2_cb_Identifier_init_zero, {{NULL}, NULL}, 0, NULL, 0, NULL}
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_Rollback_init_zero {0, NULL}
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_Node_init_zero {{{NULL}, NULL}, 0, {com_daml_ledger_api_v2_interactive_transaction_v1_cb_Create_init_zero}}
@@ -176,20 +152,10 @@ extern "C" {
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_Fetch_stakeholders_tag 6
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_Fetch_acting_parties_tag 7
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_Fetch_interface_id_tag 8
-#define com_daml_ledger_api_v2_interactive_transaction_v1_cb_ExerciseDisplay_lf_version_tag 1
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_ExerciseDisplay_contract_id_tag 2
-#define com_daml_ledger_api_v2_interactive_transaction_v1_cb_ExerciseDisplay_package_name_tag 3
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_ExerciseDisplay_template_id_tag 4
-#define com_daml_ledger_api_v2_interactive_transaction_v1_cb_ExerciseDisplay_signatories_tag 5
-#define com_daml_ledger_api_v2_interactive_transaction_v1_cb_ExerciseDisplay_stakeholders_tag 6
-#define com_daml_ledger_api_v2_interactive_transaction_v1_cb_ExerciseDisplay_acting_parties_tag 7
-#define com_daml_ledger_api_v2_interactive_transaction_v1_cb_ExerciseDisplay_interface_id_tag 8
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_ExerciseDisplay_choice_id_tag 9
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_ExerciseDisplay_chosen_value_tag 10
-#define com_daml_ledger_api_v2_interactive_transaction_v1_cb_ExerciseDisplay_consuming_tag 11
-#define com_daml_ledger_api_v2_interactive_transaction_v1_cb_ExerciseDisplay_children_tag 12
-#define com_daml_ledger_api_v2_interactive_transaction_v1_cb_ExerciseDisplay_exercise_result_tag 13
-#define com_daml_ledger_api_v2_interactive_transaction_v1_cb_ExerciseDisplay_choice_observers_tag 14
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_Exercise_lf_version_tag 1
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_Exercise_contract_id_tag 2
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_Exercise_package_name_tag 3
@@ -204,13 +170,9 @@ extern "C" {
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_Exercise_children_tag 12
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_Exercise_exercise_result_tag 13
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_Exercise_choice_observers_tag 14
-#define com_daml_ledger_api_v2_interactive_transaction_v1_cb_CreateDisplay_lf_version_tag 1
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_CreateDisplay_contract_id_tag 2
-#define com_daml_ledger_api_v2_interactive_transaction_v1_cb_CreateDisplay_package_name_tag 3
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_CreateDisplay_template_id_tag 4
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_CreateDisplay_argument_tag 5
-#define com_daml_ledger_api_v2_interactive_transaction_v1_cb_CreateDisplay_signatories_tag 6
-#define com_daml_ledger_api_v2_interactive_transaction_v1_cb_CreateDisplay_stakeholders_tag 7
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_Create_lf_version_tag 1
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_Create_contract_id_tag 2
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_Create_package_name_tag 3
@@ -244,26 +206,14 @@ X(a, POINTER,  OPTIONAL, MESSAGE,  interface_id,      8)
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_Fetch_interface_id_MSGTYPE com_daml_ledger_api_v2_cb_Identifier
 
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_ExerciseDisplay_FIELDLIST(X, a) \
-X(a, POINTER,  SINGULAR, STRING,   lf_version,        1) \
 X(a, POINTER,  SINGULAR, STRING,   contract_id,       2) \
-X(a, POINTER,  SINGULAR, STRING,   package_name,      3) \
 X(a, POINTER,  OPTIONAL, MESSAGE,  template_id,       4) \
-X(a, POINTER,  REPEATED, STRING,   signatories,       5) \
-X(a, POINTER,  REPEATED, STRING,   stakeholders,      6) \
-X(a, POINTER,  REPEATED, STRING,   acting_parties,    7) \
-X(a, POINTER,  OPTIONAL, MESSAGE,  interface_id,      8) \
 X(a, POINTER,  SINGULAR, STRING,   choice_id,         9) \
-X(a, STATIC,   OPTIONAL, MESSAGE,  chosen_value,     10) \
-X(a, POINTER,  SINGULAR, BOOL,     consuming,        11) \
-X(a, POINTER,  REPEATED, STRING,   children,         12) \
-X(a, POINTER,  OPTIONAL, MESSAGE,  exercise_result,  13) \
-X(a, POINTER,  REPEATED, STRING,   choice_observers,  14)
+X(a, STATIC,   OPTIONAL, MESSAGE,  chosen_value,     10)
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_ExerciseDisplay_CALLBACK NULL
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_ExerciseDisplay_DEFAULT NULL
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_ExerciseDisplay_template_id_MSGTYPE com_daml_ledger_api_v2_cb_Identifier
-#define com_daml_ledger_api_v2_interactive_transaction_v1_cb_ExerciseDisplay_interface_id_MSGTYPE com_daml_ledger_api_v2_cb_Identifier
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_ExerciseDisplay_chosen_value_MSGTYPE com_daml_ledger_api_v2_cb_Value
-#define com_daml_ledger_api_v2_interactive_transaction_v1_cb_ExerciseDisplay_exercise_result_MSGTYPE com_daml_ledger_api_v2_cb_Value
 
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_Exercise_FIELDLIST(X, a) \
 X(a, POINTER,  SINGULAR, STRING,   lf_version,        1) \
@@ -288,13 +238,9 @@ X(a, POINTER,  REPEATED, STRING,   choice_observers,  14)
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_Exercise_exercise_result_MSGTYPE com_daml_ledger_api_v2_cb_Value
 
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_CreateDisplay_FIELDLIST(X, a) \
-X(a, POINTER,  SINGULAR, STRING,   lf_version,        1) \
 X(a, POINTER,  SINGULAR, STRING,   contract_id,       2) \
-X(a, POINTER,  SINGULAR, STRING,   package_name,      3) \
 X(a, POINTER,  OPTIONAL, MESSAGE,  template_id,       4) \
-X(a, STATIC,   OPTIONAL, MESSAGE,  argument,          5) \
-X(a, POINTER,  REPEATED, STRING,   signatories,       6) \
-X(a, POINTER,  REPEATED, STRING,   stakeholders,      7)
+X(a, STATIC,   OPTIONAL, MESSAGE,  argument,          5)
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_CreateDisplay_CALLBACK NULL
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_CreateDisplay_DEFAULT NULL
 #define com_daml_ledger_api_v2_interactive_transaction_v1_cb_CreateDisplay_template_id_MSGTYPE com_daml_ledger_api_v2_cb_Identifier

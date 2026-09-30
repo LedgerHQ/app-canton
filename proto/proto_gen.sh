@@ -240,6 +240,21 @@ com.daml.ledger.api.v2.interactive.transaction.v1.cb.CreateDisplay type:FT_POINT
 com.daml.ledger.api.v2.interactive.transaction.v1.cb.CreateDisplay.argument type:FT_STATIC
 com.daml.ledger.api.v2.interactive.transaction.v1.cb.ExerciseDisplay type:FT_POINTER
 com.daml.ledger.api.v2.interactive.transaction.v1.cb.ExerciseDisplay.chosen_value type:FT_STATIC
+# The screen never reads these, and allocating them fragments the heap on big transactions.
+com.daml.ledger.api.v2.interactive.transaction.v1.cb.CreateDisplay.lf_version type:FT_IGNORE
+com.daml.ledger.api.v2.interactive.transaction.v1.cb.CreateDisplay.package_name type:FT_IGNORE
+com.daml.ledger.api.v2.interactive.transaction.v1.cb.CreateDisplay.signatories type:FT_IGNORE
+com.daml.ledger.api.v2.interactive.transaction.v1.cb.CreateDisplay.stakeholders type:FT_IGNORE
+com.daml.ledger.api.v2.interactive.transaction.v1.cb.ExerciseDisplay.lf_version type:FT_IGNORE
+com.daml.ledger.api.v2.interactive.transaction.v1.cb.ExerciseDisplay.package_name type:FT_IGNORE
+com.daml.ledger.api.v2.interactive.transaction.v1.cb.ExerciseDisplay.signatories type:FT_IGNORE
+com.daml.ledger.api.v2.interactive.transaction.v1.cb.ExerciseDisplay.stakeholders type:FT_IGNORE
+com.daml.ledger.api.v2.interactive.transaction.v1.cb.ExerciseDisplay.acting_parties type:FT_IGNORE
+com.daml.ledger.api.v2.interactive.transaction.v1.cb.ExerciseDisplay.interface_id type:FT_IGNORE
+com.daml.ledger.api.v2.interactive.transaction.v1.cb.ExerciseDisplay.consuming type:FT_IGNORE
+com.daml.ledger.api.v2.interactive.transaction.v1.cb.ExerciseDisplay.children type:FT_IGNORE
+com.daml.ledger.api.v2.interactive.transaction.v1.cb.ExerciseDisplay.exercise_result type:FT_IGNORE
+com.daml.ledger.api.v2.interactive.transaction.v1.cb.ExerciseDisplay.choice_observers type:FT_IGNORE
 com.daml.ledger.api.v2.interactive.transaction.v1.cb.NodeDisplay submsg_callback:true
 EOF
 

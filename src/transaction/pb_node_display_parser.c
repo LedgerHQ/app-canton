@@ -128,8 +128,8 @@ void format_token_amount_field(pb_callback_context_t *ctx, tx_field_t *field) {
         }
     }
 
-    if (instrument_field == NULL || !instrument_field->found || instrument_field->value == NULL ||
-        admin_field == NULL || !admin_field->found || admin_field->value == NULL) {
+    if (instrument_field == NULL || instrument_field->value == NULL || admin_field == NULL ||
+        admin_field->value == NULL) {
         return;
     }
 
@@ -148,6 +148,7 @@ void format_token_amount_field(pb_callback_context_t *ctx, tx_field_t *field) {
             char *new_value = (char *) app_mem_alloc(new_len);
             if (new_value == NULL) {
                 PRINTF("Memory allocation failed in format_token_amount_field\n");
+                field->store_failed = true;
                 return;
             }
             SNPRINTF(new_value, new_len, "%s %s", field->value, ticker);
@@ -187,6 +188,7 @@ void format_native_amount_field(pb_callback_context_t *ctx, tx_field_t *field) {
     char *new_value = (char *) app_mem_alloc(new_len);
     if (new_value == NULL) {
         PRINTF("Memory allocation failed in format_native_amount_field\n");
+        field->store_failed = true;
         return;
     }
     // Format the new value
@@ -211,6 +213,7 @@ void format_timestamp_field(pb_callback_context_t *ctx, tx_field_t *field) {
     time_t timestamp = (time_t) (ts_micros / 1000000ULL);  // Convert microseconds to seconds
     struct tm tm_info;
     if (gmtime_r(&timestamp, &tm_info) == NULL) {
+        field->store_failed = true;
         return;
     }
 
@@ -224,6 +227,7 @@ void format_timestamp_field(pb_callback_context_t *ctx, tx_field_t *field) {
     char *new_value = (char *) app_mem_alloc(buffer_size);
     if (new_value == NULL) {
         PRINTF("Memory allocation failed in format_timestamp_field\n");
+        field->store_failed = true;
         return;
     }
 
@@ -308,6 +312,15 @@ static void set_field_value(tx_field_t *field_state, const void *value, pb_size_
     LEDGER_ASSERT(field_state != NULL, "NULL field state passed to set_field_value");
     LEDGER_ASSERT(value != NULL, "NULL value passed to set_field_value");
 
+    // A second match would leak the first value, and the screen could show the one the ledger
+    // ignores.
+    if (field_state->matched) {
+        PRINTF("%s matched twice\n", (char *) PIC(field_state->config->path));
+        field_state->store_failed = true;
+        return;
+    }
+    field_state->matched = true;
+
     const void *src = NULL;
     size_t len = 0;
     uint8_t ts_buf[8];
@@ -329,11 +342,13 @@ static void set_field_value(tx_field_t *field_state, const void *value, pb_size_
     }
 
     field_state->value = (char *) app_mem_alloc(len);
-    if (field_state->value != NULL) {
-        memcpy(field_state->value, src, len);
-        field_state->value_len = len;
-        field_state->found = true;
+    if (field_state->value == NULL) {
+        PRINTF("No room to store %s\n", (char *) PIC(field_state->config->path));
+        field_state->store_failed = true;
+        return;
     }
+    memcpy(field_state->value, src, len);
+    field_state->value_len = len;
 }
 
 // Helper function to set display configuration
@@ -354,8 +369,9 @@ static void set_display_config(pb_callback_context_t *ctx, const display_config_
     // Initialize field states
     for (size_t i = 0; i < ctx->nb_fields; i++) {
         tx_fields[i].config = &source[i];
-        tx_fields[i].found = false;
+        tx_fields[i].matched = false;
         tx_fields[i].display = true;
+        tx_fields[i].store_failed = false;
     }
 
     ctx->tx_fields = tx_fields;
@@ -367,7 +383,6 @@ static void set_display_config(pb_callback_context_t *ctx, const display_config_
     if (strcmp((const char *) PIC(ctx->review_title), PREAPPROVAL_PROPOSAL_REVIEW_TITLE) == 0) {
         tx_field_t *field_state = &ctx->tx_fields[PREAPPROVAL_ASSET_FIELD_INDEX];
         field_state->config = (const field_config_t *) PIC(&PREAPPROVAL_ASSET_FIELD);
-        field_state->found = true;
         set_field_value(field_state, PREAPPROVAL_ASSET_FIELD_VALUE, VALUE_TEXT_TAG);
     }
 
@@ -570,8 +585,12 @@ static void find_tx_field(pb_callback_context_t *ctx, cbValue *value) {
                     // PRINTF("Setting timestamp value: %lld\n", (long long) value->timestamp);
                     set_field_value(state, (void *) &value->timestamp, value->which_sum);
                     break;
+                case VALUE_OPTIONAL_TAG:
+                    // Its inner value was already handled on the same path.
+                    break;
                 default:
                     PRINTF("Field type not handled for display: %d\n", value->which_sum);
+                    state->store_failed = true;
                     break;
             }
         }
@@ -961,8 +980,16 @@ MUST_CHECK int format_and_populate_display_items(pb_callback_context_t *ctx) {
         tx_field_t *state = &ctx->tx_fields[i];
         const field_config_t *cfg = state->config;
 
+        // A value the screen cannot show must stop clear signing, not vanish or read as missing.
+        if (state->store_failed) {
+            G_context.tx_info.clear_signing_available = false;
+            G_context.tx_info.display_failed = true;
+            cleanup_display_items();
+            goto cleanup;
+        }
+
         // Mandatory field check
-        if (cfg->mandatory && !state->found) {
+        if (cfg->mandatory && state->value == NULL) {
             PRINTF("Mandatory field not found: %s\n", (char *) PIC(cfg->path));
             G_context.tx_info.clear_signing_available = false;
             cleanup_display_items();
@@ -971,12 +998,20 @@ MUST_CHECK int format_and_populate_display_items(pb_callback_context_t *ctx) {
         }
 
         // Execute formatting callback if applicable
-        if (state->found && state->display) {
+        if (state->value != NULL && state->display) {
             field_format_callback_t callback =
                 (field_format_callback_t) PIC(ctx->tx_fields[i].config->format_callback);
             if (callback != NULL) {
                 callback(ctx, state);
             }
+        }
+
+        // The raw value is left in place, and it is not text the screen can show.
+        if (state->store_failed) {
+            G_context.tx_info.clear_signing_available = false;
+            G_context.tx_info.display_failed = true;
+            cleanup_display_items();
+            goto cleanup;
         }
 
         // If token cannot be identified, return : tx will be blind signed (if allowed in settings)
@@ -985,6 +1020,7 @@ MUST_CHECK int format_and_populate_display_items(pb_callback_context_t *ctx) {
         if (ctx->unknown_token) {
             PRINTF("Unknown token detected, aborting display population\n");
             G_context.tx_info.clear_signing_available = false;
+            G_context.tx_info.display_failed = true;
             cleanup_display_items();
             goto cleanup;
         }
@@ -995,8 +1031,7 @@ MUST_CHECK int format_and_populate_display_items(pb_callback_context_t *ctx) {
     ctx->tx_info->pairs_count = 0;
     for (size_t i = 0; i < ctx->nb_fields; i++) {
         tx_field_t *state = &ctx->tx_fields[i];
-        if (state->found && state->display && state->value_len > 0 &&
-            PIC(state->config->item_name) != NULL) {
+        if (state->display && state->value != NULL && PIC(state->config->item_name) != NULL) {
             ctx->tx_info->pairs[idx].value = app_mem_alloc(state->value_len);
             if (ctx->tx_info->pairs[idx].value == NULL) {
                 G_context.tx_info.clear_signing_available = false;
@@ -1118,7 +1153,7 @@ MUST_CHECK static int process_display_parsing(buffer_t *buf,
 MUST_CHECK int parse_node_for_display(buffer_t *buf) {
     LEDGER_ASSERT(buf != NULL, "NULL buffer passed to parse_node_for_display");
 
-    if (G_context.tx_info.clear_signing_available ||
+    if (G_context.tx_info.clear_signing_available || G_context.tx_info.display_failed ||
         global_tx_metadata_contract_identifiers != NULL) {
         return 0;
     }
@@ -1135,7 +1170,7 @@ MUST_CHECK int parse_node_for_display(buffer_t *buf) {
 MUST_CHECK int parse_input_contract_for_display(buffer_t *buf) {
     LEDGER_ASSERT(buf != NULL, "NULL buf in parse_input_contract_for_display");
 
-    if (G_context.tx_info.clear_signing_available ||
+    if (G_context.tx_info.clear_signing_available || G_context.tx_info.display_failed ||
         global_tx_metadata_contract_identifiers == NULL) {
         return 0;
     }
