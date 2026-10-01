@@ -27,8 +27,32 @@
 
 /**
  * Maximum number of child nodes per transaction node.
+ * This also sizes the node hash store in canonical_hash.c, because a parent needs its children's
+ * hashes and nothing else. It is not a limit on how many nodes a transaction may have.
  */
 #define MAX_NODE_CHILDREN 32
+
+/**
+ * Maximum number of nodes in a transaction that the node tree check tracks.
+ * The tracking array is allocated for the announced node count, so this only bounds that
+ * allocation. A transaction with more nodes is blind signed instead of clear signed.
+ */
+#define MAX_TX_NODES 256
+
+/**
+ * Maximum number of distinct contracts a transaction's nodes may act on, and the length of the
+ * digest kept per contract. 64 bits is enough here: a forged match would only let a disclosed
+ * contract that no node used pass, which is inert. 32 entries covers the widest recorded
+ * transaction, which touches 28.
+ */
+#define MAX_USED_CONTRACTS 32
+#define USED_CONTRACT_LEN  8
+
+/**
+ * Maximum number of value-holding create nodes tracked in a transaction.
+ * Real transactions write three: one for the receiver, one for the change, one for a fee.
+ */
+#define MAX_HOLDINGS 4
 
 /**
  * ED25519 signature length (bytes).

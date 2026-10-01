@@ -34,7 +34,8 @@
 #include "send_response.h"
 #include "utils.h"
 
-#define PRIVKEY_LEN 32
+// Size of one raw X/Y coordinate in the 65-byte EC point (1 prefix byte + 2 coordinates).
+#define EC_COORD_LEN 32
 
 MUST_CHECK cx_err_t derive_public_key(uint32_t *bip32_path,
                                       uint8_t bip32_path_len,
@@ -43,7 +44,10 @@ MUST_CHECK cx_err_t derive_public_key(uint32_t *bip32_path,
     LEDGER_ASSERT(bip32_path != NULL, "NULL bip32_path");
     LEDGER_ASSERT(raw_public_key != NULL, "NULL raw_public_key");
     LEDGER_ASSERT(chain_code != NULL, "NULL chain_code");
-    uint8_t rawPubkey[PUBKEY_LEN + PRIVKEY_LEN + 1] = {0};
+    // Raw EC point as the device crypto library returns it: 1 format byte, then the
+    // X-coordinate and the Y-coordinate, each 32 bytes, both big-endian. This is not the
+    // final public key format we send to the host.
+    uint8_t rawPubkey[1 + 2 * EC_COORD_LEN] = {0};
 
     cx_err_t error = bip32_derive_with_seed_get_pubkey_256(HDW_ED25519_SLIP10,
                                                            CX_CURVE_Ed25519,
@@ -59,12 +63,19 @@ MUST_CHECK cx_err_t derive_public_key(uint32_t *bip32_path,
         return error;
     }
 
+    // Convert the raw EC point into the standard 32-byte Ed25519 public key format:
+    // take the Y-coordinate and flip it from big-endian to little-endian.
     for (unsigned int i = 0; i < PUBKEY_LEN; i++) {
-        raw_public_key[i] = rawPubkey[PUBKEY_LEN + PRIVKEY_LEN - i];
+        raw_public_key[i] = rawPubkey[PUBKEY_LEN + EC_COORD_LEN - i];
     }
+    // Ed25519 also needs one bit from the X-coordinate: fold its parity into the
+    // top bit of the last output byte.
     if ((rawPubkey[PUBKEY_LEN] & 1) != 0) {
         raw_public_key[PUBKEY_LEN - 1] |= 0x80;
     }
+
+    // The raw EC point is no longer needed once converted, so wipe it from the stack.
+    explicit_bzero(rawPubkey, sizeof(rawPubkey));
 
     PRINTF("Derived public key: %.*H\n", PUBKEY_LEN, raw_public_key);
     return CX_OK;

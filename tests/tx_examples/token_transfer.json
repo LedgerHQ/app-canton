@@ -29,7 +29,7 @@
                               {
                                  "label":"dso",
                                  "value":{
-                                    "party":"DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9"
+                                    "party":"DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                                  }
                               },
                               {
@@ -102,11 +102,11 @@
                         }
                      },
                      "signatories":[
-                        "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9",
+                        "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
                         "alice::122069ff36d4042fdfdbabc35b1c2ac6d9713bf92ed32eac36468180279fea3fe091"
                      ],
                      "stakeholders":[
-                        "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9",
+                        "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
                         "alice::122069ff36d4042fdfdbabc35b1c2ac6d9713bf92ed32eac36468180279fea3fe091"
                      ]
                   }
@@ -125,15 +125,15 @@
                         "entityName":"Amulet"
                      },
                      "signatories":[
-                        "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9",
+                        "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
                         "alice::122069ff36d4042fdfdbabc35b1c2ac6d9713bf92ed32eac36468180279fea3fe091"
                      ],
                      "stakeholders":[
-                        "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9",
+                        "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
                         "alice::122069ff36d4042fdfdbabc35b1c2ac6d9713bf92ed32eac36468180279fea3fe091"
                      ],
                      "actingParties":[
-                        "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9",
+                        "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
                         "alice::122069ff36d4042fdfdbabc35b1c2ac6d9713bf92ed32eac36468180279fea3fe091"
                      ],
                      "interfaceId":{
@@ -167,7 +167,7 @@
                               {
                                  "label":"dso",
                                  "value":{
-                                    "party":"DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9"
+                                    "party":"DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                                  }
                               },
                               {
@@ -240,11 +240,11 @@
                         }
                      },
                      "signatories":[
-                        "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9",
+                        "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
                         "bob::12203553bdd6f3a73d90fe109747a2b55833cd510889b40f6936ec725135f5fa7d67"
                      ],
                      "stakeholders":[
-                        "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9",
+                        "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
                         "bob::12203553bdd6f3a73d90fe109747a2b55833cd510889b40f6936ec725135f5fa7d67"
                      ]
                   }
@@ -263,17 +263,17 @@
                         "entityName":"TransferPreapproval"
                      },
                      "signatories":[
-                        "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9",
+                        "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
                         "app_user_localnet-localparty-1::1220b52578562e767ff8e124f84c03218aa21acb12602106b8d33a20a6197a7659ce",
                         "bob::12203553bdd6f3a73d90fe109747a2b55833cd510889b40f6936ec725135f5fa7d67"
                      ],
                      "stakeholders":[
-                        "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9",
+                        "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
                         "app_user_localnet-localparty-1::1220b52578562e767ff8e124f84c03218aa21acb12602106b8d33a20a6197a7659ce",
                         "bob::12203553bdd6f3a73d90fe109747a2b55833cd510889b40f6936ec725135f5fa7d67"
                      ],
                      "actingParties":[
-                        "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9"
+                        "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                      ]
                   }
                }
@@ -291,12 +291,12 @@
                         "entityName":"TransferPreapproval"
                      },
                      "signatories":[
-                        "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9",
+                        "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
                         "app_user_localnet-localparty-1::1220b52578562e767ff8e124f84c03218aa21acb12602106b8d33a20a6197a7659ce",
                         "bob::12203553bdd6f3a73d90fe109747a2b55833cd510889b40f6936ec725135f5fa7d67"
                      ],
                      "stakeholders":[
-                        "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9",
+                        "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
                         "app_user_localnet-localparty-1::1220b52578562e767ff8e124f84c03218aa21acb12602106b8d33a20a6197a7659ce",
                         "bob::12203553bdd6f3a73d90fe109747a2b55833cd510889b40f6936ec725135f5fa7d67"
                      ],
@@ -705,15 +705,15 @@
                         "entityName":"Amulet"
                      },
                      "signatories":[
-                        "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9",
+                        "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
                         "alice::122069ff36d4042fdfdbabc35b1c2ac6d9713bf92ed32eac36468180279fea3fe091"
                      ],
                      "stakeholders":[
-                        "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9",
+                        "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
                         "alice::122069ff36d4042fdfdbabc35b1c2ac6d9713bf92ed32eac36468180279fea3fe091"
                      ],
                      "actingParties":[
-                        "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9",
+                        "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
                         "alice::122069ff36d4042fdfdbabc35b1c2ac6d9713bf92ed32eac36468180279fea3fe091"
                      ],
                      "choiceId":"Archive",
@@ -758,7 +758,7 @@
                               {
                                  "label":"dso",
                                  "value":{
-                                    "party":"DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9"
+                                    "party":"DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                                  }
                               },
                               {
@@ -813,10 +813,10 @@
                         }
                      },
                      "signatories":[
-                        "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9"
+                        "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                      ],
                      "stakeholders":[
-                        "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9",
+                        "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
                         "app_user_localnet-localparty-1::1220b52578562e767ff8e124f84c03218aa21acb12602106b8d33a20a6197a7659ce"
                      ]
                   }
@@ -835,13 +835,13 @@
                         "entityName":"OpenMiningRound"
                      },
                      "signatories":[
-                        "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9"
+                        "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                      ],
                      "stakeholders":[
-                        "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9"
+                        "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                      ],
                      "actingParties":[
-                        "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9"
+                        "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                      ]
                   }
                }
@@ -859,13 +859,13 @@
                         "entityName":"AmuletRules"
                      },
                      "signatories":[
-                        "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9"
+                        "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                      ],
                      "stakeholders":[
-                        "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9"
+                        "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                      ],
                      "actingParties":[
-                        "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9"
+                        "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                      ]
                   }
                }
@@ -883,15 +883,15 @@
                         "entityName":"Amulet"
                      },
                      "signatories":[
-                        "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9",
+                        "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
                         "alice::122069ff36d4042fdfdbabc35b1c2ac6d9713bf92ed32eac36468180279fea3fe091"
                      ],
                      "stakeholders":[
-                        "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9",
+                        "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
                         "alice::122069ff36d4042fdfdbabc35b1c2ac6d9713bf92ed32eac36468180279fea3fe091"
                      ],
                      "actingParties":[
-                        "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9",
+                        "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
                         "alice::122069ff36d4042fdfdbabc35b1c2ac6d9713bf92ed32eac36468180279fea3fe091"
                      ]
                   }
@@ -910,10 +910,10 @@
                         "entityName":"ExternalPartyAmuletRules"
                      },
                      "signatories":[
-                        "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9"
+                        "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                      ],
                      "stakeholders":[
-                        "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9"
+                        "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                      ],
                      "actingParties":[
                         "alice::122069ff36d4042fdfdbabc35b1c2ac6d9713bf92ed32eac36468180279fea3fe091"
@@ -935,7 +935,7 @@
                               {
                                  "label":"expectedAdmin",
                                  "value":{
-                                    "party":"DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9"
+                                    "party":"DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                                  }
                               },
                               {
@@ -1272,7 +1272,7 @@
                               {
                                  "label":"dso",
                                  "value":{
-                                    "party":"DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9"
+                                    "party":"DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                                  }
                               },
                               {
@@ -1311,10 +1311,10 @@
                         }
                      },
                      "signatories":[
-                        "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9"
+                        "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                      ],
                      "stakeholders":[
-                        "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9",
+                        "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
                         "alice::122069ff36d4042fdfdbabc35b1c2ac6d9713bf92ed32eac36468180279fea3fe091"
                      ]
                   }
@@ -1333,10 +1333,10 @@
                         "entityName":"AmuletRules"
                      },
                      "signatories":[
-                        "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9"
+                        "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                      ],
                      "stakeholders":[
-                        "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9"
+                        "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                      ],
                      "actingParties":[
                         "alice::122069ff36d4042fdfdbabc35b1c2ac6d9713bf92ed32eac36468180279fea3fe091",
@@ -1479,7 +1479,7 @@
                                  "value":{
                                     "optional":{
                                        "value":{
-                                          "party":"DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9"
+                                          "party":"DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                                        }
                                     }
                                  }
@@ -1833,7 +1833,7 @@
                            {
                               "label":"dso",
                               "value":{
-                                 "party":"DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9"
+                                 "party":"DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                               }
                            },
                            {
@@ -2174,10 +2174,10 @@
                      }
                   },
                   "signatories":[
-                     "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9"
+                     "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                   ],
                   "stakeholders":[
-                     "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9"
+                     "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                   ]
                },
                "createdAt":"1756130508462389",
@@ -2204,7 +2204,7 @@
                            {
                               "label":"dso",
                               "value":{
-                                 "party":"DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9"
+                                 "party":"DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                               }
                            },
                            {
@@ -2241,12 +2241,12 @@
                      }
                   },
                   "signatories":[
-                     "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9",
+                     "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
                      "app_user_localnet-localparty-1::1220b52578562e767ff8e124f84c03218aa21acb12602106b8d33a20a6197a7659ce",
                      "bob::12203553bdd6f3a73d90fe109747a2b55833cd510889b40f6936ec725135f5fa7d67"
                   ],
                   "stakeholders":[
-                     "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9",
+                     "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
                      "app_user_localnet-localparty-1::1220b52578562e767ff8e124f84c03218aa21acb12602106b8d33a20a6197a7659ce",
                      "bob::12203553bdd6f3a73d90fe109747a2b55833cd510889b40f6936ec725135f5fa7d67"
                   ]
@@ -2275,17 +2275,17 @@
                            {
                               "label":"dso",
                               "value":{
-                                 "party":"DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9"
+                                 "party":"DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                               }
                            }
                         ]
                      }
                   },
                   "signatories":[
-                     "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9"
+                     "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                   ],
                   "stakeholders":[
-                     "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9"
+                     "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                   ]
                },
                "createdAt":"1756116124712144",
@@ -2312,7 +2312,7 @@
                            {
                               "label":"dso",
                               "value":{
-                                 "party":"DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9"
+                                 "party":"DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                               }
                            },
                            {
@@ -2385,11 +2385,11 @@
                      }
                   },
                   "signatories":[
-                     "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9",
+                     "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
                      "alice::122069ff36d4042fdfdbabc35b1c2ac6d9713bf92ed32eac36468180279fea3fe091"
                   ],
                   "stakeholders":[
-                     "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9",
+                     "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a",
                      "alice::122069ff36d4042fdfdbabc35b1c2ac6d9713bf92ed32eac36468180279fea3fe091"
                   ]
                },
@@ -2417,7 +2417,7 @@
                            {
                               "label":"dso",
                               "value":{
-                                 "party":"DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9"
+                                 "party":"DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                               }
                            },
                            {
@@ -3304,10 +3304,10 @@
                      }
                   },
                   "signatories":[
-                     "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9"
+                     "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                   ],
                   "stakeholders":[
-                     "DSO::1220d8db538263ee04b7aee78e9d435ffbc3d88fee47f3144c1fee0912b3c8cff0f9"
+                     "DSO::1220be58c29e65de40bf273be1dc2b266d43a9a002ea5b18955aeef7aac881bb471a"
                   ]
                },
                "createdAt":"1756116124712144",
@@ -3318,6 +3318,6 @@
          "maxLedgerEffectiveTime":"1756217906501963"
       }
    },
-   "prepared_transaction_hash": "f181acb051cde21a1a0c4445624c3b827c10e17a8eb8a0242d9c482de089d98a",
+   "prepared_transaction_hash": "1C8572FED2DD7A39AE65DD3BC36F9732AADC1D1ABEFF5AE138D97466254EF525",
    "hashing_scheme_version": "HASHING_SCHEME_VERSION_V2"
 }

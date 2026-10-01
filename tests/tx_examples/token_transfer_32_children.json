@@ -433,7 +433,7 @@
                   ]
                 }
               },
-              "children": ["12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "22", "23", "24", "25", "26", "27", "28", "12", "13", "14", "15", "16", "17", "18", "19"],
+              "children": ["12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43"],
               "exerciseResult": {
                 "record": {
                   "recordId": {
@@ -2101,6 +2101,276 @@
                 "moduleName": "Splice.Api.Token.HoldingV1",
                 "entityName": "Holding"
               }
+            }
+          }
+        },
+        {
+          "nodeId": "29",
+          "v1": {
+            "fetch": {
+              "lfVersion": "2.1",
+              "contractId": "00dabaec6fe844e051c819ea796a05dd5482a36761946ac49dea69e074302c657cca1112209344e54f5d846dcf6ef6bee5358ac3c3ae963876d4280d3abe56508322fade10",
+              "packageName": "splice-amulet",
+              "templateId": {
+                "packageId": "3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1",
+                "moduleName": "Splice.Round",
+                "entityName": "OpenMiningRound"
+              },
+              "signatories": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"],
+              "stakeholders": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"],
+              "actingParties": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"]
+            }
+          }
+        },
+        {
+          "nodeId": "30",
+          "v1": {
+            "fetch": {
+              "lfVersion": "2.1",
+              "contractId": "00dabaec6fe844e051c819ea796a05dd5482a36761946ac49dea69e074302c657cca1112209344e54f5d846dcf6ef6bee5358ac3c3ae963876d4280d3abe56508322fade11",
+              "packageName": "splice-amulet",
+              "templateId": {
+                "packageId": "3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1",
+                "moduleName": "Splice.Round",
+                "entityName": "OpenMiningRound"
+              },
+              "signatories": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"],
+              "stakeholders": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"],
+              "actingParties": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"]
+            }
+          }
+        },
+        {
+          "nodeId": "31",
+          "v1": {
+            "fetch": {
+              "lfVersion": "2.1",
+              "contractId": "00dabaec6fe844e051c819ea796a05dd5482a36761946ac49dea69e074302c657cca1112209344e54f5d846dcf6ef6bee5358ac3c3ae963876d4280d3abe56508322fade12",
+              "packageName": "splice-amulet",
+              "templateId": {
+                "packageId": "3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1",
+                "moduleName": "Splice.Round",
+                "entityName": "OpenMiningRound"
+              },
+              "signatories": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"],
+              "stakeholders": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"],
+              "actingParties": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"]
+            }
+          }
+        },
+        {
+          "nodeId": "32",
+          "v1": {
+            "fetch": {
+              "lfVersion": "2.1",
+              "contractId": "00dabaec6fe844e051c819ea796a05dd5482a36761946ac49dea69e074302c657cca1112209344e54f5d846dcf6ef6bee5358ac3c3ae963876d4280d3abe56508322fade13",
+              "packageName": "splice-amulet",
+              "templateId": {
+                "packageId": "3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1",
+                "moduleName": "Splice.Round",
+                "entityName": "OpenMiningRound"
+              },
+              "signatories": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"],
+              "stakeholders": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"],
+              "actingParties": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"]
+            }
+          }
+        },
+        {
+          "nodeId": "33",
+          "v1": {
+            "fetch": {
+              "lfVersion": "2.1",
+              "contractId": "00dabaec6fe844e051c819ea796a05dd5482a36761946ac49dea69e074302c657cca1112209344e54f5d846dcf6ef6bee5358ac3c3ae963876d4280d3abe56508322fade14",
+              "packageName": "splice-amulet",
+              "templateId": {
+                "packageId": "3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1",
+                "moduleName": "Splice.Round",
+                "entityName": "OpenMiningRound"
+              },
+              "signatories": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"],
+              "stakeholders": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"],
+              "actingParties": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"]
+            }
+          }
+        },
+        {
+          "nodeId": "34",
+          "v1": {
+            "fetch": {
+              "lfVersion": "2.1",
+              "contractId": "00dabaec6fe844e051c819ea796a05dd5482a36761946ac49dea69e074302c657cca1112209344e54f5d846dcf6ef6bee5358ac3c3ae963876d4280d3abe56508322fade15",
+              "packageName": "splice-amulet",
+              "templateId": {
+                "packageId": "3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1",
+                "moduleName": "Splice.Round",
+                "entityName": "OpenMiningRound"
+              },
+              "signatories": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"],
+              "stakeholders": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"],
+              "actingParties": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"]
+            }
+          }
+        },
+        {
+          "nodeId": "35",
+          "v1": {
+            "fetch": {
+              "lfVersion": "2.1",
+              "contractId": "00dabaec6fe844e051c819ea796a05dd5482a36761946ac49dea69e074302c657cca1112209344e54f5d846dcf6ef6bee5358ac3c3ae963876d4280d3abe56508322fade16",
+              "packageName": "splice-amulet",
+              "templateId": {
+                "packageId": "3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1",
+                "moduleName": "Splice.Round",
+                "entityName": "OpenMiningRound"
+              },
+              "signatories": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"],
+              "stakeholders": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"],
+              "actingParties": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"]
+            }
+          }
+        },
+        {
+          "nodeId": "36",
+          "v1": {
+            "fetch": {
+              "lfVersion": "2.1",
+              "contractId": "00dabaec6fe844e051c819ea796a05dd5482a36761946ac49dea69e074302c657cca1112209344e54f5d846dcf6ef6bee5358ac3c3ae963876d4280d3abe56508322fade17",
+              "packageName": "splice-amulet",
+              "templateId": {
+                "packageId": "3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1",
+                "moduleName": "Splice.Round",
+                "entityName": "OpenMiningRound"
+              },
+              "signatories": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"],
+              "stakeholders": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"],
+              "actingParties": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"]
+            }
+          }
+        },
+        {
+          "nodeId": "37",
+          "v1": {
+            "fetch": {
+              "lfVersion": "2.1",
+              "contractId": "00dabaec6fe844e051c819ea796a05dd5482a36761946ac49dea69e074302c657cca1112209344e54f5d846dcf6ef6bee5358ac3c3ae963876d4280d3abe56508322fade18",
+              "packageName": "splice-amulet",
+              "templateId": {
+                "packageId": "3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1",
+                "moduleName": "Splice.Round",
+                "entityName": "OpenMiningRound"
+              },
+              "signatories": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"],
+              "stakeholders": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"],
+              "actingParties": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"]
+            }
+          }
+        },
+        {
+          "nodeId": "38",
+          "v1": {
+            "fetch": {
+              "lfVersion": "2.1",
+              "contractId": "00dabaec6fe844e051c819ea796a05dd5482a36761946ac49dea69e074302c657cca1112209344e54f5d846dcf6ef6bee5358ac3c3ae963876d4280d3abe56508322fade19",
+              "packageName": "splice-amulet",
+              "templateId": {
+                "packageId": "3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1",
+                "moduleName": "Splice.Round",
+                "entityName": "OpenMiningRound"
+              },
+              "signatories": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"],
+              "stakeholders": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"],
+              "actingParties": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"]
+            }
+          }
+        },
+        {
+          "nodeId": "39",
+          "v1": {
+            "fetch": {
+              "lfVersion": "2.1",
+              "contractId": "00dabaec6fe844e051c819ea796a05dd5482a36761946ac49dea69e074302c657cca1112209344e54f5d846dcf6ef6bee5358ac3c3ae963876d4280d3abe56508322fade1a",
+              "packageName": "splice-amulet",
+              "templateId": {
+                "packageId": "3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1",
+                "moduleName": "Splice.Round",
+                "entityName": "OpenMiningRound"
+              },
+              "signatories": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"],
+              "stakeholders": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"],
+              "actingParties": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"]
+            }
+          }
+        },
+        {
+          "nodeId": "40",
+          "v1": {
+            "fetch": {
+              "lfVersion": "2.1",
+              "contractId": "00dabaec6fe844e051c819ea796a05dd5482a36761946ac49dea69e074302c657cca1112209344e54f5d846dcf6ef6bee5358ac3c3ae963876d4280d3abe56508322fade1b",
+              "packageName": "splice-amulet",
+              "templateId": {
+                "packageId": "3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1",
+                "moduleName": "Splice.Round",
+                "entityName": "OpenMiningRound"
+              },
+              "signatories": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"],
+              "stakeholders": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"],
+              "actingParties": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"]
+            }
+          }
+        },
+        {
+          "nodeId": "41",
+          "v1": {
+            "fetch": {
+              "lfVersion": "2.1",
+              "contractId": "00dabaec6fe844e051c819ea796a05dd5482a36761946ac49dea69e074302c657cca1112209344e54f5d846dcf6ef6bee5358ac3c3ae963876d4280d3abe56508322fade1c",
+              "packageName": "splice-amulet",
+              "templateId": {
+                "packageId": "3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1",
+                "moduleName": "Splice.Round",
+                "entityName": "OpenMiningRound"
+              },
+              "signatories": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"],
+              "stakeholders": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"],
+              "actingParties": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"]
+            }
+          }
+        },
+        {
+          "nodeId": "42",
+          "v1": {
+            "fetch": {
+              "lfVersion": "2.1",
+              "contractId": "00dabaec6fe844e051c819ea796a05dd5482a36761946ac49dea69e074302c657cca1112209344e54f5d846dcf6ef6bee5358ac3c3ae963876d4280d3abe56508322fade1d",
+              "packageName": "splice-amulet",
+              "templateId": {
+                "packageId": "3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1",
+                "moduleName": "Splice.Round",
+                "entityName": "OpenMiningRound"
+              },
+              "signatories": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"],
+              "stakeholders": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"],
+              "actingParties": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"]
+            }
+          }
+        },
+        {
+          "nodeId": "43",
+          "v1": {
+            "fetch": {
+              "lfVersion": "2.1",
+              "contractId": "00dabaec6fe844e051c819ea796a05dd5482a36761946ac49dea69e074302c657cca1112209344e54f5d846dcf6ef6bee5358ac3c3ae963876d4280d3abe56508322fade1e",
+              "packageName": "splice-amulet",
+              "templateId": {
+                "packageId": "3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1",
+                "moduleName": "Splice.Round",
+                "entityName": "OpenMiningRound"
+              },
+              "signatories": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"],
+              "stakeholders": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"],
+              "actingParties": ["DSO::1220b1431ef217342db44d516bb9befde802be7d8899637d290895fa58880f19accc"]
             }
           }
         }
@@ -4258,7 +4528,7 @@
       "maxLedgerEffectiveTime": "1761250749072758"
     }
   },
-  "hash": "5A14215BC3EA0C61DBF0E90AE27670C3AA99833781C698D90852106211A74E2D",
+  "hash": "41E6A6A6FC5FCFB7FFC65758C8BBAA8CE482D5471B20BAA2912708F14206E797",
   "step": {
     "type": "single-step"
   }

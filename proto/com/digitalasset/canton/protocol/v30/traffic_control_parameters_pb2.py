@@ -15,7 +15,7 @@ _sym_db = _symbol_database.Default()
 from google.protobuf import duration_pb2 as google_dot_protobuf_dot_duration__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\nEcom/digitalasset/canton/protocol/v30/traffic_control_parameters.proto\x12$com.digitalasset.canton.protocol.v30\x1a\x1egoogle/protobuf/duration.proto\"\xcc\x02\n\x18TrafficControlParameters\x12\x1f\n\x17max_base_traffic_amount\x18\x01 \x01(\x04\x12I\n&max_base_traffic_accumulation_duration\x18\x03 \x01(\x0b\x32\x19.google.protobuf.Duration\x12$\n\x1cread_vs_write_scaling_factor\x18\x04 \x01(\r\x12M\n*set_balance_request_submission_window_size\x18\x05 \x01(\x0b\x32\x19.google.protobuf.Duration\x12\x1d\n\x15\x65nforce_rate_limiting\x18\x06 \x01(\x08\x12\x1c\n\x0f\x62\x61se_event_cost\x18\x07 \x01(\x04H\x00\x88\x01\x01\x42\x12\n\x10_base_event_cost\"g\n\x0eTrafficReceipt\x12\x15\n\rconsumed_cost\x18\x01 \x01(\x04\x12\x1e\n\x16\x65xtra_traffic_consumed\x18\x02 \x01(\x04\x12\x1e\n\x16\x62\x61se_traffic_remainder\x18\x03 \x01(\x04\"\x9b\x01\n\x0fTrafficConsumed\x12\x0e\n\x06member\x18\x01 \x01(\t\x12\x1e\n\x16\x65xtra_traffic_consumed\x18\x02 \x01(\x04\x12\x1e\n\x16\x62\x61se_traffic_remainder\x18\x03 \x01(\x04\x12\x1a\n\x12last_consumed_cost\x18\x04 \x01(\x04\x12\x1c\n\x14sequencing_timestamp\x18\x05 \x01(\x03\"q\n\x10TrafficPurchased\x12\x0e\n\x06member\x18\x01 \x01(\t\x12\x0e\n\x06serial\x18\x02 \x01(\r\x12\x1f\n\x17\x65xtra_traffic_purchased\x18\x03 \x01(\x04\x12\x1c\n\x14sequencing_timestamp\x18\x04 \x01(\x03\"\xbe\x01\n\x0cTrafficState\x12\x1f\n\x17\x65xtra_traffic_purchased\x18\x01 \x01(\x03\x12\x1e\n\x16\x65xtra_traffic_consumed\x18\x02 \x01(\x03\x12\x1e\n\x16\x62\x61se_traffic_remainder\x18\x03 \x01(\x03\x12\x1a\n\x12last_consumed_cost\x18\x04 \x01(\x04\x12\x11\n\ttimestamp\x18\x05 \x01(\x03\x12\x13\n\x06serial\x18\x06 \x01(\rH\x00\x88\x01\x01\x42\t\n\x07_serial\"\x7f\n\x1aSetTrafficPurchasedMessage\x12\x0e\n\x06member\x18\x01 \x01(\t\x12\x0e\n\x06serial\x18\x02 \x01(\r\x12\x1f\n\x17total_traffic_purchased\x18\x04 \x01(\x04\x12 \n\x18physical_synchronizer_id\x18\x05 \x01(\tb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\nEcom/digitalasset/canton/protocol/v30/traffic_control_parameters.proto\x12$com.digitalasset.canton.protocol.v30\x1a\x1egoogle/protobuf/duration.proto\"\xf1\x02\n\x18TrafficControlParameters\x12\x1f\n\x17max_base_traffic_amount\x18\x01 \x01(\x04\x12I\n&max_base_traffic_accumulation_duration\x18\x03 \x01(\x0b\x32\x19.google.protobuf.Duration\x12$\n\x1cread_vs_write_scaling_factor\x18\x04 \x01(\r\x12M\n*set_balance_request_submission_window_size\x18\x05 \x01(\x0b\x32\x19.google.protobuf.Duration\x12\x1d\n\x15\x65nforce_rate_limiting\x18\x06 \x01(\x08\x12\x1c\n\x0f\x62\x61se_event_cost\x18\x07 \x01(\x04H\x00\x88\x01\x01\x12#\n\x1b\x66ree_confirmation_responses\x18\x08 \x01(\x08\x42\x12\n\x10_base_event_cost\"g\n\x0eTrafficReceipt\x12\x15\n\rconsumed_cost\x18\x01 \x01(\x04\x12\x1e\n\x16\x65xtra_traffic_consumed\x18\x02 \x01(\x04\x12\x1e\n\x16\x62\x61se_traffic_remainder\x18\x03 \x01(\x04\"\x9b\x01\n\x0fTrafficConsumed\x12\x0e\n\x06member\x18\x01 \x01(\t\x12\x1e\n\x16\x65xtra_traffic_consumed\x18\x02 \x01(\x04\x12\x1e\n\x16\x62\x61se_traffic_remainder\x18\x03 \x01(\x04\x12\x1a\n\x12last_consumed_cost\x18\x04 \x01(\x04\x12\x1c\n\x14sequencing_timestamp\x18\x05 \x01(\x03\"q\n\x10TrafficPurchased\x12\x0e\n\x06member\x18\x01 \x01(\t\x12\x0e\n\x06serial\x18\x02 \x01(\r\x12\x1f\n\x17\x65xtra_traffic_purchased\x18\x03 \x01(\x04\x12\x1c\n\x14sequencing_timestamp\x18\x04 \x01(\x03\"\xbe\x01\n\x0cTrafficState\x12\x1f\n\x17\x65xtra_traffic_purchased\x18\x01 \x01(\x03\x12\x1e\n\x16\x65xtra_traffic_consumed\x18\x02 \x01(\x03\x12\x1e\n\x16\x62\x61se_traffic_remainder\x18\x03 \x01(\x03\x12\x1a\n\x12last_consumed_cost\x18\x04 \x01(\x04\x12\x11\n\ttimestamp\x18\x05 \x01(\x03\x12\x13\n\x06serial\x18\x06 \x01(\rH\x00\x88\x01\x01\x42\t\n\x07_serial\"\x7f\n\x1aSetTrafficPurchasedMessage\x12\x0e\n\x06member\x18\x01 \x01(\t\x12\x0e\n\x06serial\x18\x02 \x01(\r\x12\x1f\n\x17total_traffic_purchased\x18\x04 \x01(\x04\x12 \n\x18physical_synchronizer_id\x18\x05 \x01(\tb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -23,15 +23,15 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'com.digitalasset.canton.pro
 if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
   _globals['_TRAFFICCONTROLPARAMETERS']._serialized_start=144
-  _globals['_TRAFFICCONTROLPARAMETERS']._serialized_end=476
-  _globals['_TRAFFICRECEIPT']._serialized_start=478
-  _globals['_TRAFFICRECEIPT']._serialized_end=581
-  _globals['_TRAFFICCONSUMED']._serialized_start=584
-  _globals['_TRAFFICCONSUMED']._serialized_end=739
-  _globals['_TRAFFICPURCHASED']._serialized_start=741
-  _globals['_TRAFFICPURCHASED']._serialized_end=854
-  _globals['_TRAFFICSTATE']._serialized_start=857
-  _globals['_TRAFFICSTATE']._serialized_end=1047
-  _globals['_SETTRAFFICPURCHASEDMESSAGE']._serialized_start=1049
-  _globals['_SETTRAFFICPURCHASEDMESSAGE']._serialized_end=1176
+  _globals['_TRAFFICCONTROLPARAMETERS']._serialized_end=513
+  _globals['_TRAFFICRECEIPT']._serialized_start=515
+  _globals['_TRAFFICRECEIPT']._serialized_end=618
+  _globals['_TRAFFICCONSUMED']._serialized_start=621
+  _globals['_TRAFFICCONSUMED']._serialized_end=776
+  _globals['_TRAFFICPURCHASED']._serialized_start=778
+  _globals['_TRAFFICPURCHASED']._serialized_end=891
+  _globals['_TRAFFICSTATE']._serialized_start=894
+  _globals['_TRAFFICSTATE']._serialized_end=1084
+  _globals['_SETTRAFFICPURCHASEDMESSAGE']._serialized_start=1086
+  _globals['_SETTRAFFICPURCHASEDMESSAGE']._serialized_end=1213
 # @@protoc_insertion_point(module_scope)

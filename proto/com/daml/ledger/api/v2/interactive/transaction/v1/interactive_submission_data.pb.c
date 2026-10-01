@@ -6,7 +6,7 @@
 #error Regenerate this file with the current version of nanopb generator.
 #endif
 
-PB_BIND(com_daml_ledger_api_v2_interactive_transaction_v1_Fetch, com_daml_ledger_api_v2_interactive_transaction_v1_Fetch, 2)
+PB_BIND(com_daml_ledger_api_v2_interactive_transaction_v1_Fetch, com_daml_ledger_api_v2_interactive_transaction_v1_Fetch, 4)
 
 
 PB_BIND(com_daml_ledger_api_v2_interactive_transaction_v1_Exercise, com_daml_ledger_api_v2_interactive_transaction_v1_Exercise, 4)
@@ -16,6 +16,9 @@ PB_BIND(com_daml_ledger_api_v2_interactive_transaction_v1_Create, com_daml_ledge
 
 
 PB_BIND(com_daml_ledger_api_v2_interactive_transaction_v1_Rollback, com_daml_ledger_api_v2_interactive_transaction_v1_Rollback, AUTO)
+
+
+PB_BIND(com_daml_ledger_api_v2_interactive_transaction_v1_QueryByKey, com_daml_ledger_api_v2_interactive_transaction_v1_QueryByKey, 4)
 
 
 PB_BIND(com_daml_ledger_api_v2_interactive_transaction_v1_Node, com_daml_ledger_api_v2_interactive_transaction_v1_Node, 4)

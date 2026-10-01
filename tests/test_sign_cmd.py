@@ -1,14 +1,10 @@
 import json
-import os
-from enum import IntEnum
-from pathlib import Path
-from typing import Optional
 import pytest
 from ragger.backend.interface import BackendInterface
 from ragger.error import ExceptionRAPDU
 from ragger.navigator.navigation_scenario import NavigateWithScenario
-from ragger.navigator import NavInsID, Navigator, NavIns
-from ledgered.devices import Device, DeviceType
+from ragger.navigator import NavInsID, Navigator
+from ledgered.devices import Device
 
 from application_client.canton_transaction import Transaction
 from application_client.canton_command_sender import (
@@ -22,64 +18,11 @@ from application_client.canton_response_unpacker import (
 )
 from utils import verify_signature
 
-# pylint: disable=import-error
-from generateCryptoData import get_keys_bytes
-
-ROOT_SCREENSHOT_PATH = Path(__file__).parent.resolve()
-
-MAINNET_VALIDATOR_PARTY_ID_1 = (
-    "ledger-ledgerops-2::12207a4859ad414f4f47c2d773ddf4ea88de8c3a1aab19abaa197e504acdbf679d3c"
+from signing_flows import (
+    ROOT_SCREENSHOT_PATH,
+    enable_blind_signing,
+    sign_and_verify_prepared_transaction,
 )
-MAINNET_VALIDATOR_PARTY_ID_2 = "Ledger-Kiln-2::1220e2225d5a297fae4000be2e3ca560ce802461da04c8e3e40c9fbbf0547f4fe8e3"
-
-TESTNET_VALIDATOR_PARTY_ID_1 = (
-    "ledger-ledgeropstestnet-0::122095f38f5c73cc18fbeb3290f8c17f7a1ff190f66fe159c671cf1fb0dc634eedaf"
-)
-TESTNET_VALIDATOR_PARTY_ID_2 = (
-    "Ledger-KilnTestnet-2::1220fa9df3caa84092023bf7edf28de1d28f96caf9b7d130385bfe6e284be6e0fbd7"
-)
-
-DEVNET_VALIDATOR_PARTY_ID_1 = (
-    "ledger-ledgeropsdevnet-0::12208f74f551f8c28b68414fc3bb4b8466178055845485878a1af8ac1fe96f88fad2"
-)
-DEVNET_VALIDATOR_PARTY_ID_2 = (
-    "Ledger-KilnDevnet-2::12203b77e5d74eb787ff0251fd76949379a625368646302a203fea7f7db1dd5402bf"
-)
-
-
-def _nano_enable_blind_signing() -> list[NavInsID]:
-    # initial: go to settings
-    seq = [NavInsID.RIGHT_CLICK, NavInsID.BOTH_CLICK]
-    # enable
-    seq += [NavInsID.BOTH_CLICK]
-    # go to "back" screen
-    seq += [NavInsID.RIGHT_CLICK]
-    # back to main menu
-    seq += [NavInsID.BOTH_CLICK]
-    # back to home screen
-    seq += [NavInsID.LEFT_CLICK]
-    return seq
-
-
-def _enable_blind_signing(device: Device, navigator: Navigator, snapshots_name: str) -> None:
-    if device.is_nano:
-        nav = _nano_enable_blind_signing()
-    else:
-        if device.type is DeviceType.APEX_P:
-            coordinates = (263, 95)
-        else:
-            coordinates = (348, 132)
-        nav = [
-            NavInsID.USE_CASE_HOME_SETTINGS,
-            NavIns(NavInsID.TOUCH, coordinates),
-            NavInsID.USE_CASE_SETTINGS_MULTI_PAGE_EXIT,
-        ]
-    navigator.navigate_and_compare(
-        ROOT_SCREENSHOT_PATH,
-        snapshots_name,
-        nav,
-        screen_change_before_first_instruction=False,
-    )
 
 
 def _sign_and_verify_hash(
@@ -93,7 +36,7 @@ def _sign_and_verify_hash(
     client = CantonCommandSender(backend)
     path = "m/44'/6767'/0'/0'/0'"
 
-    _enable_blind_signing(device, navigator, f"{test_name}_enable_bs")
+    enable_blind_signing(device, navigator, f"{test_name}_enable_bs")
 
     rapdu = client.get_public_key(path=path)
     _, public_key, _, _ = unpack_get_public_key_response(rapdu.data)
@@ -183,48 +126,6 @@ def test_sign_hash_34(
     )
 
 
-def _sign_and_verify_prepared_transaction(
-    backend: BackendInterface,
-    scenario_navigator: NavigateWithScenario,
-    tx_json: str,
-    device: Optional[Device] = None,
-    navigator: Optional[Navigator] = None,
-    test_name: Optional[str] = None,
-    custom_screen_text: Optional[str] = None,
-    blind_sign: bool = False,
-    snapshot_check: bool = True,
-) -> None:
-    client = CantonCommandSender(backend)
-    path: str = "m/44'/6767'/0'/0'/0'"
-
-    _, public_key, _, _ = unpack_get_public_key_response(client.get_public_key(path=path).data)
-
-    serialized_parts = Transaction.serialize_from_json_into_tx_parts(tx_json)
-    tx_hash = Transaction.get_hash_from_json(tx_json)
-    print(f"Transaction hash: {tx_hash.hex()}")
-    print(f"Serialized transaction length: {sum(len(part) for part in serialized_parts)} bytes")
-
-    if blind_sign:
-        _enable_blind_signing(device, navigator, f"{test_name}_enable_bs")
-
-    with client.sign_tx_in_parts(path, *serialized_parts) as _:
-        if blind_sign:
-            scenario_navigator.review_approve_with_warning(
-                path=ROOT_SCREENSHOT_PATH,
-                custom_screen_text=custom_screen_text,
-                do_comparison=snapshot_check,
-            )
-        else:
-            scenario_navigator.review_approve(
-                path=ROOT_SCREENSHOT_PATH,
-                custom_screen_text=custom_screen_text,
-                do_comparison=snapshot_check,
-            )
-
-    _, der_sig, _, _, _ = unpack_sign_tx_response(client.get_async_response().data)
-    verify_signature(public_key, tx_hash, der_sig)
-
-
 def test_sign_ping(
     backend: BackendInterface,
     scenario_navigator: NavigateWithScenario,
@@ -232,7 +133,7 @@ def test_sign_ping(
     navigator: Navigator,
     test_name: str,
 ) -> None:
-    _sign_and_verify_prepared_transaction(
+    sign_and_verify_prepared_transaction(
         backend,
         scenario_navigator,
         device=device,
@@ -315,8 +216,57 @@ def test_sign_max_nodes_hash_error(backend: BackendInterface) -> None:
     assert e.value.status == Errors.SW_TX_HASH_FAIL
 
 
+# Node trees that the device refuses during the tree check itself
+TREE_CHECK_REFUSED_TX = [
+    "tree_err_node_id_out_of_range",
+    "tree_err_duplicate_node",
+    "tree_err_child_out_of_range",
+    "tree_err_self_child",
+    "tree_err_root_claimed",
+    "tree_err_duplicate_claim",
+]
+
+# Node trees that the device cannot display, so it falls back to blind signing
+TREE_CHECK_BLIND_SIGNING_TX = [
+    "tree_err_root_count",
+    "tree_err_orphan_node",
+    "tree_err_too_many_nodes",
+]
+
+
+@pytest.mark.parametrize("tx_name", TREE_CHECK_REFUSED_TX, ids=TREE_CHECK_REFUSED_TX)
+def test_sign_invalid_node_tree_error(backend: BackendInterface, tx_name: str) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(f"tests/tx_examples/{tx_name}.json")
+    path = "m/44'/6767'/0'/0'/0'"
+    client = CantonCommandSender(backend)
+    with pytest.raises(ExceptionRAPDU) as e:
+        with client.sign_tx_in_parts(path, *serialized_parts):
+            pass
+    assert e.value.status == Errors.SW_TX_INVALID_NODE_TREE
+
+
+@pytest.mark.parametrize("tx_name", TREE_CHECK_BLIND_SIGNING_TX, ids=TREE_CHECK_BLIND_SIGNING_TX)
+def test_sign_invalid_node_tree_blind_signing_disabled(backend: BackendInterface, tx_name: str) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(f"tests/tx_examples/{tx_name}.json")
+    _check_blind_signing_rejection(backend, serialized_parts)
+
+
+# Nodes 4 and 5 claim each other. Every node still has exactly one parent, so the tree check finds
+# nothing wrong, and neither node hangs off the root. A parent hashes its children's hashes, and a
+# cycle has no order in which both children arrive before their parent, so the child hash lookup
+# fails and the transaction is refused. The tree check does not have to prove reachability itself.
+def test_sign_node_tree_cycle(backend: BackendInterface) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts("tests/tx_examples/tree_err_cycle.json")
+    path = "m/44'/6767'/0'/0'/0'"
+    client = CantonCommandSender(backend)
+    with pytest.raises(ExceptionRAPDU) as e:
+        with client.sign_tx_in_parts(path, *serialized_parts):
+            pass
+    assert e.value.status == Errors.SW_TX_HASH_FAIL
+
+
 def test_sign_native_transfer(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
-    _sign_and_verify_prepared_transaction(
+    sign_and_verify_prepared_transaction(
         backend,
         scenario_navigator,
         tx_json="tests/tx_examples/native_transfer.json",
@@ -325,7 +275,7 @@ def test_sign_native_transfer(backend: BackendInterface, scenario_navigator: Nav
 
 
 def test_sign_token_transfer(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
-    _sign_and_verify_prepared_transaction(
+    sign_and_verify_prepared_transaction(
         backend,
         scenario_navigator,
         tx_json="tests/tx_examples/token_transfer.json",
@@ -333,8 +283,62 @@ def test_sign_token_transfer(backend: BackendInterface, scenario_navigator: Navi
     )
 
 
+# Consolidating your own holdings is a transfer to yourself. It writes two holdings to the one
+# account, the amount moved and the change, so the value check has to allow that case.
+def test_sign_token_transfer_consolidate(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
+    sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_consolidate.json",
+        custom_screen_text="Sign transaction to",
+    )
+
+
+def test_sign_token_transfer_consolidate_v2(
+    backend: BackendInterface, scenario_navigator: NavigateWithScenario
+) -> None:
+    sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_consolidate_v2.json",
+        custom_screen_text="Sign transaction to",
+    )
+
+
+def test_sign_token_transfer_v2(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
+    sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_v2.json",
+        custom_screen_text="Sign transaction to",
+    )
+
+
+# A Token Standard V2 transfer that creates the transfer instruction in one transaction and settles
+# it in another. The displayed action is still TransferFactory_Transfer.
+def test_sign_token_transfer_multistep_v2(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
+    sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_multistep_v2.json",
+        custom_screen_text="Sign transaction to",
+    )
+
+
+# A CBTC send: the registry runs the transfer on its own factory contract and parks the money in
+# its own TransferOffer, rather than using Canton Coin's contracts. Reconstructed from a device
+# APDU log after a real transfer was refused on 3.4.0.
+def test_sign_token_transfer_cbtc_send(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
+    sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_cbtc_send.json",
+        custom_screen_text="Sign transaction to",
+    )
+
+
 def test_sign_token_transfer_cip107(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
-    _sign_and_verify_prepared_transaction(
+    sign_and_verify_prepared_transaction(
         backend,
         scenario_navigator,
         tx_json="tests/tx_examples/token_transfer_cip107.json",
@@ -343,7 +347,7 @@ def test_sign_token_transfer_cip107(backend: BackendInterface, scenario_navigato
 
 
 def test_sign_token_transfer_lower_case(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
-    _sign_and_verify_prepared_transaction(
+    sign_and_verify_prepared_transaction(
         backend,
         scenario_navigator,
         tx_json="tests/tx_examples/token_transfer_lower_case.json",
@@ -352,7 +356,7 @@ def test_sign_token_transfer_lower_case(backend: BackendInterface, scenario_navi
 
 
 def test_sign_token_transfer_with_memo(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
-    _sign_and_verify_prepared_transaction(
+    sign_and_verify_prepared_transaction(
         backend,
         scenario_navigator,
         tx_json="tests/tx_examples/token_transfer_with_memo.json",
@@ -363,7 +367,7 @@ def test_sign_token_transfer_with_memo(backend: BackendInterface, scenario_navig
 def test_sign_token_transfer_32_node_children(
     backend: BackendInterface, scenario_navigator: NavigateWithScenario
 ) -> None:
-    _sign_and_verify_prepared_transaction(
+    sign_and_verify_prepared_transaction(
         backend,
         scenario_navigator,
         tx_json="tests/tx_examples/token_transfer_32_children.json",
@@ -378,7 +382,7 @@ def test_sign_proxy_token_transfer_blind_signing_disabled(
     test_name: str,
     navigator: Navigator,
 ) -> None:
-    _sign_and_verify_prepared_transaction(
+    sign_and_verify_prepared_transaction(
         backend,
         scenario_navigator,
         navigator=navigator,
@@ -390,11 +394,125 @@ def test_sign_proxy_token_transfer_blind_signing_disabled(
 
 
 def test_sign_token_transfer_accept(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
-    _sign_and_verify_prepared_transaction(
+    sign_and_verify_prepared_transaction(
         backend,
         scenario_navigator,
         tx_json="tests/tx_examples/token_transfer_accept.json",
         custom_screen_text="Sign transaction to",
+    )
+
+
+def test_sign_token_transfer_accept_v2(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
+    sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_accept_v2.json",
+        custom_screen_text="Sign transaction to",
+    )
+
+
+def test_sign_token_transfer_usdcx_send(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
+    sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_usdcx_send.json",
+        custom_screen_text="Sign transaction to",
+    )
+
+
+# A USDCx send that merges two holdings. The nodes come from a Ledger Wallet log whose root node the
+# device refused with 0xB005; the two input holdings are crafted, since the log stops before them.
+def test_sign_token_transfer_usdcx_send_two_holdings(
+    backend: BackendInterface, scenario_navigator: NavigateWithScenario
+) -> None:
+    sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_usdcx_send_two_holdings.json",
+        custom_screen_text="Sign transaction to",
+    )
+
+
+# A memo too long to copy for the screen must stop clear signing, not vanish from the screen.
+# 700 characters decodes but does not fit the copy; retune if heap use changes.
+def test_sign_memo_too_long_blind_signing_disabled(backend: BackendInterface) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(
+        "tests/tx_examples/token_transfer_memo_too_long.json"
+    )
+    _check_blind_signing_rejection(backend, serialized_parts)
+
+
+# The memo key appears twice with different texts. The screen cannot tell which one the ledger
+# uses, so clear signing must stop.
+def test_sign_memo_repeated_blind_signing_disabled(backend: BackendInterface) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(
+        "tests/tx_examples/token_transfer_memo_repeated.json"
+    )
+    _check_blind_signing_rejection(backend, serialized_parts)
+
+
+# An empty first memo must still count as a match, so the second one is refused.
+def test_sign_memo_empty_then_set_blind_signing_disabled(backend: BackendInterface) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(
+        "tests/tx_examples/token_transfer_memo_empty_then_set.json"
+    )
+    _check_blind_signing_rejection(backend, serialized_parts)
+
+
+# A memo of a type the screen cannot show, then a text memo. The first one must still count.
+def test_sign_memo_bool_then_text_blind_signing_disabled(backend: BackendInterface) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(
+        "tests/tx_examples/token_transfer_memo_bool_then_text.json"
+    )
+    _check_blind_signing_rejection(backend, serialized_parts)
+
+
+# A child node with a repeated memo fails first. The root that follows must not turn clear signing
+# back on.
+def test_sign_memo_repeated_in_child_blind_signing_disabled(backend: BackendInterface) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(
+        "tests/tx_examples/token_transfer_memo_repeated_in_child.json"
+    )
+    _check_blind_signing_rejection(backend, serialized_parts)
+
+
+def test_sign_token_transfer_usdcx_accept(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
+    sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_usdcx_accept.json",
+        custom_screen_text="Sign transaction to",
+    )
+
+
+def test_sign_token_transfer_cbtc_accept(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
+    sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_cbtc_accept.json",
+        custom_screen_text="Sign transaction to",
+    )
+
+
+def test_sign_token_transfer_accept_wrong_metadata_contract_id_blind_signing_disabled(
+    backend: BackendInterface, navigator: Navigator, test_name: str
+) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(
+        "tests/tx_examples/token_transfer_accept_wrong_metadata_contract_id.json"
+    )
+    if backend.device.is_nano:
+        validation_instructions = [NavInsID.BOTH_CLICK]
+        pattern = "Blind signing"
+    else:
+        validation_instructions = [NavInsID.USE_CASE_CHOICE_REJECT]
+        pattern = "Enable blind signing"
+    _check_blind_signing_rejection(backend, serialized_parts)
+    navigator.navigate_until_text_and_compare(
+        navigate_instruction=None,
+        validation_instructions=validation_instructions,
+        text=pattern,
+        path=ROOT_SCREENSHOT_PATH,
+        test_case_name=test_name,
     )
 
 
@@ -404,7 +522,7 @@ def test_sign_transfer_accept_with_empty_strings(
     device: Device,
     navigator: Navigator,
 ) -> None:
-    _sign_and_verify_prepared_transaction(
+    sign_and_verify_prepared_transaction(
         backend,
         scenario_navigator,
         navigator=navigator,
@@ -420,7 +538,7 @@ def test_sign_token_transfer_withdraw_sbc(
     device: Device,
     navigator: Navigator,
 ) -> None:
-    _sign_and_verify_prepared_transaction(
+    sign_and_verify_prepared_transaction(
         backend,
         scenario_navigator,
         navigator=navigator,
@@ -431,7 +549,7 @@ def test_sign_token_transfer_withdraw_sbc(
 
 
 def test_sign_token_transfer_reject(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
-    _sign_and_verify_prepared_transaction(
+    sign_and_verify_prepared_transaction(
         backend,
         scenario_navigator,
         tx_json="tests/tx_examples/token_transfer_reject.json",
@@ -439,11 +557,29 @@ def test_sign_token_transfer_reject(backend: BackendInterface, scenario_navigato
     )
 
 
+def test_sign_token_transfer_reject_v2(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
+    sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_reject_v2.json",
+        custom_screen_text="Sign transaction to",
+    )
+
+
 def test_sign_token_transfer_withdraw(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
-    _sign_and_verify_prepared_transaction(
+    sign_and_verify_prepared_transaction(
         backend,
         scenario_navigator,
         tx_json="tests/tx_examples/token_transfer_withdraw.json",
+        custom_screen_text="Sign transaction to",
+    )
+
+
+def test_sign_token_transfer_withdraw_v2(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
+    sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_withdraw_v2.json",
         custom_screen_text="Sign transaction to",
     )
 
@@ -476,7 +612,7 @@ def test_sign_token_transfer_wrong_token_id_blind_signing_enabled(
     device: Device,
     navigator,
 ) -> None:
-    _sign_and_verify_prepared_transaction(
+    sign_and_verify_prepared_transaction(
         backend,
         scenario_navigator,
         device=device,
@@ -487,8 +623,55 @@ def test_sign_token_transfer_wrong_token_id_blind_signing_enabled(
     )
 
 
+# Canton keeps no balance: each amount owned is its own contract naming an owner and an amount, and
+# the app sees one as a create node. Each fixture below is token_transfer.json with exactly one line
+# changed, so the screen still promises 20 CC to bob while the holdings say otherwise. Clear signing
+# has to drop, which leaves blind signing as the only route and makes the transaction refusable.
+@pytest.mark.parametrize(
+    "tx_name",
+    [
+        # bob's holding has 21 while the screen shows 20
+        "values_err_receiver_amount",
+        # bob's holding was issued by a party the displayed ticker was not resolved from
+        "values_err_holding_admin",
+        # the holding went to a third account, so nothing is written for the receiver shown
+        "values_err_no_holding",
+        # the change holding goes to bob as well, so bob is paid 20 CC and 67.79 CC on top. The
+        # screen still says 20, and the amounts are digests that cannot be added up, so a second
+        # holding for the receiver has to drop clear signing.
+        "values_err_extra_holding",
+        # One create is turned into a pre-approval proposal, which the display parser reaches before
+        # the transfer node, so the screen offers a pre-approval while the transfer still pays bob
+        # 20 CC. A pre-approval moves nothing, so any holding at all has to drop clear signing.
+        "values_err_preapproval_holding",
+        # bob's holding pays 21 and hides decoy owner, dso and amount fields one level down, behind a
+        # record field that carries no label. A label is only pushed onto the path when it is there,
+        # so the pop that follows the field must not remove a level the push never added, or the
+        # decoys are read as the holding's own fields and 20 looks correct.
+        "values_err_unlabelled_field",
+        # The same decoys, this time behind a label too long to fit in the path. A label that cannot
+        # be written down can never equal a configured path, so the holding has to read as unknown.
+        "values_err_overlong_label",
+        # bob still gets 20 CC, but the change goes to carol instead of alice. The screen names only
+        # alice and bob, so a holding for anyone else is value the user was never shown.
+        "values_err_third_party_holding",
+        # token_transfer_cbtc_send.json with every created holding set to instrument CBTX while the
+        # screen still says CBTC. Both come from the same issuer, so only the instrument id tells
+        # them apart.
+        "values_err_holding_instrument",
+        # A third holding, same owner, different amount, on top of a real consolidation
+        "values_err_consolidate_extra_holding",
+        # A native CC transfer with an extra token holding spliced in for the same receiver
+        "values_err_native_hides_token_holding",
+    ],
+)
+def test_sign_values_mismatch_blind_signing_disabled(backend: BackendInterface, tx_name: str) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(f"tests/tx_examples/{tx_name}.json")
+    _check_blind_signing_rejection(backend, serialized_parts)
+
+
 def test_sign_preapproval_proposal(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
-    _sign_and_verify_prepared_transaction(
+    sign_and_verify_prepared_transaction(
         backend,
         scenario_navigator,
         tx_json="tests/tx_examples/preapproval_proposal.json",
@@ -496,259 +679,23 @@ def test_sign_preapproval_proposal(backend: BackendInterface, scenario_navigator
     )
 
 
-def _onboard_party(
-    backend: BackendInterface,
-    scenario_navigator: NavigateWithScenario,
-    validator_uids: Optional[list[str]] = None,
-    attestation_keys: Optional[tuple[bytes, bytes]] = None,
-    der_key_format: bool = True,
-    snapshot_check: bool = True,
-) -> None:
-    client = CantonCommandSender(backend)
-
-    if validator_uids is None:
-        validator_uids = [MAINNET_VALIDATOR_PARTY_ID_1, MAINNET_VALIDATOR_PARTY_ID_2]
-
-    # Get public key
-    _, raw_key, _, _ = unpack_get_public_key_response(client.get_public_key(path="m/44'/6767'/0'/0'/0'").data)
-
-    # Convert to DER format for inclusion in topology transactions
-    public_key = b"\x30\x2a\x30\x05\x06\x03\x2b\x65\x70\x03\x21\x00" + raw_key if der_key_format else raw_key
-
-    # Create and hash transactions
-    txs = [
-        Transaction.namespace_delegation(public_key, der_key_format),
-        Transaction.party_to_key(public_key, der_key_format),
-        Transaction.party_to_participant_from_uid(public_key, validator_uids),
-    ]
-    multi_hash = Transaction.compute_multi_transaction_hash(
-        [Transaction.compute_topology_transaction_hash(tx) for tx in txs]
-    )
-
-    # Sign transactions
-    challenge = os.urandom(24) if attestation_keys else None
-    with client.sign_topology_tx(path="m/44'/6767'/0'/0'/0'", transactions=txs, challenge=challenge):
-        scenario_navigator.review_approve(
-            path=ROOT_SCREENSHOT_PATH,
-            custom_screen_text="Sign transaction to",
-            do_comparison=snapshot_check,
-        )
-
-    # Verify signatures
-    _, der_sig, _, challenge_sig_len, challenge_sig = unpack_sign_tx_response(client.get_async_response().data)
-    verify_signature(raw_key, multi_hash, der_sig)
-
-    if attestation_keys:
-        _verify_attestation(attestation_keys[1], multi_hash, challenge, challenge_sig, challenge_sig_len)
-    else:
-        assert challenge is None
-        assert challenge_sig is None
-        assert challenge_sig_len is None
-
-
-class WhichPartyTx(IntEnum):
-    PARTY_TO_KEY = 1
-    PARTY_TO_PARTICIPANT = 2
-
-
-def _onboard_party_expect_error(
-    backend: BackendInterface,
-    validator_uids: Optional[list[str]] = None,
-    der_key_format: bool = True,
-    threshold: Optional[int] = None,
-    party_id: Optional[str] = None,
-    which_party_tx: Optional[WhichPartyTx] = None,
-    expected_error: int = Errors.SW_WRONG_RESPONSE_LENGTH,
-) -> None:
-    client = CantonCommandSender(backend)
-
-    if validator_uids is None:
-        validator_uids = [MAINNET_VALIDATOR_PARTY_ID_1, MAINNET_VALIDATOR_PARTY_ID_2]
-
-    # Get public key
-    _, raw_key, _, _ = unpack_get_public_key_response(client.get_public_key(path="m/44'/6767'/0'/0'/0'").data)
-
-    # Convert to DER format for inclusion in topology transactions
-    public_key = b"\x30\x2a\x30\x05\x06\x03\x2b\x65\x70\x03\x21\x00" + raw_key if der_key_format else raw_key
-
-    if which_party_tx is None:
-        which_party_tx = WhichPartyTx.PARTY_TO_PARTICIPANT
-
-    party_to_key_party_id = None
-    party_to_participant_party_id = None
-
-    if which_party_tx == WhichPartyTx.PARTY_TO_KEY:
-        party_to_key_party_id = party_id
-    else:
-        party_to_participant_party_id = party_id
-
-    # Create transactions
-    txs = [
-        Transaction.namespace_delegation(public_key, der_key_format),
-        Transaction.party_to_key(public_key, der_key_format, party_to_key_party_id),
-        Transaction.party_to_participant_from_uid(public_key, validator_uids, threshold, party_to_participant_party_id),
-    ]
-
-    # Sign transactions and expect error
-    path = "m/44'/6767'/0'/0'/0'"
-    with pytest.raises(ExceptionRAPDU) as e:
-        with client.sign_topology_tx(path=path, transactions=txs):
-            pass
-    assert e.value.status == expected_error
-
-
-def test_sign_onboarding_expect_error_unexpected_participant_id(
-    backend: BackendInterface,
-) -> None:
-    _onboard_party_expect_error(
-        backend,
-        validator_uids=[MAINNET_VALIDATOR_PARTY_ID_1, "invalid_validator_id_2"],
-        expected_error=Errors.SW_TOPOLOGY_UNEXPECTED_PARTICIPANT_ID,
-    )
-
-
-def test_sign_onboarding_expect_error_unexpected_number_of_participants_single(
-    backend: BackendInterface,
-) -> None:
-    _onboard_party_expect_error(
-        backend,
-        validator_uids=[MAINNET_VALIDATOR_PARTY_ID_1],
-        expected_error=Errors.SW_TOPOLOGY_UNEXPECTED_NUMBER_OF_PARTICIPANTS,
-    )
-
-
-def test_sign_onboarding_expect_error_unexpected_threshold(
-    backend: BackendInterface,
-) -> None:
-    _onboard_party_expect_error(
-        backend,
-        threshold=3,
-        expected_error=Errors.SW_TOPOLOGY_UNEXPECTED_THRESHOLD_VALUE,
-    )
-
-
-def test_sign_onboarding_expect_error_unexpected_number_of_participants_three(
-    backend: BackendInterface,
-) -> None:
-    _onboard_party_expect_error(
-        backend,
-        validator_uids=[
-            MAINNET_VALIDATOR_PARTY_ID_1,
-            MAINNET_VALIDATOR_PARTY_ID_2,
-            "extra_validator_id_3",
-        ],
-        expected_error=Errors.SW_TOPOLOGY_UNEXPECTED_NUMBER_OF_PARTICIPANTS,
-    )
-
-
-def test_sign_onboarding_expect_error_duplicate_participants(
-    backend: BackendInterface,
-) -> None:
-    _onboard_party_expect_error(
-        backend,
-        validator_uids=[MAINNET_VALIDATOR_PARTY_ID_1, MAINNET_VALIDATOR_PARTY_ID_1],
-        expected_error=Errors.SW_TOPOLOGY_UNEXPECTED_DUPLICATE_PARTICIPANT,
-    )
-
-
-def test_sign_onboarding_expect_error_wrong_party_id_in_party_to_key(
-    backend: BackendInterface,
-) -> None:
-    _onboard_party_expect_error(
-        backend,
-        party_id="invalid_party_id_in_party_to_key",
-        which_party_tx=WhichPartyTx.PARTY_TO_KEY,
-        expected_error=Errors.SW_TOPOLOGY_PARTY_ID_MISMATCH,
-    )
-
-
-def test_sign_onboarding_expect_error_wrong_party_id_in_party_to_participant(
-    backend: BackendInterface,
-) -> None:
-    _onboard_party_expect_error(
-        backend,
-        party_id="invalid_party_id_in_party_to_participant",
-        which_party_tx=WhichPartyTx.PARTY_TO_PARTICIPANT,
-        expected_error=Errors.SW_TOPOLOGY_PARTY_ID_MISMATCH,
-    )
-
-
-def _verify_attestation(
-    attest_pub_key: bytes,
-    multi_hash: bytes,
-    challenge: Optional[bytes],
-    challenge_sig: Optional[bytes],
-    challenge_sig_len: int | None,
-) -> None:
-    assert challenge_sig is not None
-    assert challenge_sig_len is not None
-    assert challenge_sig_len == 64 == len(challenge_sig)
-    assert challenge is not None
-    verify_signature(attest_pub_key, multi_hash + challenge, challenge_sig)
-
-
-def test_sign_onboarding_attested(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
-    attest_key, attest_pub_key = get_keys_bytes("attestations/data/test/priv-key.pem")
-    _onboard_party(backend, scenario_navigator, attestation_keys=(attest_key, attest_pub_key))
-
-
-def test_sign_onboarding_attested_devnet_multi(
-    backend: BackendInterface, scenario_navigator: NavigateWithScenario
-) -> None:
-    attest_key, attest_pub_key = get_keys_bytes("attestations/data/test/priv-key.pem")
-    _onboard_party(
-        backend,
-        scenario_navigator,
-        attestation_keys=(attest_key, attest_pub_key),
-        validator_uids=[DEVNET_VALIDATOR_PARTY_ID_1, DEVNET_VALIDATOR_PARTY_ID_2],
-    )
-
-
-def test_sign_onboarding_attested_testnet_multi(
-    backend: BackendInterface, scenario_navigator: NavigateWithScenario
-) -> None:
-    attest_key, attest_pub_key = get_keys_bytes("attestations/data/test/priv-key.pem")
-    _onboard_party(
-        backend,
-        scenario_navigator,
-        attestation_keys=(attest_key, attest_pub_key),
-        validator_uids=[TESTNET_VALIDATOR_PARTY_ID_1, TESTNET_VALIDATOR_PARTY_ID_2],
-    )
-
-
-def test_sign_onboarding_raw_format_key(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
-    _onboard_party(backend, scenario_navigator, der_key_format=False)
-
-
-def test_sign_onboard_then_preapprove(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
-    for _ in range(10):
-        _onboard_party(backend, scenario_navigator, snapshot_check=False)
-        _sign_and_verify_prepared_transaction(
-            backend,
-            scenario_navigator,
-            tx_json="tests/tx_examples/preapproval_proposal.json",
-            custom_screen_text="Sign transaction to",
-            snapshot_check=False,
-        )
-
-
 def test_sign_withdraw_then_send(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
     for _ in range(2):
-        _sign_and_verify_prepared_transaction(
+        sign_and_verify_prepared_transaction(
             backend,
             scenario_navigator,
             tx_json="tests/tx_examples/token_transfer_withdraw.json",
             custom_screen_text="Sign transaction to",
             snapshot_check=False,
         )
-        _sign_and_verify_prepared_transaction(
+        sign_and_verify_prepared_transaction(
             backend,
             scenario_navigator,
             tx_json="tests/tx_examples/token_transfer.json",
             custom_screen_text="Sign transaction to",
             snapshot_check=False,
         )
-        _sign_and_verify_prepared_transaction(
+        sign_and_verify_prepared_transaction(
             backend,
             scenario_navigator,
             tx_json="tests/tx_examples/token_transfer_accept.json",

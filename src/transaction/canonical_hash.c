@@ -76,6 +76,12 @@ typedef struct {
     uint8_t hash[SHA256_HASH_LEN];
 } PrecomputedNodeHash;
 
+// A cache of the most recent node hashes, not a record of the whole transaction. Children arrive
+// before their parent, and a parent needs only its own children, so MAX_NODE_CHILDREN slots are
+// enough however many nodes the transaction has. Older entries are overwritten on purpose: a
+// 44-node transfer wraps this store and still hashes correctly. A hash a parent still needs but
+// that has been overwritten is a lookup failure, which refuses the transaction rather than
+// producing a wrong hash.
 static PrecomputedNodeHash G_hashed_nodes_store[MAX_NODE_CHILDREN] = {0};
 static size_t G_hashed_nodes_store_count = 0;
 
@@ -184,11 +190,29 @@ void encode_bytes(HashWriter *hw, const uint8_t *data, int32_t len) {
     hw_put(hw, data, (size_t) len);
 }
 
+// The protobuf schemas are proto3, so the decoder does not enforce the fields the comments call
+// required. Any field the host leaves out arrives as a NULL pointer. That is a protocol error and
+// not a broken assumption, so record it and stop encoding. The callers already read
+// get_hash_error() and refuse the transaction with SW_TX_HASH_FAIL.
+MUST_CHECK static bool require_field(const void *p, const char *what) {
+    if (p == NULL) {
+        set_hash_error(HASH_ERROR_MISSING_FIELD, what);
+        return false;
+    }
+    return true;
+}
+
 void encode_string(HashWriter *hw, const char *s) {
+    if (!require_field(s, "Missing string field")) {
+        return;
+    }
     encode_bytes(hw, (const uint8_t *) s, (int32_t) strlen(s));
 }
 
 void encode_hash(HashWriter *hw, const uint8_t h[SHA256_HASH_LEN]) {
+    if (!require_field(h, "Missing hash field")) {
+        return;
+    }
     hw_put(hw, h, SHA256_HASH_LEN);
 }
 
@@ -200,6 +224,10 @@ static uint8_t hex_val(char c) {
 }
 
 void encode_hex_string(HashWriter *hw, const char *hex) {
+    if (!require_field(hex, "Missing hex field")) {
+        return;
+    }
+
     size_t len = strlen(hex);
 
     if (len % 2 != 0) {
@@ -242,6 +270,10 @@ static void wrap_encode_identifier(HashWriter *hw, const void *ctx) {
 }
 
 static void split_dot_and_encode(HashWriter *hw, const char *dotstr) {
+    if (!require_field(dotstr, "Missing dotted name")) {
+        return;
+    }
+
     size_t parts = 1;
     for (const char *p = dotstr; *p; ++p)
         if (*p == '.') ++parts;
@@ -306,12 +338,13 @@ void encode_exercise_start(HashWriter *hw, const Node_ExerciseCb *e, const uint8
     encode_string(hw, e->lf_version);
     hw_put_byte(hw, 0x01);
 
-    // NOTE: Seed always present for exercise nodes
-    LEDGER_ASSERT(seed != NULL, "Missing seed for exercise node");
+    // An exercise node always carries a seed, and always a template id. Both come from the host,
+    // so a missing one is reported by the encoders rather than asserted on: encode_hash refuses a
+    // NULL seed, and an absent template_id leaves the identifier zeroed, which encode_identifier
+    // refuses on its first field.
     encode_hash(hw, seed);
     encode_hex_string(hw, e->contract_id);
     encode_string(hw, e->package_name);
-    LEDGER_ASSERT(e->has_template_id, "Missing template_id in exercise node");
     encode_identifier(hw, (Identifier *) &e->template_id);
     encode_repeated(hw, e->signatories_count, e->signatories, sizeof(char *), wrap_encode_string);
     encode_repeated(hw, e->stakeholders_count, e->stakeholders, sizeof(char *), wrap_encode_string);

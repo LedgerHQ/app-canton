@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Installing PIP dependencies
         run: |
-          pip install pylint
+          pip install pylint==3.3.8
           pip install -r tests/requirements.txt
       - name: Lint Python code
         run: pylint --rc tests/setup.cfg tests/application_client/
@@ -35,8 +35,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Installing PIP dependencies
         run: |
-          pip install mypy
-          mypy --install-types
+          pip install mypy==1.13.0
           pip install -r tests/requirements.txt
       - name: Mypy type checking
         run: mypy tests/application_client/ --ignore-missing-imports

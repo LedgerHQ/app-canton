@@ -26,6 +26,8 @@
 #include "cx.h"
 #include "globals.h"
 #include "pb_node_display_parser.h"
+#include "node_tree_check.h"
+#include "node_values_check.h"
 
 #define SHA256_ALGO_PREFIX ((uint8_t) 0x12)
 #define SHA256_ALGO_LENGTH ((uint8_t) 0x20)
@@ -78,6 +80,8 @@ void clean_context(void) {
     // before resetting the context
     cleanup_display_items();
     reset_display_parser_state();
+    tree_check_reset();
+    values_check_reset();
     // Reset the global context
     explicit_bzero(&G_context, sizeof(G_context));
 }
