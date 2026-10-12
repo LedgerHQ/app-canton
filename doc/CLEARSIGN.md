@@ -58,7 +58,8 @@ In the tables below, a field without a label is read but not shown.
 #### Send tokens
 
 Title: "Review transaction to send tokens".
-If the ticker is CC, the title is "Review transaction to send Canton Coin".
+If the ticker is CC, the title is "Review transaction to send Canton Coin",
+and the last screen is "Sign transaction to send Canton Coin?".
 
 | Label | V1 path | V2 path | Mandatory |
 | --- | --- | --- | --- |
@@ -135,9 +136,13 @@ The fields are read from the disclosed transfer instruction contract.
 - No node matches a screen: blind signing.
 - The token is not known: blind signing.
 - A value appears twice on the same path, or the app has no memory to store it: blind signing.
-- The node tree check or the value check fails (see [TRANSACTION.md](./TRANSACTION.md)):
+- A value has a type that the app cannot show: blind signing.
+- The value check fails (see [TRANSACTION.md](./TRANSACTION.md)): blind signing.
+- The node tree check fails (see [TRANSACTION.md](./TRANSACTION.md)):
   blind signing, or refusal for a tree that a correct host cannot produce.
 - A mandatory field is missing or empty: the app refuses the transaction with `SW_TX_PARSING_FAIL`.
+- A node or an input contract cannot be decoded, or the app has no memory for the displayed fields:
+  the app refuses the transaction with `SW_TX_PARSING_FAIL`.
 
 ---
 
@@ -167,8 +172,8 @@ Title: "Review transaction to add account". Finish: "Sign transaction to add acc
 | Label | Value |
 | --- | --- |
 | Add account | The party ID |
-| Associate to validator 1 | The name of the first participant, for example "Ledger Validator" |
-| Associate to validator 2 | The name of the second participant, for example "Kiln Validator" |
+| Associate to validator 1 | The name of the first participant, for example "Ledger Validator" on MainNet |
+| Associate to validator 2 | The name of the second participant, for example "Kiln Validator" on MainNet |
 | Validators threshold | "2 out of 2" |
 
 The participant IDs and names for MainNet, TestNet and DevNet are in
@@ -176,14 +181,17 @@ The participant IDs and names for MainNet, TestNet and DevNet are in
 
 ### Clear signing availability
 
-The app clear signs only if it received all three mappings and found the "Add account" and
-"Associate to validator 1" fields. If a mapping is missing, the app falls back to blind signing.
+The app clear signs only if it received all three mappings.
+If a mapping is missing, the app falls back to blind signing.
+If all three mappings are present but the "Add account" or "Associate to validator 1" field is
+missing, the app refuses the transaction with `SW_TOPOLOGY_MANDATORY_FIELD_MISSING` (0xC403).
 If a check above fails, the app refuses the transaction with a `0xC1xx` to `0xC4xx` status word
 (see [APDU.md](./APDU.md)).
 
 ### Device challenge
 
-The host can send a 24-byte challenge: 16 bytes of challenge and 8 bytes of deadline.
+The host can send a challenge: a length byte (0x18), then 16 bytes of challenge and
+8 bytes of deadline.
 The app signs the multi-hash and the challenge with the attestation key, which is separate from
 the account key. The response contains this signature after the transaction signature.
 

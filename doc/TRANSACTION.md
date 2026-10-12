@@ -83,8 +83,8 @@ If blind signing is disabled in the settings, the app refuses the transaction.
   - Each holding must belong to the account that receives the value, or go back to the sender
     (change).
   - Exactly one holding must belong to the account that receives the value
-    (two for a transfer to self).
-    When the amount can be compared, that holding must have the displayed amount.
+    (one or two for a transfer to self).
+    When the amount can be compared, one of these holdings must have the displayed amount.
   - For a token standard action, all holdings must be issued by the displayed instrument admin.
     A holding that names an instrument ID must name the displayed one.
   - A transaction behind a pre-approval screen must create no holding.
@@ -99,7 +99,8 @@ To onboard an account, the host sends the topology transactions of the new party
 Each message is a serialized `UntypedVersionedMessage` that contains one `TopologyTransaction`.
 The host can send at most 3 messages.
 
-The operation of each transaction must be `ADD_REPLACE`.
+The operation of each transaction that contains a mapping must be `ADD_REPLACE`.
+A transaction without a mapping is hashed, but the app cannot clear sign it.
 The app accepts these mappings:
 
 | Mapping | Checks |
@@ -141,10 +142,14 @@ Otherwise, it falls back to blind signing.
 ### Device challenge
 
 The host can add a challenge to the first APDU, after the derivation path.
-The challenge is 24 bytes: 16 bytes of random challenge and 8 bytes of deadline.
+The challenge starts with a length byte (0x18), followed by 24 bytes:
+16 bytes of random challenge and 8 bytes of deadline.
+If the length byte is not 0x18 or the data is too short, the app returns `SW_WRONG_DATA_LENGTH`.
 The app signs `multi_hash || challenge` with Ed25519 and a fixed attestation key.
 The attestation key is in the app binary, not derived from the seed.
-A production build sets it with `PROD_CANTON_PRIVATE_KEY`; other builds use a test key.
+A production build sets it with the `PROD_CANTON_PRIVATE_KEY` make variable
+(C define `PROD_PRIVATE_KEY`).
+Other builds use `TEST_ATTESTATION_KEY`.
 The host can check this signature to confirm that a Ledger device signed the onboarding.
 The app returns the challenge signature after the transaction signature.
 
