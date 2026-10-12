@@ -39,7 +39,8 @@ MUST_CHECK bool party_id_from_pubkey(const uint8_t public_key[ED25519_RAW_PUBLIC
     }
 
     canton_hash(0x0C, public_key, ED25519_RAW_PUBLIC_KEY_LEN, tmp);
-    // Format party id as hex(public_key) : hex(sha256(hash purpose (12) || public_key))
+    // Format party id as "ldg::" + hex(fingerprint), where the fingerprint is
+    // 0x12 || 0x20 || sha256(u32_be(12) || public_key) (34 bytes, lowercase hex).
     SNPRINTF((char *) out, out_len, "ldg::%.*h", sizeof(tmp), tmp);
 
     return true;

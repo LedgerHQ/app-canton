@@ -30,18 +30,23 @@
   - [Functional Tests (Ragger based)](#functional-tests-ragger-based)
     - [Linux (Ubuntu)](#linux-ubuntu-2)
     - [macOS / Windows](#macos--windows)
-  - [Unit Tests](#unit-tests)
 - [Contributing](#contributing)
 
 </details>
 
 ## About the project
 
-Canton Network application for Ledger Nano S Plus, Ledger Nano X, Ledger Flex and Ledger Stax.
+Canton Network application for Ledger Nano S Plus, Ledger Nano X, Ledger Stax, Ledger Flex and Apex P devices.
+The supported devices are listed in `ledger_app.toml`.
 
 ## Documentation
 
-This app follows the specification available in the `doc/` folder.
+This app follows the specification available in the `doc/` folder:
+
+- [APDU.md](doc/APDU.md): the APDU commands and status words.
+- [TRANSACTION.md](doc/TRANSACTION.md): the data that the app signs, the hashes and the checks.
+- [SPLIT_TRANSACTION.md](doc/SPLIT_TRANSACTION.md): how the host splits a prepared transaction into components.
+- [CLEARSIGN.md](doc/CLEARSIGN.md): the transactions that the app clear signs and the fields it shows.
 
 ## Quick start guide
 
@@ -119,12 +124,6 @@ If you prefer using a terminal to perform the steps manually, you can use the gu
 
 Setup a compilation environment by following the [shell with docker approach](#with-a-terminal).
 
-Be sure you checkout the submodule:
-
-```shell
-git submodule update --init
-```
-
 From inside the container, use the following command to build the app:
 
 ```shell
@@ -137,6 +136,7 @@ You can choose which device to compile and load for by setting the `BOLOS_SDK` e
 - `BOLOS_SDK=$NANOSP_SDK`
 - `BOLOS_SDK=$STAX_SDK`
 - `BOLOS_SDK=$FLEX_SDK`
+- `BOLOS_SDK=$APEX_P_SDK`
 
 ### Loading on a physical device
 
@@ -154,7 +154,7 @@ for the device you want, run the following command:
 
 ```shell
 # Run this command from the app-builder container terminal.
-make load    # load the app on a Nano S by default
+make load    # load the app on the device selected by BOLOS_SDK
 ```
 
 [Setting the BOLOS_SDK environment variable](#compilation-and-load) will allow you to load
@@ -183,15 +183,14 @@ Enter the Python virtual environment
 # Install Ledgerblue (tool to load the app)
 python3 -m pip install ledgerblue
 # Load the app.
-python3 -m ledgerblue.runScript --scp --fileName bin/app.apdu --elfFile bin/app.elf
+# Replace <device> with the build target, for example nanox.
+python3 -m ledgerblue.runScript --scp --fileName build/<device>/bin/app.apdu --elfFile build/<device>/bin/app.elf
 ```
 
 ## Tests
 
-The Canton Network app comes with different tests :
-
-- Functional Tests implemented with Ledger's [Ragger](https://github.com/LedgerHQ/ragger) test framework.
-- Unit Tests, allowing to test basic simple functions
+The Canton Network app comes with functional tests implemented with Ledger's
+[Ragger](https://github.com/LedgerHQ/ragger) test framework, in the `tests/` directory.
 
 ### Functional Tests (Ragger based)
 
@@ -203,7 +202,7 @@ If you prefer not to, open a terminal and follow the steps below.
 Install the tests requirements:
 
 ```shell
-pip install -r tests/ragger/requirements.txt
+pip install -r tests/requirements.txt
 ```
 
 Then you can:
@@ -211,10 +210,10 @@ Then you can:
 Run the functional tests (here for flex but available for any device once you have built the binaries):
 
 ```shell
-pytest tests/ragger/ --tb=short -v --device flex
+pytest tests/ --tb=short -v --device flex
 ```
 
-Please see the corresponding ducomentation [USAGE](tests/ragger/usage.md)
+Please see the corresponding documentation [USAGE](tests/usage.md)
 
 Or run your app directly with Speculos
 
@@ -239,11 +238,6 @@ Then you can choose to execute the functional tests:
 Or simply run the app on the Speculos emulator:
 
 - `Run with Speculos`.
-
-### Unit Tests
-
-Those tests are available in the directory `tests/unit`. Please see the corresponding [README](tests/unit/README.md)
-to compile and run them.
 
 ## Contributing
 
