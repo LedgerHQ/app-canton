@@ -7,22 +7,18 @@
 #include "constants.h"
 
 /**
- * Convert public key to party id. Party id is defined as:
- * the concatenation of:
- * - the hex-encoded ed25519 public key (32 bytes)
- * - a colon (':', 1 byte)
- * - the hex-encoded sha256 hash of the concatenation of:
- *  - a purpose byte (0x0C for party id)
- *  - the raw public key (32 bytes)
+ * Convert public key to party id. Party id is defined as the concatenation of:
+ * - the prefix "ldg::"
+ * - the lowercase hex encoding of the 34-byte key fingerprint, which is:
+ *  - the multihash prefix 0x12 0x20 (SHA-256, 32 bytes)
+ *  - the sha256 hash of the hash purpose 12 (as 4 bytes, big-endian) and the raw public key
  *
- * party id = hex(public_key) : hex(sha256(hash purpose (12) || public_key))
+ * party id = "ldg::" hex(0x12 || 0x20 || sha256(u32_be(12) || public_key))
  *
  * @param[in]  public_key
- *   Pointer to byte buffer with public key.
- *   The public key is represented as 32 bytes
- *   each coordinate.
+ *   Pointer to byte buffer with the raw Ed25519 public key (32 bytes).
  * @param[out] out
- *   Pointer to output byte buffer for address.
+ *   Pointer to output byte buffer for the null-terminated party id.
  * @param[in]  out_len
  *   Length of output byte buffer.
  *
