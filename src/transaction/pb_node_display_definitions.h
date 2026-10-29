@@ -149,6 +149,8 @@ struct pb_callback_context_t {
     const char *review_title;
     const char *review_finish;
     bool unknown_token;
+    // A field had no label, or a label too long to read, so paths no longer say what a value is.
+    bool unreadable;
     char *last_parsed_contract_id;
     // The action this node signs, read from the node before its argument is walked. Only a record
     // that names this action may choose the screen, so a record nested inside the argument cannot.

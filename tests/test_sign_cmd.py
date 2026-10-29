@@ -652,6 +652,14 @@ def test_sign_token_transfer_wrong_token_id_blind_signing_enabled(
         # The same decoys, this time behind a label too long to fit in the path. A label that cannot
         # be written down can never equal a configured path, so the holding has to read as unknown.
         "values_err_overlong_label",
+        # The transfer argument and bob's holding each hide a decoy (bob, 20) behind a field with no
+        # label, before the real receiver eve and amount 21. A field without a label leaves values
+        # without a trustworthy path, so the screen and the holding check must not read the decoy.
+        "values_err_nested_decoy_display_and_holding",
+        # Only bob's holding hides the decoy, so the holding check alone must catch it
+        "values_err_nested_decoy_holding_only",
+        # Only the transfer argument hides the decoy, so the screen alone must catch it
+        "values_err_nested_decoy_display_only",
         # bob still gets 20 CC, but the change goes to carol instead of alice. The screen names only
         # alice and bob, so a holding for anyone else is value the user was never shown.
         "values_err_third_party_holding",

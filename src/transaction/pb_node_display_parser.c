@@ -610,7 +610,7 @@ static void init_field_path(pb_callback_context_t *ctx) {
     }
     ctx->field_path = (char *) app_mem_alloc(MAX_FIELD_PATH_LEN);
     if (ctx->field_path == NULL) {
-        return;  // push_path, pop_path and find_tx_field all treat a NULL path as "no path"
+        return;  // push_path and find_tx_field both treat a NULL path as "no path"
     }
     memset(ctx->field_path, 0, MAX_FIELD_PATH_LEN);
 }
@@ -665,27 +665,32 @@ static void push_path(pb_callback_context_t *ctx, const char *new_segment) {
     ctx->field_path[current_len] = '\0';
 }
 
-// Pop the last segment from the field path considering escaping
-static void pop_path(pb_callback_context_t *ctx) {
-    LEDGER_ASSERT(ctx != NULL, "NULL context passed to pop_path");
-
-    if (!ctx->tx_fields || !ctx->field_path) return;
-
-    // Find last unescaped dot
-    char *p = ctx->field_path + strlen(ctx->field_path) - 1;
-    while (p >= ctx->field_path) {
-        if (*p == '.' && (p == ctx->field_path || *(p - 1) != '\\')) {
-            *p = '\0';
-            return;
-        }
-        p--;
-    }
-    ctx->field_path[0] = '\0';
-}
-
 /* -------------------------------------------------------------------------- */
 /*  Protobuf decoding callbacks                                               */
 /* -------------------------------------------------------------------------- */
+
+// Lets a field know whether its label or key callback ran.
+typedef struct {
+    pb_callback_context_t *ctx;
+    bool seen;
+} label_read_t;
+
+// Read a record label or a TextMap key and push it onto the path. A segment that does not fit the
+// buffer would be cut and pushed in pieces, so it makes the node unreadable instead.
+MUST_CHECK static bool read_path_segment(pb_istream_t *stream, pb_callback_context_t *ctx) {
+    char buffer[DEFAULT_DECODE_BUFFER_SIZE] = {0};
+
+    if (stream->bytes_left >= sizeof(buffer)) {
+        ctx->unreadable = true;
+        return pb_read(stream, NULL, stream->bytes_left);
+    }
+    if (!pb_read(stream, (pb_byte_t *) buffer, stream->bytes_left)) {
+        PRINTF("Failed to read string from stream\n");
+        return false;
+    }
+    push_path(ctx, buffer);
+    return true;
+}
 
 // Decode the label field of a record field
 MUST_CHECK static bool decode_record_field_label(pb_istream_t *stream,
@@ -695,19 +700,12 @@ MUST_CHECK static bool decode_record_field_label(pb_istream_t *stream,
     LEDGER_ASSERT(arg != NULL, "NULL arg passed to decode_record_field_label");
     UNUSED(field);
 
-    pb_callback_context_t *ctx = (pb_callback_context_t *) (*arg);
-    // Read string from stream
-    char label_buffer[DEFAULT_DECODE_BUFFER_SIZE] = {0};
-
-    size_t len =
-        stream->bytes_left < sizeof(label_buffer) ? stream->bytes_left : sizeof(label_buffer) - 1;
-
-    if (!pb_read(stream, (pb_byte_t *) label_buffer, len)) {
-        PRINTF("Failed to read string from stream\n");
+    label_read_t *label = (label_read_t *) (*arg);
+    pb_callback_context_t *ctx = label->ctx;
+    label->seen = true;
+    if (!read_path_segment(stream, ctx)) {
         return false;
     }
-    // Push the label onto the field path
-    push_path(ctx, label_buffer);
     return true;
 }
 
@@ -754,10 +752,14 @@ MUST_CHECK static bool decode_record_field(pb_istream_t *stream,
         return true;
     }
 
+
     PRINTF("Decoding Record field\n");
+    // Cutting back to this length undoes whatever the label pushed, including nothing.
+    size_t parent_len = ctx->field_path != NULL ? strlen(ctx->field_path) : 0;
+    label_read_t label = {.ctx = ctx, .seen = false};
     cbRecordField rf = {};
     rf.label.funcs.decode = &decode_record_field_label;
-    rf.label.arg = ctx;
+    rf.label.arg = &label;
 
     rf.value.cb_sum.funcs.decode = &decode_value_variant;
     rf.value.cb_sum.arg = ctx;
@@ -767,10 +769,17 @@ MUST_CHECK static bool decode_record_field(pb_istream_t *stream,
         return false;
     }
 
+    // Without a label the value has no path, and a value inside it would take its parent's.
+    if (!label.seen) {
+        ctx->unreadable = true;
+    }
+
     // Check if current field path matches any display configured field
     find_tx_field(ctx, &rf.value);
 
-    pop_path(ctx);
+    if (ctx->field_path != NULL) {
+        ctx->field_path[parent_len] = '\0';
+    }
 
     pb_release(com_daml_ledger_api_v2_cb_RecordField_fields, &rf);
 
@@ -784,6 +793,7 @@ MUST_CHECK static bool decode_value(pb_istream_t *stream, const pb_field_t *fiel
     UNUSED(field);
 
     pb_callback_context_t *ctx = (pb_callback_context_t *) (*arg);
+
 
     PRINTF("Decoding Optional value\n");
 
@@ -810,23 +820,11 @@ MUST_CHECK static bool decode_textmap_key(pb_istream_t *stream,
     LEDGER_ASSERT(arg != NULL, "NULL arg passed to decode_textmap_key");
     UNUSED(field);
 
-    pb_callback_context_t *ctx = (pb_callback_context_t *) (*arg);
-
-    // Read string from stream
-    char key_buffer[DEFAULT_DECODE_BUFFER_SIZE] = {0};
-    size_t len =
-        stream->bytes_left < sizeof(key_buffer) ? stream->bytes_left : sizeof(key_buffer) - 1;
-
-    if (!pb_read(stream, (pb_byte_t *) key_buffer, len)) {
-        PRINTF("Failed to read string from stream\n");
+    label_read_t *key = (label_read_t *) (*arg);
+    key->seen = true;
+    if (!read_path_segment(stream, key->ctx)) {
         return false;
     }
-
-    PRINTF("Decoded TextMap key: %s\n", key_buffer);
-
-    // Push entry key onto path
-    push_path(ctx, key_buffer);
-
     return true;
 }
 
@@ -839,12 +837,15 @@ MUST_CHECK static bool decode_value_text_map(pb_istream_t *stream,
 
     pb_callback_context_t *ctx = (pb_callback_context_t *) (*arg);
 
+
     PRINTF("Decoding TextMap value\n");
 
     cbTextMapEntry entry = com_daml_ledger_api_v2_cb_TextMap_Entry_init_zero;
+    size_t parent_len = ctx->field_path != NULL ? strlen(ctx->field_path) : 0;
+    label_read_t key = {.ctx = ctx, .seen = false};
 
     entry.key.funcs.decode = &decode_textmap_key;
-    entry.key.arg = ctx;
+    entry.key.arg = &key;
     entry.value.cb_sum.funcs.decode = &decode_value_variant;
     entry.value.cb_sum.arg = ctx;
 
@@ -853,11 +854,18 @@ MUST_CHECK static bool decode_value_text_map(pb_istream_t *stream,
         return false;
     }
 
+    // Same as a record field without a label.
+    if (!key.seen && ctx->tx_fields != NULL) {
+        ctx->unreadable = true;
+    }
+
     // Check if current field path matches any display configured field
     find_tx_field(ctx, &entry.value);
 
     // Pop entry key from path
-    pop_path(ctx);
+    if (ctx->field_path != NULL) {
+        ctx->field_path[parent_len] = '\0';
+    }
 
     pb_release(com_daml_ledger_api_v2_cb_TextMap_Entry_fields, &entry);
 
@@ -974,6 +982,15 @@ MUST_CHECK int format_and_populate_display_items(pb_callback_context_t *ctx) {
 
     // Hand the screen's own values to the value check while they are still unformatted.
     values_bind_from_display(ctx->tx_fields, ctx->nb_fields, ctx->destination, ctx->amount_check);
+
+    // The screen cannot be trusted to show the values the node holds.
+    if (ctx->unreadable) {
+        PRINTF("Unlabeled or unreadable field, aborting display population\n");
+        G_context.tx_info.clear_signing_available = false;
+        G_context.tx_info.display_failed = true;
+        cleanup_display_items();
+        goto cleanup;
+    }
 
     // Loop for mandatory check + format callbacks
     for (size_t i = 0; i < ctx->nb_fields; i++) {
