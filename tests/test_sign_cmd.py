@@ -11,6 +11,9 @@ from application_client.canton_command_sender import (
     CantonCommandSender,
     P1SignType,
     Errors,
+    CLA,
+    InsType,
+    P2,
 )
 from application_client.canton_response_unpacker import (
     unpack_get_public_key_response,
@@ -461,6 +464,24 @@ def test_sign_memo_key_nul_blind_signing_disabled(backend: BackendInterface) -> 
     _check_blind_signing_rejection(backend, serialized_parts)
 
 
+# A memo key of 64 bytes does not fit the label buffer, so the path is unknown and clear signing
+# must stop.
+def test_sign_memo_key_64_blind_signing_disabled(backend: BackendInterface) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(
+        "tests/tx_examples/token_transfer_memo_key_64.json"
+    )
+    _check_blind_signing_rejection(backend, serialized_parts)
+
+
+# A memo key of 63 dots fits the label buffer, but each dot is escaped, so the path overflows.
+# The values under it must not take the parent path, so clear signing must stop.
+def test_sign_memo_key_dots_blind_signing_disabled(backend: BackendInterface) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(
+        "tests/tx_examples/token_transfer_memo_key_dots.json"
+    )
+    _check_blind_signing_rejection(backend, serialized_parts)
+
+
 # The memo key appears twice with different texts. The screen cannot tell which one the ledger
 # uses, so clear signing must stop.
 def test_sign_memo_repeated_blind_signing_disabled(backend: BackendInterface) -> None:
@@ -724,9 +745,33 @@ def test_sign_value_too_deep_refused(backend: BackendInterface, tx_name: str) ->
     with pytest.raises(ExceptionRAPDU) as e:
         with client.sign_tx_in_parts(path, *serialized_parts):
             pass
-    # SW_INCORRECT_DATA: the review screen opened, see the comment above.
-    assert e.value.status in (Errors.SW_TX_PARSING_FAIL, Errors.SW_INCORRECT_DATA)
+    if backend.device.name == "nanox":
+        # Nano X has the smallest stack, so every chain must hit the guard there.
+        assert e.value.status == Errors.SW_TX_PARSING_FAIL
+    else:
+        # SW_INCORRECT_DATA: the review screen opened, see the comment above.
+        assert e.value.status in (Errors.SW_TX_PARSING_FAIL, Errors.SW_INCORRECT_DATA)
     client.get_public_key(path=path)
+
+
+# After a refusal, the app must not accept more parts on top of the half-processed transaction.
+# Only a new first APDU starts a new one.
+def test_sign_refused_tx_rejects_more_parts(backend: BackendInterface) -> None:
+    path = "m/44'/6767'/0'/0'/0'"
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(
+        "tests/tx_examples/metadata_err_missing_command_id.json"
+    )
+    client = CantonCommandSender(backend)
+    with pytest.raises(ExceptionRAPDU) as e:
+        with client.sign_tx_in_parts(path, *serialized_parts):
+            pass
+    assert e.value.status == Errors.SW_TX_HASH_FAIL
+
+    with pytest.raises(ExceptionRAPDU) as e:
+        backend.exchange(
+            cla=CLA, ins=InsType.SIGN_TX, p1=P1SignType.P1_SIGN_PREPARED_TRANSACTION, p2=P2.P2_MORE, data=b"\x00"
+        )
+    assert e.value.status == Errors.SW_BAD_STATE
 
 
 # Each fixture is external_sign_ping.json, which has no input contracts, with one metadata string

@@ -94,6 +94,7 @@ static struct {
     const holding_path_config_t *cfg;  // NULL when this create holds no value
     char path[MAX_LABEL_PATH_LEN];
     uint8_t depth;
+    uint32_t records_opened;  // lets a label tell if its value came first
     uint8_t owner[SHA256_HASH_LEN];
     uint8_t amount[SHA256_HASH_LEN];
     uint8_t admin[SHA256_HASH_LEN];
@@ -218,10 +219,20 @@ static void find_holding_field(const cbValue *value) {
 }
 
 /* --- Record descent --- */
+typedef struct {
+    bool labelled;
+    uint32_t records_before;  // ctx.records_opened when the field started
+} label_seen_t;
+
 MUST_CHECK static bool decode_label(pb_istream_t *stream, const pb_field_t *field, void **arg) {
     char label[DEFAULT_DECODE_BUFFER_SIZE] = {0};
     (void) field;
-    *(bool *) (*arg) = true;
+    label_seen_t *seen = (label_seen_t *) (*arg);
+    seen->labelled = true;
+    // A record read before its label was matched under the parent's path.
+    if (ctx.records_opened != seen->records_before) {
+        ctx.unreadable = true;
+    }
     // A label that does not fit would be cut and pushed in pieces.
     if (stream->bytes_left >= sizeof(label)) {
         ctx.unreadable = true;
@@ -247,11 +258,11 @@ MUST_CHECK static bool decode_record_field(pb_istream_t *stream,
     // Where this field's siblings start. Cutting back to it undoes whatever decode_label pushed,
     // including nothing at all when the field has no label or the label did not fit.
     size_t parent_len = strlen(ctx.path);
-    bool labelled = false;
+    label_seen_t seen = {.labelled = false, .records_before = ctx.records_opened};
 
     (void) field, (void) arg;
     rf.label.funcs.decode = &decode_label;
-    rf.label.arg = &labelled;
+    rf.label.arg = &seen;
     rf.value.cb_sum.funcs.decode = &decode_value;
     if (!pb_decode(stream, com_daml_ledger_api_v2_cb_RecordField_fields, &rf)) {
         // pb_decode frees nothing of what it already built, and this field is a local, so the
@@ -260,7 +271,7 @@ MUST_CHECK static bool decode_record_field(pb_istream_t *stream,
         return false;
     }
     // Without a label the value has no path, and a value inside it would take its parent's.
-    if (!labelled && ctx.cfg != NULL) {
+    if (!seen.labelled && ctx.cfg != NULL) {
         ctx.unreadable = true;
     }
     find_holding_field(&rf.value);
@@ -282,6 +293,7 @@ MUST_CHECK static bool decode_value(pb_istream_t *stream, const pb_field_t *fiel
 
     cbRecord *record = field->pData;
     record->fields.funcs.decode = &decode_record_field;
+    ctx.records_opened++;
     ctx.depth++;
     bool ok = pb_decode(stream, com_daml_ledger_api_v2_cb_Record_fields, record);
     ctx.depth--;

@@ -164,6 +164,8 @@ struct pb_callback_context_t {
     // How many records deep the argument walk currently is. The screen is chosen by the outermost
     // record only, which is depth 1.
     uint8_t record_depth;
+    // Counts the nested values opened, so a label can tell if its value came first.
+    uint32_t values_opened;
     // Copied from the matched configuration, so the value check can be handed the displayed values
     // once they are resolved.
     destination_e destination;

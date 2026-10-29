@@ -706,6 +706,7 @@ static void push_path(pb_callback_context_t *ctx, const char *new_segment) {
 typedef struct {
     pb_callback_context_t *ctx;
     bool seen;
+    uint32_t values_before;  // ctx->values_opened when the field started
 } label_read_t;
 
 // Read a record label or a TextMap key and push it onto the path. A segment that does not fit the
@@ -742,6 +743,10 @@ MUST_CHECK static bool decode_record_field_label(pb_istream_t *stream,
     label_read_t *label = (label_read_t *) (*arg);
     pb_callback_context_t *ctx = label->ctx;
     label->seen = true;
+    // A value read before its label was matched under the parent's path.
+    if (ctx->values_opened != label->values_before) {
+        ctx->unreadable = true;
+    }
     if (!read_path_segment(stream, ctx)) {
         return false;
     }
@@ -798,7 +803,7 @@ MUST_CHECK static bool decode_record_field(pb_istream_t *stream,
     PRINTF("Decoding Record field\n");
     // Cutting back to this length undoes whatever the label pushed, including nothing.
     size_t parent_len = ctx->field_path != NULL ? strlen(ctx->field_path) : 0;
-    label_read_t label = {.ctx = ctx, .seen = false};
+    label_read_t label = {.ctx = ctx, .seen = false, .values_before = ctx->values_opened};
     cbRecordField rf = {};
     rf.label.funcs.decode = &decode_record_field_label;
     rf.label.arg = &label;
@@ -867,6 +872,10 @@ MUST_CHECK static bool decode_textmap_key(pb_istream_t *stream,
 
     label_read_t *key = (label_read_t *) (*arg);
     key->seen = true;
+    // Same as a value read before its record label.
+    if (key->ctx->values_opened != key->values_before) {
+        key->ctx->unreadable = true;
+    }
     if (!read_path_segment(stream, key->ctx)) {
         return false;
     }
@@ -890,7 +899,7 @@ MUST_CHECK static bool decode_value_text_map(pb_istream_t *stream,
 
     cbTextMapEntry entry = com_daml_ledger_api_v2_cb_TextMap_Entry_init_zero;
     size_t parent_len = ctx->field_path != NULL ? strlen(ctx->field_path) : 0;
-    label_read_t key = {.ctx = ctx, .seen = false};
+    label_read_t key = {.ctx = ctx, .seen = false, .values_before = ctx->values_opened};
 
     entry.key.funcs.decode = &decode_textmap_key;
     entry.key.arg = &key;
@@ -930,6 +939,9 @@ MUST_CHECK static bool decode_value_variant(pb_istream_t *stream,
 
     cbValue *topmsg = field->message;
     (void) topmsg;
+
+    pb_callback_context_t *opened_ctx = (pb_callback_context_t *) (*arg);
+    opened_ctx->values_opened++;
 
     switch (field->tag) {
         case com_daml_ledger_api_v2_cb_Value_record_tag: {
