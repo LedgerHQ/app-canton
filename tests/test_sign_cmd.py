@@ -678,6 +678,38 @@ def test_sign_values_mismatch_blind_signing_disabled(backend: BackendInterface, 
     _check_blind_signing_rejection(backend, serialized_parts)
 
 
+# Values nest as deep as the host wants, and each level recurses on the device stack. Each fixture
+# wraps one field of external_sign_ping.json 24 times in containers of one kind, or of mixed kinds.
+# The app must never crash on them. When the stack gets too low, the parser refuses the node with
+# SW_TX_PARSING_FAIL. Nano S+ and Apex P have room for the optional, list and variant chains, so the
+# app opens the review screen, which this test sees as SW_INCORRECT_DATA because it does not
+# navigate. In both cases the app must still answer afterwards. Real transactions nest up to 8
+# levels, as in token_transfer.json, and keep passing.
+@pytest.mark.parametrize(
+    "tx_name",
+    [
+        "values_err_deep_optional",
+        "values_err_deep_list",
+        "values_err_deep_record",
+        "values_err_deep_textmap",
+        "values_err_deep_genmap_value",
+        "values_err_deep_genmap_key",
+        "values_err_deep_variant",
+        "values_err_deep_mixed",
+    ],
+)
+def test_sign_value_too_deep_refused(backend: BackendInterface, tx_name: str) -> None:
+    path = "m/44'/6767'/0'/0'/0'"
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(f"tests/tx_examples/{tx_name}.json")
+    client = CantonCommandSender(backend)
+    with pytest.raises(ExceptionRAPDU) as e:
+        with client.sign_tx_in_parts(path, *serialized_parts):
+            pass
+    # SW_INCORRECT_DATA: the review screen opened, see the comment above.
+    assert e.value.status in (Errors.SW_TX_PARSING_FAIL, Errors.SW_INCORRECT_DATA)
+    client.get_public_key(path=path)
+
+
 def test_sign_preapproval_proposal(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
     sign_and_verify_prepared_transaction(
         backend,

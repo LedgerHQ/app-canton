@@ -32,6 +32,22 @@
 #define SHA256_ALGO_PREFIX ((uint8_t) 0x12)
 #define SHA256_ALGO_LENGTH ((uint8_t) 0x20)
 
+// Lowest stack address, set by the SDK linker script. The stack grows down towards it.
+extern char _stack;
+
+// One more level must fit with its leaf work. A record level, the most expensive one, takes
+// about 1 KB on Nano X.
+#define STACK_MARGIN 1536
+
+bool stack_has_room(void) {
+    uintptr_t sp = (uintptr_t) __builtin_frame_address(0);
+    if (sp - (uintptr_t) &_stack < STACK_MARGIN) {
+        PRINTF("Stack too low for another nested value\n");
+        return false;
+    }
+    return true;
+}
+
 void canton_hash(uint8_t purpose,
                  const uint8_t *data,
                  size_t data_len,

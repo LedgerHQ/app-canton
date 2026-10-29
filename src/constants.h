@@ -23,7 +23,15 @@
 /**
  * Maximum transaction length (bytes).
  */
+#include "bolos_target.h"  // TARGET_NANOX, so all files see the same G_context layout
+
+#if defined(TARGET_NANOX)
+// Nano X has the least RAM, and the stack gets what this buffer does not use. Deep transactions
+// need that stack space.
+#define MAX_TRANSACTION_LEN (1024 * 9)
+#else
 #define MAX_TRANSACTION_LEN (1024 * 12)
+#endif
 
 /**
  * Maximum number of child nodes per transaction node.

@@ -752,6 +752,9 @@ MUST_CHECK static bool decode_record_field(pb_istream_t *stream,
         return true;
     }
 
+    if (!stack_has_room()) {
+        return false;
+    }
 
     PRINTF("Decoding Record field\n");
     // Cutting back to this length undoes whatever the label pushed, including nothing.
@@ -794,6 +797,9 @@ MUST_CHECK static bool decode_value(pb_istream_t *stream, const pb_field_t *fiel
 
     pb_callback_context_t *ctx = (pb_callback_context_t *) (*arg);
 
+    if (!stack_has_room()) {
+        return false;
+    }
 
     PRINTF("Decoding Optional value\n");
 
@@ -837,6 +843,9 @@ MUST_CHECK static bool decode_value_text_map(pb_istream_t *stream,
 
     pb_callback_context_t *ctx = (pb_callback_context_t *) (*arg);
 
+    if (!stack_has_room()) {
+        return false;
+    }
 
     PRINTF("Decoding TextMap value\n");
 

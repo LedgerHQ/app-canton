@@ -270,6 +270,9 @@ MUST_CHECK static bool decode_value(pb_istream_t *stream, const pb_field_t *fiel
     if (field->tag != com_daml_ledger_api_v2_cb_Value_record_tag || ctx.depth >= MAX_LABEL_DEPTH) {
         return true;
     }
+    if (!stack_has_room()) {
+        return false;
+    }
 
     cbRecord *record = field->pData;
     record->fields.funcs.decode = &decode_record_field;
