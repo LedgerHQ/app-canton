@@ -351,6 +351,35 @@ static void set_field_value(tx_field_t *field_state, const void *value, pb_size_
     field_state->value_len = len;
 }
 
+// Take a string that nanopb decoded instead of copying it, so a long memo is stored only once.
+// nanopb allocates from the app heap, and pb_release skips the NULL left behind.
+static void take_field_value(tx_field_t *field_state, char **value) {
+    LEDGER_ASSERT(field_state != NULL, "NULL field state passed to take_field_value");
+    LEDGER_ASSERT(value != NULL && *value != NULL, "NULL value passed to take_field_value");
+
+    if (field_state->matched) {
+        PRINTF("%s matched twice\n", (char *) PIC(field_state->config->path));
+        field_state->store_failed = true;
+        return;
+    }
+    field_state->matched = true;
+
+    size_t len = strlen(*value);
+    if (len == 0) {
+        PRINTF("Empty value passed to take_field_value, skipping\n");
+        return;
+    }
+    if (len > MAX_FIELD_VALUE_LEN) {
+        PRINTF("%s is too long to show\n", (char *) PIC(field_state->config->path));
+        field_state->store_failed = true;
+        return;
+    }
+
+    field_state->value = *value;
+    field_state->value_len = len + 1;
+    *value = NULL;
+}
+
 // Helper function to set display configuration
 static void set_display_config(pb_callback_context_t *ctx, const display_config_t *config_source) {
     LEDGER_ASSERT(ctx != NULL, "NULL context passed to set_display_config");
@@ -571,15 +600,15 @@ static void find_tx_field(pb_callback_context_t *ctx, cbValue *value) {
             switch (value->which_sum) {
                 case VALUE_PARTY_TAG:
                     PRINTF("Setting party value: %s\n", value->party);
-                    set_field_value(state, value->party, value->which_sum);
+                    take_field_value(state, &value->party);
                     break;
                 case VALUE_NUMERIC_TAG:
                     PRINTF("Setting numeric value: %s\n", value->numeric);
-                    set_field_value(state, value->numeric, value->which_sum);
+                    take_field_value(state, &value->numeric);
                     break;
                 case VALUE_TEXT_TAG:
                     PRINTF("Setting text value: %s\n", value->text);
-                    set_field_value(state, value->text, value->which_sum);
+                    take_field_value(state, &value->text);
                     break;
                 case VALUE_TIMESTAMP_TAG:
                     // PRINTF("Setting timestamp value: %lld\n", (long long) value->timestamp);
@@ -1058,14 +1087,9 @@ MUST_CHECK int format_and_populate_display_items(pb_callback_context_t *ctx) {
     for (size_t i = 0; i < ctx->nb_fields; i++) {
         tx_field_t *state = &ctx->tx_fields[i];
         if (state->display && state->value != NULL && PIC(state->config->item_name) != NULL) {
-            ctx->tx_info->pairs[idx].value = app_mem_alloc(state->value_len);
-            if (ctx->tx_info->pairs[idx].value == NULL) {
-                G_context.tx_info.clear_signing_available = false;
-                cleanup_display_items();
-                ret = -1;
-                goto cleanup;
-            }
-            memcpy((void *) ctx->tx_info->pairs[idx].value, state->value, state->value_len);
+            // The screen takes the value over, so a long memo is not copied a second time.
+            ctx->tx_info->pairs[idx].value = state->value;
+            state->value = NULL;
             ctx->tx_info->pairs[idx].item = (char *) PIC(state->config->item_name);
             ctx->tx_info->pairs_count++;
             idx++;

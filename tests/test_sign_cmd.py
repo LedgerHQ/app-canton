@@ -433,11 +433,21 @@ def test_sign_token_transfer_usdcx_send_two_holdings(
     )
 
 
-# A memo too long to copy for the screen must stop clear signing, not vanish from the screen.
-# 700 characters decodes but does not fit the copy; retune if heap use changes.
+# CIP-0127 stores lock data in the memo, and Canton asks wallets to accept 1,000 characters. A
+# 1,000-byte memo must be clear-signed in full.
+def test_sign_token_transfer_memo_1000(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
+    sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_memo_1000.json",
+        custom_screen_text="Sign transaction to",
+    )
+
+
+# A memo over the 1,000-byte limit must stop clear signing, not vanish from the screen.
 def test_sign_memo_too_long_blind_signing_disabled(backend: BackendInterface) -> None:
     serialized_parts = Transaction.serialize_from_json_into_tx_parts(
-        "tests/tx_examples/token_transfer_memo_too_long.json"
+        "tests/tx_examples/token_transfer_memo_1001.json"
     )
     _check_blind_signing_rejection(backend, serialized_parts)
 
