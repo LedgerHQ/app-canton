@@ -710,6 +710,28 @@ def test_sign_value_too_deep_refused(backend: BackendInterface, tx_name: str) ->
     client.get_public_key(path=path)
 
 
+# Each fixture is external_sign_ping.json, which has no input contracts, with one metadata string
+# removed. The metadata hash cannot encode a missing string, so the app must refuse the transaction
+# and still answer afterwards. An act_as entry cannot arrive missing, so it has no fixture.
+@pytest.mark.parametrize(
+    "tx_name",
+    [
+        "metadata_err_missing_command_id",
+        "metadata_err_missing_transaction_uuid",
+        "metadata_err_missing_synchronizer_id",
+    ],
+)
+def test_sign_metadata_missing_field_refused(backend: BackendInterface, tx_name: str) -> None:
+    path = "m/44'/6767'/0'/0'/0'"
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(f"tests/tx_examples/{tx_name}.json")
+    client = CantonCommandSender(backend)
+    with pytest.raises(ExceptionRAPDU) as e:
+        with client.sign_tx_in_parts(path, *serialized_parts):
+            pass
+    assert e.value.status == Errors.SW_TX_HASH_FAIL
+    client.get_public_key(path=path)
+
+
 def test_sign_preapproval_proposal(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
     sign_and_verify_prepared_transaction(
         backend,
