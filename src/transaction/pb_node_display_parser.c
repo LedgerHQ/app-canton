@@ -1,7 +1,7 @@
 #include <stdint.h>   // uint*_t
 #include <stdbool.h>  // bool
 #include <stddef.h>   // size_t
-#include <string.h>   // memset, explicit_bzero
+#include <string.h>   // memchr, memset, explicit_bzero
 
 #include "os.h"
 #include "cx.h"
@@ -680,7 +680,11 @@ static void push_path(pb_callback_context_t *ctx, const char *new_segment) {
         new_len++;
     }
 
-    if (current_len + 1 + new_len >= MAX_FIELD_PATH_LEN) return;
+    // A dropped segment would leave the value under its parent's path.
+    if (current_len + 1 + new_len >= MAX_FIELD_PATH_LEN) {
+        ctx->unreadable = true;
+        return;
+    }
 
     // Add dot separator if needed
     if (current_len > 0) ctx->field_path[current_len++] = '.';
@@ -713,9 +717,15 @@ MUST_CHECK static bool read_path_segment(pb_istream_t *stream, pb_callback_conte
         ctx->unreadable = true;
         return pb_read(stream, NULL, stream->bytes_left);
     }
-    if (!pb_read(stream, (pb_byte_t *) buffer, stream->bytes_left)) {
+    size_t len = stream->bytes_left;
+    if (!pb_read(stream, (pb_byte_t *) buffer, len)) {
         PRINTF("Failed to read string from stream\n");
         return false;
+    }
+    // A NUL would cut the segment, so a different key could read as a configured one.
+    if (memchr(buffer, '\0', len) != NULL) {
+        ctx->unreadable = true;
+        return true;
     }
     push_path(ctx, buffer);
     return true;

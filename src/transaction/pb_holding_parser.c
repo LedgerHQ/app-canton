@@ -1,7 +1,7 @@
 #include <stdbool.h>  // bool
 #include <stddef.h>   // size_t
 #include <stdint.h>   // uint*_t
-#include <string.h>   // memmove, strcmp, strlen
+#include <string.h>   // memchr, memmove, strcmp, strlen
 
 #include "cx.h"  // cx_hash_sha256
 #include "ledger_assert.h"
@@ -227,8 +227,14 @@ MUST_CHECK static bool decode_label(pb_istream_t *stream, const pb_field_t *fiel
         ctx.unreadable = true;
         return pb_read(stream, NULL, stream->bytes_left);
     }
-    if (!pb_read(stream, (pb_byte_t *) label, stream->bytes_left)) {
+    size_t len = stream->bytes_left;
+    if (!pb_read(stream, (pb_byte_t *) label, len)) {
         return false;
+    }
+    // A NUL would cut the label, so a different label could read as a configured one.
+    if (memchr(label, '\0', len) != NULL) {
+        ctx.unreadable = true;
+        return true;
     }
     path_push(label);
     return true;

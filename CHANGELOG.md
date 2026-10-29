@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refuse values nested deeper than the stack can hold
 - Fall back to blind signing on unlabeled or overlong value fields
 
+### Changed
+
+- Nano X refuses a transaction part larger than 7 KB (was 12 KB), to keep stack for deep transactions
+
 ## [3.5.1] - 2026-09-29
 
 ### Fixed

@@ -11,8 +11,9 @@
 
 #define MAX_DISPLAY_FIELDS_NB 10
 #define MAX_FIELD_PATH_LEN    128
-// Longest text value the screen shows, without the terminator. Canton asks wallets to accept
-// 1,000-character memos (CIP-0127). A longer value stops clear signing.
+// Longest text value the screen shows, in bytes, without the terminator. Canton asks wallets to
+// accept 1,000-character memos (CIP-0127). This covers them in ASCII. A non-ASCII memo can be
+// longer in bytes, and a longer value stops clear signing.
 #define MAX_FIELD_VALUE_LEN 1000
 
 #define PREAPPROVAL_ASSET_FIELD_INDEX 1
