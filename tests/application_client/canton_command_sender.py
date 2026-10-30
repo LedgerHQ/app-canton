@@ -76,6 +76,7 @@ class Errors(IntEnum):
     SW_TOPOLOGY_UNSUPPORTED_OPERATION = 0xC402
     SW_TOPOLOGY_MANDATORY_FIELD_MISSING = 0xC403
     SW_TOPOLOGY_TOO_MANY_MESSAGES = 0xC404
+    SW_TOPOLOGY_UNSUPPORTED_VERSION = 0xC405
 
 
 def split_message(message: bytes, max_size: int) -> List[bytes]:

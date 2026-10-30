@@ -15,6 +15,7 @@ LAPI_VALUE_PROTO_PATH=$ROOT_PATH/canton-protos-scala/src/main/protobuf/com/daml/
 COMMUNITY_CANTON_PROTO_PATH=$COMMUNITY_PROTO_PATH/com/digitalasset/canton
 PROTOCOL_PROTO_PATH=$COMMUNITY_CANTON_PROTO_PATH/protocol/v30
 CRYPTO_PROTO_PATH=$COMMUNITY_CANTON_PROTO_PATH/crypto/v30
+PROTOCOL_V31_TOPOLOGY_PROTO_PATH=$ROOT_PATH/com/digitalasset/canton/protocol/v31/topology.proto
 LEDGER_API_V2_PATH=$LEDGER_API_PROTO_PATH/com/daml/ledger/api/v2
 OUTPUT_DIR="./"
 NANOPB_GENERATOR="../vendor/nanopb/generator/protoc-gen-nanopb"
@@ -62,6 +63,8 @@ download_if_not_exists "https://raw.githubusercontent.com/googleapis/googleapis/
 download_if_not_exists "https://raw.githubusercontent.com/protocolbuffers/protobuf/refs/heads/main/src/google/protobuf/any.proto" "google/protobuf/any.proto"
 download_if_not_exists "https://raw.githubusercontent.com/protocolbuffers/protobuf/refs/heads/main/src/google/protobuf/duration.proto" "google/protobuf/duration.proto"
 download_if_not_exists "https://raw.githubusercontent.com/protocolbuffers/protobuf/refs/heads/main/src/google/protobuf/timestamp.proto" "google/protobuf/timestamp.proto"
+
+download_if_not_exists "https://raw.githubusercontent.com/digital-asset/canton/v3.7.0/community/base/src/main/protobuf/com/digitalasset/canton/protocol/v31/topology.proto" "com/digitalasset/canton/protocol/v31/topology.proto"
 
 clone_if_not_exists "$PROTO_SOURCE_REPO_URL" "$PROTO_SOURCE_REPO_REF" "src/main/protobuf/com/daml/ledger/api/v2"
 clone_if_not_exists "$PROTO_SOURCE_REPO_URL" "$PROTO_SOURCE_REPO_REF" "src/main/protobuf/com/daml/ledger/api/v2/interactive"
@@ -342,7 +345,14 @@ com.digitalasset.canton.protocol.v30.SignedTopologyTransaction.transaction type:
 EOF
 
 
-# Generate nanopb C/H code for protobuf messages
+echo "topology_v31.options file..."
+cat > topology_v31.options << 'EOF'
+# Canton 3.7.0 / protocol version 37 topology transactions.
+# Keep bounded participant data because the device reviews exactly two validators.
+com.digitalasset.canton.protocol.v31.PartyToParticipant.participants type:FT_POINTER
+com.digitalasset.canton.protocol.v31.PartyToParticipant.participants max_count:8
+EOF
+
 generate_nanopb_code() {
   local include_paths=$1
   local proto_file=$2
@@ -389,7 +399,7 @@ sed -i -E 's/\bbool bool\b/bool bool_/g; s/\bEnum enum\b/Enum enum_/g' com/daml/
 sed -i -E 's/\bbool bool\b/bool bool_/g; s/\bEnum enum\b/Enum enum_/g' com/daml/ledger/api/v2/value_cb.proto
 
 # Remove scalapb annotations from all proto files to avoid nanopb generation issues (we don't use them anyway as we are in C)
-find "$PROTOCOL_PROTO_PATH" "$CRYPTO_PROTO_PATH" -name "*.proto" \
+find "$PROTOCOL_PROTO_PATH" "$CRYPTO_PROTO_PATH" "$(dirname "$PROTOCOL_V31_TOPOLOGY_PROTO_PATH")" -name "*.proto" \
   -exec sed -i -E '/option \(scalapb\.message\)|import "scalapb\/scalapb.proto";/d' {} +
 
 # Generate value.proto first to ensure all dependencies are available
@@ -417,6 +427,8 @@ generate_nanopb_code "$COMMUNITY_PROTO_PATH" "$PROTOCOL_PROTO_PATH/traffic_contr
 generate_nanopb_code "$COMMUNITY_PROTO_PATH" "$PROTOCOL_PROTO_PATH/synchronizer_parameters.proto"
 generate_nanopb_code "$COMMUNITY_PROTO_PATH" "$PROTOCOL_PROTO_PATH/sequencing_parameters.proto"
 generate_nanopb_code "$COMMUNITY_PROTO_PATH" "$PROTOCOL_PROTO_PATH/topology.proto"
+cp topology_v31.options topology.options
+generate_nanopb_code "." "com/digitalasset/canton/protocol/v31/topology.proto"
 generate_nanopb_code "$COMMUNITY_PROTO_PATH" "$CRYPTO_PROTO_PATH/crypto.proto"
 
 # Generate other ledger API files
