@@ -6,6 +6,7 @@
 #include "com/daml/ledger/api/v2/interactive/device.pb.h"
 #include "com/digitalasset/canton/version/v1/untyped_versioned_message.pb.h"
 #include "com/digitalasset/canton/protocol/v30/topology.pb.h"
+#include "com/digitalasset/canton/protocol/v31/topology.pb.h"
 
 typedef com_daml_ledger_api_v2_interactive_DeviceDamlTransaction DamlTransaction;
 typedef com_daml_ledger_api_v2_interactive_DeviceDamlTransaction_Node Node;
@@ -88,6 +89,7 @@ typedef com_daml_ledger_api_v2_Identifier Identifier;
 
 typedef com_digitalasset_canton_version_v1_UntypedVersionedMessage UntypedVersionedMessage;
 typedef com_digitalasset_canton_protocol_v30_TopologyTransaction TopologyTransaction;
+typedef com_digitalasset_canton_protocol_v31_TopologyTransaction TopologyTransactionV31;
 typedef com_digitalasset_canton_crypto_v30_CryptoKeyFormat CryptoKeyFormat;
 
 #define PARTY_ID_LEN 74  // 3 + 2 + 2*34 + 1 = 74 ldg::hex(fingerprint) + null terminator
@@ -100,7 +102,8 @@ typedef enum {
     MEMO_LENGTH_ERROR = -4,
     MEMO_PARSING_ERROR = -5,
     MEMO_ENCODING_ERROR = -6,
-    WRONG_LENGTH_ERROR = -7
+    WRONG_LENGTH_ERROR = -7,
+    UNSUPPORTED_VERSION_ERROR = -8
 } parser_status_e;
 
 /**
@@ -117,5 +120,7 @@ typedef struct {
         Node node;                                 /// DAML transaction node
         InputContract input_contract;              /// input contract
         TopologyTransaction topology_transaction;  /// topology transaction
+        TopologyTransactionV31 topology_transaction_v31;  /// PV37 topology transaction
     };
+    int32_t topology_proto_version;  /// decoded topology schema version, 0 outside onboarding
 } transaction_parts_ctx_t;

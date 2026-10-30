@@ -11,6 +11,7 @@ from ragger.backend.interface import BackendInterface
 from ragger.error import ExceptionRAPDU
 from ragger.navigator.navigation_scenario import NavigateWithScenario
 
+from com.digitalasset.canton.version.v1.untyped_versioned_message_pb2 import UntypedVersionedMessage
 from application_client.canton_transaction import Transaction
 from application_client.canton_command_sender import (
     CantonCommandSender,
@@ -354,6 +355,23 @@ def _verify_attestation(
     assert challenge_sig_len == 64 == len(challenge_sig)
     assert challenge is not None
     verify_signature(attest_pub_key, multi_hash + challenge, challenge_sig)
+
+
+def test_sign_onboarding_rejects_unsupported_topology_version(backend: BackendInterface) -> None:
+    """Never decode a future topology schema as v30.
+
+    Canton 3.7.0/PV37 uses wrapper version 31; any other wrapper version is
+    rejected before the device attempts to review or sign its payload.
+    """
+    path = "m/44'/6767'/0'/0'/0'"
+    client = CantonCommandSender(backend)
+    unsupported = UntypedVersionedMessage(data=b"\x08\x01", version=32).SerializeToString()
+
+    with pytest.raises(ExceptionRAPDU) as e:
+        with client.sign_topology_tx(path=path, transactions=[unsupported]):
+            pass
+
+    assert e.value.status == Errors.SW_TOPOLOGY_UNSUPPORTED_VERSION
 
 
 def test_sign_onboarding_attested(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:

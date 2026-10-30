@@ -21,6 +21,7 @@
 #include "com/daml/ledger/api/v2/interactive/device.pb.h"
 #include "com/digitalasset/canton/version/v1/untyped_versioned_message.pb.h"
 #include "com/digitalasset/canton/protocol/v30/topology.pb.h"
+#include "com/digitalasset/canton/protocol/v31/topology.pb.h"
 
 #include "pb_decode.h"
 #include "ledger_assert.h"
@@ -99,14 +100,31 @@ MUST_CHECK parser_status_e proto_deserialize_topology_transaction(buffer_t *buf,
         pb_istream_from_buffer(tx_ctx->tx_parts_ctx.untyped_versioned_msg.data->bytes,
                                tx_ctx->tx_parts_ctx.untyped_versioned_msg.data->size);
 
-    if (!pb_decode(&stream2,
-                   com_digitalasset_canton_protocol_v30_TopologyTransaction_fields,
-                   &tx_ctx->tx_parts_ctx.topology_transaction)) {
-        PRINTF("Failed to decode Topology Transaction: %s\n", PB_GET_ERROR(&stream2));
-        return VALUE_PARSING_ERROR;
+    switch (tx_ctx->tx_parts_ctx.untyped_versioned_msg.version) {
+        case 30:
+            if (!pb_decode(&stream2,
+                           com_digitalasset_canton_protocol_v30_TopologyTransaction_fields,
+                           &tx_ctx->tx_parts_ctx.topology_transaction)) {
+                PRINTF("Failed to decode v30 Topology Transaction: %s\n", PB_GET_ERROR(&stream2));
+                return VALUE_PARSING_ERROR;
+            }
+            break;
+        case 31:
+            if (!pb_decode(&stream2,
+                           com_digitalasset_canton_protocol_v31_TopologyTransaction_fields,
+                           &tx_ctx->tx_parts_ctx.topology_transaction_v31)) {
+                PRINTF("Failed to decode v31 Topology Transaction: %s\n", PB_GET_ERROR(&stream2));
+                return VALUE_PARSING_ERROR;
+            }
+            break;
+        default:
+            PRINTF("Unsupported topology transaction version: %d\n",
+                   tx_ctx->tx_parts_ctx.untyped_versioned_msg.version);
+            return UNSUPPORTED_VERSION_ERROR;
     }
+    tx_ctx->tx_parts_ctx.topology_proto_version = tx_ctx->tx_parts_ctx.untyped_versioned_msg.version;
 
-    PRINTF("Decoded Topology Transaction.\n");
+    PRINTF("Decoded Topology Transaction version %d.\n", tx_ctx->tx_parts_ctx.topology_proto_version);
 
     return PARSING_OK;
 }
@@ -130,6 +148,17 @@ void release_topology_transaction(transaction_ctx_t *tx_ctx) {
 
     pb_release(com_digitalasset_canton_version_v1_UntypedVersionedMessage_fields,
                &tx_ctx->tx_parts_ctx.untyped_versioned_msg);
-    pb_release(com_digitalasset_canton_protocol_v30_TopologyTransaction_fields,
-               &tx_ctx->tx_parts_ctx.topology_transaction);
+    switch (tx_ctx->tx_parts_ctx.topology_proto_version) {
+        case 30:
+            pb_release(com_digitalasset_canton_protocol_v30_TopologyTransaction_fields,
+                       &tx_ctx->tx_parts_ctx.topology_transaction);
+            break;
+        case 31:
+            pb_release(com_digitalasset_canton_protocol_v31_TopologyTransaction_fields,
+                       &tx_ctx->tx_parts_ctx.topology_transaction_v31);
+            break;
+        default:
+            break;
+    }
+    tx_ctx->tx_parts_ctx.topology_proto_version = 0;
 }

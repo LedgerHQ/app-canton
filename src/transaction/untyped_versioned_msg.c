@@ -531,8 +531,14 @@ cleanup:
     return ret;
 }
 
-// Process party to participant mapping
-static int process_party_to_participant(const PartyToParticipant *mapping,
+// Process a v30 or v31 party-to-participant mapping after the version dispatcher has extracted
+// the common fields. PV37 changed its wire type and field number, so sharing the review policy
+// here prevents accepting a v31 mapping through the v30 decoder by accident.
+static int process_party_to_participant(const char *party,
+                                        uint32_t threshold,
+                                        const char *const *participants,
+                                        size_t participants_count,
+                                        bool has_party_signing_keys,
                                         transaction_ctx_t *tx_info) {
     LEDGER_ASSERT(tx_info != NULL, "NULL tx_ctx in process_party_to_participant");
 
@@ -544,43 +550,43 @@ static int process_party_to_participant(const PartyToParticipant *mapping,
     int ret = 0;
 
     // Pre-checks and mandatory count checks
-    if (mapping->party == NULL) {
+    if (party == NULL || party[0] == '\0') {
         ret = SW_TOPOLOGY_MISSING_PARTY;
         goto cleanup;
     }
 
-    if (!check_party_id_value(mapping->party)) {
+    if (!check_party_id_value(party)) {
         ret = SW_TOPOLOGY_PARTY_ID_MISMATCH;
         goto cleanup;
     }
 
-    if (mapping->participants_count != EXPECTED_PARTICIPANTS_NB) {
+    if (participants_count != EXPECTED_PARTICIPANTS_NB) {
         ret = SW_TOPOLOGY_UNEXPECTED_NUMBER_OF_PARTICIPANTS;
         goto cleanup;
     }
 
-    if (mapping->threshold != mapping->participants_count) {
+    if (threshold != participants_count) {
         ret = SW_TOPOLOGY_UNEXPECTED_THRESHOLD_VALUE;
         goto cleanup;
     }
 
-    if (mapping->participants == NULL) {
+    if (participants == NULL) {
         ret = SW_TOPOLOGY_MISSING_PARTICIPANT_DATA;
         goto cleanup;
     }
 
-    if (mapping->has_party_signing_keys) {
+    if (has_party_signing_keys) {
         ret = SW_TOPOLOGY_UNEXPECTED_PARTY_SIGNING_KEYS;
         goto cleanup;
     }
 
     // Set party field
-    LEDGER_ASSERT(set_field_value(tx_info, PARTY_FIELD_IDX, mapping->party) == true,
+    LEDGER_ASSERT(set_field_value(tx_info, PARTY_FIELD_IDX, party) == true,
                   "Failed to set party field");
 
     size_t configs_count =
         sizeof(VALID_PARTICIPANTS_CONFIGS) / sizeof(VALID_PARTICIPANTS_CONFIGS[0]);
-    size_t pc = mapping->participants_count;
+    size_t pc = participants_count;
     uint8_t found_valid = 0;
     bool matched_valid[EXPECTED_PARTICIPANTS_NB] = {false};
     char *participant_names[EXPECTED_PARTICIPANTS_NB] = {NULL};
@@ -594,7 +600,7 @@ static int process_party_to_participant(const PartyToParticipant *mapping,
 
         if (config.count == pc) {
             for (size_t j = 0; j < pc; j++) {
-                const char *uid = (const char *) PIC(mapping->participants[j].participant_uid);
+                const char *uid = participants[j];
                 if (uid == NULL || *uid == '\0') {
                     ret = SW_TOPOLOGY_MISSING_PARTICIPANT_DATA;
                     goto cleanup;
@@ -636,13 +642,13 @@ static int process_party_to_participant(const PartyToParticipant *mapping,
     }
 
     // Set threshold field
-    if (mapping->threshold > 1) {
+    if (threshold > 1) {
         char threshold_str[DEFAULT_DECODE_BUFFER_SIZE];
         SNPRINTF(threshold_str,
                  sizeof(threshold_str),
                  "%u out of %u",
-                 mapping->threshold,
-                 mapping->participants_count);
+                 threshold,
+                 participants_count);
 
         LEDGER_ASSERT(set_field_value(tx_info, THRESHOLD_FIELD_IDX, threshold_str) == true,
                       "Failed to set threshold field");
@@ -665,45 +671,111 @@ static int parse_topology_transaction_for_display(buffer_t *buf) {
     int32_t ret = 0;
     parser_status_e status = proto_deserialize_topology_transaction(buf, &G_context.tx_info);
 
+    if (status == UNSUPPORTED_VERSION_ERROR) {
+        ret = SW_TOPOLOGY_UNSUPPORTED_VERSION;
+        goto exit;
+    }
     if (status != PARSING_OK) {
         ret = status;
         goto exit;
     }
 
-    if (G_context.tx_info.tx_parts_ctx.topology_transaction.has_mapping == false) {
-        ret = 0;
-        goto exit;
-    }
-
-    if (G_context.tx_info.tx_parts_ctx.topology_transaction.operation !=
-        com_digitalasset_canton_protocol_v30_Enums_TopologyChangeOp_TOPOLOGY_CHANGE_OP_ADD_REPLACE) {
-        ret = SW_TOPOLOGY_UNSUPPORTED_OPERATION;
-        goto exit;
-    }
-
-    switch (G_context.tx_info.tx_parts_ctx.topology_transaction.mapping.which_mapping) {
-        case TOPOLOGY_MAPPING_NAMESPACE_DELEGATION_TAG:
-            PRINTF("Processing namespace delegation mapping\n");
-            ret = process_namespace_delegation(&G_context.tx_info.tx_parts_ctx.topology_transaction
-                                                    .mapping.mapping.namespace_delegation,
-                                               &G_context.tx_info);
-            break;
-        case TOPOLOGY_MAPPING_PARTY_TO_PARTICIPANT_TAG:
-            PRINTF("Processing party to participant mapping\n");
-            ret = process_party_to_participant(&G_context.tx_info.tx_parts_ctx.topology_transaction
-                                                    .mapping.mapping.party_to_participant,
-                                               &G_context.tx_info);
-            break;
-        case TOPOLOGY_MAPPING_PARTY_TO_KEY_MAPPING_TAG:
-            PRINTF("Processing party to key mapping\n");
-            ret = process_party_to_key_mapping(&G_context.tx_info.tx_parts_ctx.topology_transaction
-                                                    .mapping.mapping.party_to_key_mapping,
-                                               &G_context.tx_info);
-            break;
-        default:
-            PRINTF("Unknown mapping type in topology transaction: %d\n",
-                   G_context.tx_info.tx_parts_ctx.topology_transaction.mapping.which_mapping);
-            ret = SW_TOPOLOGY_UNKNOWN_MAPPING_TYPE;
+    if (G_context.tx_info.tx_parts_ctx.topology_proto_version == 30) {
+        TopologyTransaction *transaction = &G_context.tx_info.tx_parts_ctx.topology_transaction;
+        if (!transaction->has_mapping) {
+            goto exit;
+        }
+        if (transaction->operation !=
+            com_digitalasset_canton_protocol_v30_Enums_TopologyChangeOp_TOPOLOGY_CHANGE_OP_ADD_REPLACE) {
+            ret = SW_TOPOLOGY_UNSUPPORTED_OPERATION;
+            goto exit;
+        }
+        switch (transaction->mapping.which_mapping) {
+            case TOPOLOGY_MAPPING_NAMESPACE_DELEGATION_TAG:
+                ret = process_namespace_delegation(&transaction->mapping.mapping.namespace_delegation,
+                                                   &G_context.tx_info);
+                break;
+            case TOPOLOGY_MAPPING_PARTY_TO_PARTICIPANT_TAG: {
+                PartyToParticipant *mapping = &transaction->mapping.mapping.party_to_participant;
+                const char *participants[EXPECTED_PARTICIPANTS_NB] = {NULL};
+                if (mapping->participants_count > EXPECTED_PARTICIPANTS_NB) {
+                    ret = SW_TOPOLOGY_UNEXPECTED_NUMBER_OF_PARTICIPANTS;
+                    break;
+                }
+                for (size_t i = 0; i < mapping->participants_count; i++) {
+                    participants[i] = mapping->participants[i].participant_uid;
+                }
+                ret = process_party_to_participant(mapping->party,
+                                                   mapping->threshold,
+                                                   participants,
+                                                   mapping->participants_count,
+                                                   mapping->has_party_signing_keys,
+                                                   &G_context.tx_info);
+                break;
+            }
+            case TOPOLOGY_MAPPING_PARTY_TO_KEY_MAPPING_TAG:
+                ret = process_party_to_key_mapping(&transaction->mapping.mapping.party_to_key_mapping,
+                                                   &G_context.tx_info);
+                break;
+            default:
+                ret = SW_TOPOLOGY_UNKNOWN_MAPPING_TYPE;
+                break;
+        }
+    } else if (G_context.tx_info.tx_parts_ctx.topology_proto_version == 31) {
+        TopologyTransactionV31 *transaction = &G_context.tx_info.tx_parts_ctx.topology_transaction_v31;
+        if (!transaction->has_mapping) {
+            goto exit;
+        }
+        if (transaction->operation !=
+            com_digitalasset_canton_protocol_v30_Enums_TopologyChangeOp_TOPOLOGY_CHANGE_OP_ADD_REPLACE) {
+            ret = SW_TOPOLOGY_UNSUPPORTED_OPERATION;
+            goto exit;
+        }
+        switch (transaction->mapping.which_mapping) {
+            case com_digitalasset_canton_protocol_v31_TopologyMapping_namespace_delegation_tag:
+                ret = process_namespace_delegation(&transaction->mapping.mapping.namespace_delegation,
+                                                   &G_context.tx_info);
+                break;
+            case com_digitalasset_canton_protocol_v31_TopologyMapping_party_to_participant_tag: {
+                com_digitalasset_canton_protocol_v31_PartyToParticipant *mapping =
+                    &transaction->mapping.mapping.party_to_participant;
+                const char *participants[EXPECTED_PARTICIPANTS_NB] = {NULL};
+                if (mapping->participants_count > EXPECTED_PARTICIPANTS_NB) {
+                    ret = SW_TOPOLOGY_UNEXPECTED_NUMBER_OF_PARTICIPANTS;
+                    break;
+                }
+                for (size_t i = 0; i < mapping->participants_count; i++) {
+                    // PV37 replaced the v30 onboarding marker with a state enum. This signing
+                    // flow authorizes onboarding only; reviewing another lifecycle transition as
+                    // an account-add would be misleading.
+                    if (mapping->participants[i].state !=
+                        com_digitalasset_canton_protocol_v31_PartyToParticipant_HostingParticipant_HostingState_HOSTING_STATE_ONBOARDING) {
+                        ret = SW_TOPOLOGY_MISSING_PARTICIPANT_DATA;
+                        break;
+                    }
+                    participants[i] = mapping->participants[i].participant_uid;
+                }
+                if (ret != 0) {
+                    break;
+                }
+                ret = process_party_to_participant(mapping->party,
+                                                   mapping->threshold,
+                                                   participants,
+                                                   mapping->participants_count,
+                                                   mapping->has_party_signing_keys,
+                                                   &G_context.tx_info);
+                break;
+            }
+            case com_digitalasset_canton_protocol_v31_TopologyMapping_party_to_key_mapping_tag:
+                ret = process_party_to_key_mapping(&transaction->mapping.mapping.party_to_key_mapping,
+                                                   &G_context.tx_info);
+                break;
+            default:
+                ret = SW_TOPOLOGY_UNKNOWN_MAPPING_TYPE;
+                break;
+        }
+    } else {
+        ret = SW_TOPOLOGY_UNSUPPORTED_VERSION;
     }
 
 exit:

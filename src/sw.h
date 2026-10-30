@@ -175,3 +175,7 @@
  * Status word for more topology messages in one signing flow than the app can hold.
  */
 #define SW_TOPOLOGY_TOO_MANY_MESSAGES 0xC404
+/**
+ * Status word for a topology schema version the device cannot review safely.
+ */
+#define SW_TOPOLOGY_UNSUPPORTED_VERSION 0xC405
