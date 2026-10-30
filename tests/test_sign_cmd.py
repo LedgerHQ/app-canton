@@ -449,9 +449,7 @@ def test_sign_token_transfer_memo_1000(backend: BackendInterface, scenario_navig
 
 # A memo over the 1,000-byte limit must stop clear signing, not vanish from the screen.
 def test_sign_memo_too_long_blind_signing_disabled(backend: BackendInterface) -> None:
-    serialized_parts = Transaction.serialize_from_json_into_tx_parts(
-        "tests/tx_examples/token_transfer_memo_1001.json"
-    )
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts("tests/tx_examples/token_transfer_memo_1001.json")
     _check_blind_signing_rejection(backend, serialized_parts)
 
 
