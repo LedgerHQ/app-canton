@@ -4,3 +4,4 @@ ecdsa>=0.16.1,<0.17.0
 pycryptodome==3.23.0
 types-protobuf==7.35.1.20260906
 coloredlogs==15.0.1
+PyQt6<6.12
