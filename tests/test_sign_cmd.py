@@ -462,6 +462,19 @@ def test_sign_memo_key_nul_blind_signing_disabled(backend: BackendInterface) -> 
     _check_blind_signing_rejection(backend, serialized_parts)
 
 
+# A label sent as an empty string leaves the path unchanged, so at the top of the argument the fields
+# inside it read as the argument's own. The fixture hides a memo there behind the label "QZ", and
+# the test rewrites that label to two empty labels, which keeps every length the same.
+def test_sign_memo_empty_label_blind_signing_disabled(backend: BackendInterface) -> None:
+    daml_tx, nodes, metadata, contracts = Transaction.serialize_from_json_into_tx_parts(
+        "tests/tx_examples/token_transfer_memo_empty_label.json"
+    )
+    labelled = [i for i, node in enumerate(nodes) if b"\x0a\x02QZ" in node]
+    assert len(labelled) == 1
+    nodes[labelled[0]] = nodes[labelled[0]].replace(b"\x0a\x02QZ", b"\x0a\x00\x0a\x00")
+    _check_blind_signing_rejection(backend, [daml_tx, nodes, metadata, contracts])
+
+
 # A memo key of 64 bytes does not fit the label buffer, so the path is unknown and clear signing
 # must stop.
 def test_sign_memo_key_64_blind_signing_disabled(backend: BackendInterface) -> None:

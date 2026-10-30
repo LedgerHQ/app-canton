@@ -242,8 +242,9 @@ MUST_CHECK static bool decode_label(pb_istream_t *stream, const pb_field_t *fiel
     if (!pb_read(stream, (pb_byte_t *) label, len)) {
         return false;
     }
-    // A NUL would cut the label, so a different label could read as a configured one.
-    if (memchr(label, '\0', len) != NULL) {
+    // A NUL would cut the label, so a different label could read as a configured one. An empty
+    // label adds no level, so the values under it would read as the parent's own.
+    if (len == 0 || memchr(label, '\0', len) != NULL) {
         ctx.unreadable = true;
         return true;
     }

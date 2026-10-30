@@ -723,8 +723,9 @@ MUST_CHECK static bool read_path_segment(pb_istream_t *stream, pb_callback_conte
         PRINTF("Failed to read string from stream\n");
         return false;
     }
-    // A NUL would cut the segment, so a different key could read as a configured one.
-    if (memchr(buffer, '\0', len) != NULL) {
+    // A NUL would cut the segment, so a different key could read as a configured one. An empty
+    // segment adds no level, so the values under it would read as the parent's own.
+    if (len == 0 || memchr(buffer, '\0', len) != NULL) {
         ctx->unreadable = true;
         return true;
     }
