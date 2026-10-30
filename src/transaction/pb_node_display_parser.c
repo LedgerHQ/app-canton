@@ -723,8 +723,11 @@ MUST_CHECK static bool read_path_segment(pb_istream_t *stream, pb_callback_conte
         PRINTF("Failed to read string from stream\n");
         return false;
     }
-    // A NUL would cut the segment, so a different key could read as a configured one. An empty
-    // segment adds no level, so the values under it would read as the parent's own.
+    // Stop clear signing if the label or key is empty or contains a NUL byte.
+    // - A NUL byte ends a C string early. "memo\0x" would then read as "memo", so the
+    //   screen could show a field that the ledger stores under another name.
+    // - An empty label adds nothing to the path. The fields inside it would then get the
+    //   same path as the fields one level up, so they could pass for real fields.
     if (len == 0 || memchr(buffer, '\0', len) != NULL) {
         ctx->unreadable = true;
         return true;
