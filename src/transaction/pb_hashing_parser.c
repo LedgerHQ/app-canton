@@ -10,6 +10,7 @@
 #include "constants.h"
 #include "node_tree_check.h"
 #include "node_values_check.h"
+#include "utils.h"
 
 #define VALUE_ELEM_COUNT_NONE -1
 
@@ -447,6 +448,9 @@ MUST_CHECK static bool decode_record_field(pb_istream_t *stream,
 
     PRINTF("Decoding Record fields\n");
 
+    if (!stack_has_room()) {
+        return false;
+    }
     if (!count_record_field_helper(stream)) {
         return false;
     }
@@ -473,6 +477,9 @@ MUST_CHECK static bool decode_list_elem(pb_istream_t *stream, const pb_field_t *
     LEDGER_ASSERT(stream != NULL, "NULL stream passed to decode_list_elem");
 
     PRINTF("Decoding List elements\n");
+    if (!stack_has_room()) {
+        return false;
+    }
     if (!count_value_helper(stream)) {
         return false;
     }
@@ -499,6 +506,9 @@ MUST_CHECK static bool decode_value(pb_istream_t *stream, const pb_field_t *fiel
     LEDGER_ASSERT(stream != NULL, "NULL stream passed to decode_value");
 
     PRINTF("Decoding Optional value\n");
+    if (!stack_has_room()) {
+        return false;
+    }
     if (!count_value_helper(stream)) {
         return false;
     }
@@ -529,6 +539,9 @@ MUST_CHECK static bool decode_text_map_entry(pb_istream_t *stream,
 
     PRINTF("Decoding TextMap entry\n");
 
+    if (!stack_has_room()) {
+        return false;
+    }
     if (!count_text_map_helper(stream)) {
         return false;
     }
@@ -559,6 +572,9 @@ MUST_CHECK static bool decode_gen_map_entry(pb_istream_t *stream,
     LEDGER_ASSERT(stream != NULL, "NULL stream passed to decode_gen_map_entry");
 
     PRINTF("Decoding GenMap entry\n");
+    if (!stack_has_room()) {
+        return false;
+    }
     if (!count_gen_map_helper(stream)) {
         return false;
     }

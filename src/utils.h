@@ -11,6 +11,14 @@
 #define MUST_CHECK __attribute__((warn_unused_result))
 
 /**
+ * @brief Check that the stack has room for one more level of a recursive parse.
+ *
+ * The host chooses how deep transaction values nest. A parser that recurses on them calls this
+ * before each level, and refuses the value instead of overflowing the stack.
+ */
+MUST_CHECK bool stack_has_room(void);
+
+/**
  * @brief Compute a fingerprint and add a 2-byte prefix to indicate SHA-256 with length.
  *
  * @param[in]  purpose   A single-byte value indicating the hash purpose

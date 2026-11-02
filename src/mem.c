@@ -10,7 +10,8 @@
 #include "mem.h"
 #include "app_mem_utils.h"
 
-#define SIZE_MEM_BUFFER (1024 * 3)
+// A 1,000-byte memo needs one free block of that size while nanopb decodes it.
+#define SIZE_MEM_BUFFER (1024 * 5)
 
 static uint8_t mem_buffer[SIZE_MEM_BUFFER] __attribute__((aligned(sizeof(intmax_t))));
 

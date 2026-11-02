@@ -11,6 +11,10 @@
 
 #define MAX_DISPLAY_FIELDS_NB 10
 #define MAX_FIELD_PATH_LEN    128
+// Longest text value the screen shows, in bytes, without the terminator. Canton asks wallets to
+// accept 1,000-character memos (CIP-0127). This covers them in ASCII. A non-ASCII memo can be
+// longer in bytes, and a longer value stops clear signing.
+#define MAX_FIELD_VALUE_LEN 1000
 
 #define PREAPPROVAL_ASSET_FIELD_INDEX 1
 
@@ -149,6 +153,8 @@ struct pb_callback_context_t {
     const char *review_title;
     const char *review_finish;
     bool unknown_token;
+    // A field had no label, or a label too long to read, so paths no longer say what a value is.
+    bool unreadable;
     char *last_parsed_contract_id;
     // The action this node signs, read from the node before its argument is walked. Only a record
     // that names this action may choose the screen, so a record nested inside the argument cannot.
@@ -158,6 +164,8 @@ struct pb_callback_context_t {
     // How many records deep the argument walk currently is. The screen is chosen by the outermost
     // record only, which is depth 1.
     uint8_t record_depth;
+    // Counts the nested values opened, so a label can tell if its value came first.
+    uint32_t values_opened;
     // Copied from the matched configuration, so the value check can be handed the displayed values
     // once they are resolved.
     destination_e destination;

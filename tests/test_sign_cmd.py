@@ -11,6 +11,9 @@ from application_client.canton_command_sender import (
     CantonCommandSender,
     P1SignType,
     Errors,
+    CLA,
+    InsType,
+    P2,
 )
 from application_client.canton_response_unpacker import (
     unpack_get_public_key_response,
@@ -433,11 +436,59 @@ def test_sign_token_transfer_usdcx_send_two_holdings(
     )
 
 
-# A memo too long to copy for the screen must stop clear signing, not vanish from the screen.
-# 700 characters decodes but does not fit the copy; retune if heap use changes.
+# CIP-0127 stores lock data in the memo, and Canton asks wallets to accept 1,000 characters. A
+# 1,000-byte memo must be clear-signed in full.
+def test_sign_token_transfer_memo_1000(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
+    sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_memo_1000.json",
+        custom_screen_text="Sign transaction to",
+    )
+
+
+# A memo over the 1,000-byte limit must stop clear signing, not vanish from the screen.
 def test_sign_memo_too_long_blind_signing_disabled(backend: BackendInterface) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts("tests/tx_examples/token_transfer_memo_1001.json")
+    _check_blind_signing_rejection(backend, serialized_parts)
+
+
+# A NUL in the memo key cuts the key on the device. The ledger reads a different key, so the
+# screen must not show it as the memo.
+def test_sign_memo_key_nul_blind_signing_disabled(backend: BackendInterface) -> None:
     serialized_parts = Transaction.serialize_from_json_into_tx_parts(
-        "tests/tx_examples/token_transfer_memo_too_long.json"
+        "tests/tx_examples/token_transfer_memo_key_nul.json"
+    )
+    _check_blind_signing_rejection(backend, serialized_parts)
+
+
+# A label sent as an empty string leaves the path unchanged, so at the top of the argument the fields
+# inside it read as the argument's own. The fixture hides a memo there behind the label "QZ", and
+# the test rewrites that label to two empty labels, which keeps every length the same.
+def test_sign_memo_empty_label_blind_signing_disabled(backend: BackendInterface) -> None:
+    daml_tx, nodes, metadata, contracts = Transaction.serialize_from_json_into_tx_parts(
+        "tests/tx_examples/token_transfer_memo_empty_label.json"
+    )
+    labelled = [i for i, node in enumerate(nodes) if b"\x0a\x02QZ" in node]
+    assert len(labelled) == 1
+    nodes[labelled[0]] = nodes[labelled[0]].replace(b"\x0a\x02QZ", b"\x0a\x00\x0a\x00")
+    _check_blind_signing_rejection(backend, [daml_tx, nodes, metadata, contracts])
+
+
+# A memo key of 64 bytes does not fit the label buffer, so the path is unknown and clear signing
+# must stop.
+def test_sign_memo_key_64_blind_signing_disabled(backend: BackendInterface) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(
+        "tests/tx_examples/token_transfer_memo_key_64.json"
+    )
+    _check_blind_signing_rejection(backend, serialized_parts)
+
+
+# A memo key of 63 dots fits the label buffer, but each dot is escaped, so the path overflows.
+# The values under it must not take the parent path, so clear signing must stop.
+def test_sign_memo_key_dots_blind_signing_disabled(backend: BackendInterface) -> None:
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(
+        "tests/tx_examples/token_transfer_memo_key_dots.json"
     )
     _check_blind_signing_rejection(backend, serialized_parts)
 
@@ -652,6 +703,14 @@ def test_sign_token_transfer_wrong_token_id_blind_signing_enabled(
         # The same decoys, this time behind a label too long to fit in the path. A label that cannot
         # be written down can never equal a configured path, so the holding has to read as unknown.
         "values_err_overlong_label",
+        # The transfer argument and bob's holding each hide a decoy (bob, 20) behind a field with no
+        # label, before the real receiver eve and amount 21. A field without a label leaves values
+        # without a trustworthy path, so the screen and the holding check must not read the decoy.
+        "values_err_nested_decoy_display_and_holding",
+        # Only bob's holding hides the decoy, so the holding check alone must catch it
+        "values_err_nested_decoy_holding_only",
+        # Only the transfer argument hides the decoy, so the screen alone must catch it
+        "values_err_nested_decoy_display_only",
         # bob still gets 20 CC, but the change goes to carol instead of alice. The screen names only
         # alice and bob, so a holding for anyone else is value the user was never shown.
         "values_err_third_party_holding",
@@ -668,6 +727,84 @@ def test_sign_token_transfer_wrong_token_id_blind_signing_enabled(
 def test_sign_values_mismatch_blind_signing_disabled(backend: BackendInterface, tx_name: str) -> None:
     serialized_parts = Transaction.serialize_from_json_into_tx_parts(f"tests/tx_examples/{tx_name}.json")
     _check_blind_signing_rejection(backend, serialized_parts)
+
+
+# Values nest as deep as the host wants, and each level recurses on the device stack. Each fixture
+# wraps one field of external_sign_ping.json 24 times in containers of one kind, or of mixed kinds.
+# The app must never crash on them. When the stack gets too low, the parser refuses the node with
+# SW_TX_PARSING_FAIL. Nano S+ and Apex P have room for the optional, list and variant chains, so the
+# app opens the review screen, which this test sees as SW_INCORRECT_DATA because it does not
+# navigate. In both cases the app must still answer afterwards. Real transactions nest up to 8
+# levels, as in token_transfer.json, and keep passing.
+@pytest.mark.parametrize(
+    "tx_name",
+    [
+        "values_err_deep_optional",
+        "values_err_deep_list",
+        "values_err_deep_record",
+        "values_err_deep_textmap",
+        "values_err_deep_genmap_value",
+        "values_err_deep_genmap_key",
+        "values_err_deep_variant",
+        "values_err_deep_mixed",
+    ],
+)
+def test_sign_value_too_deep_refused(backend: BackendInterface, tx_name: str) -> None:
+    path = "m/44'/6767'/0'/0'/0'"
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(f"tests/tx_examples/{tx_name}.json")
+    client = CantonCommandSender(backend)
+    with pytest.raises(ExceptionRAPDU) as e:
+        with client.sign_tx_in_parts(path, *serialized_parts):
+            pass
+    if backend.device.name == "nanox":
+        # Nano X has the smallest stack, so every chain must hit the guard there.
+        assert e.value.status == Errors.SW_TX_PARSING_FAIL
+    else:
+        # SW_INCORRECT_DATA: the review screen opened, see the comment above.
+        assert e.value.status in (Errors.SW_TX_PARSING_FAIL, Errors.SW_INCORRECT_DATA)
+    client.get_public_key(path=path)
+
+
+# After a refusal, the app must not accept more parts on top of the half-processed transaction.
+# Only a new first APDU starts a new one.
+def test_sign_refused_tx_rejects_more_parts(backend: BackendInterface) -> None:
+    path = "m/44'/6767'/0'/0'/0'"
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(
+        "tests/tx_examples/metadata_err_missing_command_id.json"
+    )
+    client = CantonCommandSender(backend)
+    with pytest.raises(ExceptionRAPDU) as e:
+        with client.sign_tx_in_parts(path, *serialized_parts):
+            pass
+    assert e.value.status == Errors.SW_TX_HASH_FAIL
+
+    with pytest.raises(ExceptionRAPDU) as e:
+        backend.exchange(
+            cla=CLA, ins=InsType.SIGN_TX, p1=P1SignType.P1_SIGN_PREPARED_TRANSACTION, p2=P2.P2_MORE, data=b"\x00"
+        )
+    assert e.value.status == Errors.SW_BAD_STATE
+
+
+# Each fixture is external_sign_ping.json, which has no input contracts, with one metadata string
+# removed. The metadata hash cannot encode a missing string, so the app must refuse the transaction
+# and still answer afterwards. An act_as entry cannot arrive missing, so it has no fixture.
+@pytest.mark.parametrize(
+    "tx_name",
+    [
+        "metadata_err_missing_command_id",
+        "metadata_err_missing_transaction_uuid",
+        "metadata_err_missing_synchronizer_id",
+    ],
+)
+def test_sign_metadata_missing_field_refused(backend: BackendInterface, tx_name: str) -> None:
+    path = "m/44'/6767'/0'/0'/0'"
+    serialized_parts = Transaction.serialize_from_json_into_tx_parts(f"tests/tx_examples/{tx_name}.json")
+    client = CantonCommandSender(backend)
+    with pytest.raises(ExceptionRAPDU) as e:
+        with client.sign_tx_in_parts(path, *serialized_parts):
+            pass
+    assert e.value.status == Errors.SW_TX_HASH_FAIL
+    client.get_public_key(path=path)
 
 
 def test_sign_preapproval_proposal(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:

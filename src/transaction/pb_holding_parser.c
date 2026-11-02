@@ -1,7 +1,7 @@
 #include <stdbool.h>  // bool
 #include <stddef.h>   // size_t
 #include <stdint.h>   // uint*_t
-#include <string.h>   // memmove, strcmp, strlen
+#include <string.h>   // memchr, memmove, strcmp, strlen
 
 #include "cx.h"  // cx_hash_sha256
 #include "ledger_assert.h"
@@ -94,11 +94,15 @@ static struct {
     const holding_path_config_t *cfg;  // NULL when this create holds no value
     char path[MAX_LABEL_PATH_LEN];
     uint8_t depth;
+    uint32_t records_opened;  // lets a label tell if its value came first
     uint8_t owner[SHA256_HASH_LEN];
     uint8_t amount[SHA256_HASH_LEN];
     uint8_t admin[SHA256_HASH_LEN];
     uint8_t instrument[SHA256_HASH_LEN];
     bool has_owner, has_amount, has_admin, has_instrument;
+    // A field had no label, a label too long to read, or a configured path matched twice. The
+    // paths then no longer say which value is which.
+    bool unreadable;
 } ctx;
 
 MUST_CHECK static bool decode_value(pb_istream_t *stream, const pb_field_t *field, void **arg);
@@ -181,8 +185,8 @@ static void find_holding_field(const cbValue *value) {
     // id, amount is a number. So this text check runs first, and returns, before the owner/amount
     // check below ever sees it.
     if (value->which_sum == com_daml_ledger_api_v2_cb_Value_text_tag) {
-        if (!ctx.has_instrument && value->text != NULL && PIC(ctx.cfg->id_path) != NULL &&
-            path_is(ctx.cfg->id_path)) {
+        if (value->text != NULL && PIC(ctx.cfg->id_path) != NULL && path_is(ctx.cfg->id_path)) {
+            ctx.unreadable |= ctx.has_instrument;
             set_field_value(ctx.instrument, value->text);
             ctx.has_instrument = true;
         }
@@ -197,26 +201,55 @@ static void find_holding_field(const cbValue *value) {
         return;
     }
 
-    // Set the first occurrence of each; a repeat would belong to another contract.
-    if (!ctx.has_owner && path_is(ctx.cfg->owner_path)) {
+    // One contract has one owner, one amount and one admin. A second match means the paths do
+    // not say which one is real.
+    if (path_is(ctx.cfg->owner_path)) {
+        ctx.unreadable |= ctx.has_owner;
         set_field_value(ctx.owner, text);
         ctx.has_owner = true;
-    } else if (!ctx.has_amount && path_is(ctx.cfg->amount_path)) {
+    } else if (path_is(ctx.cfg->amount_path)) {
+        ctx.unreadable |= ctx.has_amount;
         set_field_value(ctx.amount, text);
         ctx.has_amount = true;
-    } else if (!ctx.has_admin && path_is(ctx.cfg->admin_path)) {
+    } else if (path_is(ctx.cfg->admin_path)) {
+        ctx.unreadable |= ctx.has_admin;
         set_field_value(ctx.admin, text);
         ctx.has_admin = true;
     }
 }
 
 /* --- Record descent --- */
+typedef struct {
+    bool labelled;
+    uint32_t records_before;  // ctx.records_opened when the field started
+} label_seen_t;
+
 MUST_CHECK static bool decode_label(pb_istream_t *stream, const pb_field_t *field, void **arg) {
     char label[DEFAULT_DECODE_BUFFER_SIZE] = {0};
-    size_t len = stream->bytes_left < sizeof(label) ? stream->bytes_left : sizeof(label) - 1;
-    (void) field, (void) arg;
+    (void) field;
+    label_seen_t *seen = (label_seen_t *) (*arg);
+    seen->labelled = true;
+    // A record read before its label was matched under the parent's path.
+    if (ctx.records_opened != seen->records_before) {
+        ctx.unreadable = true;
+    }
+    // A label that does not fit would be cut and pushed in pieces.
+    if (stream->bytes_left >= sizeof(label)) {
+        ctx.unreadable = true;
+        return pb_read(stream, NULL, stream->bytes_left);
+    }
+    size_t len = stream->bytes_left;
     if (!pb_read(stream, (pb_byte_t *) label, len)) {
         return false;
+    }
+    // Stop clear signing if the label is empty or contains a NUL byte.
+    // - A NUL byte ends a C string early. "owner\0x" would then read as "owner", so the
+    //   check could accept a field that the ledger stores under another name.
+    // - An empty label adds nothing to the path. The fields inside it would then get the
+    //   same path as the fields one level up, so they could pass for real fields.
+    if (len == 0 || memchr(label, '\0', len) != NULL) {
+        ctx.unreadable = true;
+        return true;
     }
     path_push(label);
     return true;
@@ -229,15 +262,21 @@ MUST_CHECK static bool decode_record_field(pb_istream_t *stream,
     // Where this field's siblings start. Cutting back to it undoes whatever decode_label pushed,
     // including nothing at all when the field has no label or the label did not fit.
     size_t parent_len = strlen(ctx.path);
+    label_seen_t seen = {.labelled = false, .records_before = ctx.records_opened};
 
     (void) field, (void) arg;
     rf.label.funcs.decode = &decode_label;
+    rf.label.arg = &seen;
     rf.value.cb_sum.funcs.decode = &decode_value;
     if (!pb_decode(stream, com_daml_ledger_api_v2_cb_RecordField_fields, &rf)) {
         // pb_decode frees nothing of what it already built, and this field is a local, so the
         // strings under it are only reachable from here.
         pb_release(com_daml_ledger_api_v2_cb_RecordField_fields, &rf);
         return false;
+    }
+    // Without a label the value has no path, and a value inside it would take its parent's.
+    if (!seen.labelled && ctx.cfg != NULL) {
+        ctx.unreadable = true;
     }
     find_holding_field(&rf.value);
     ctx.path[parent_len] = '\0';
@@ -252,9 +291,13 @@ MUST_CHECK static bool decode_value(pb_istream_t *stream, const pb_field_t *fiel
     if (field->tag != com_daml_ledger_api_v2_cb_Value_record_tag || ctx.depth >= MAX_LABEL_DEPTH) {
         return true;
     }
+    if (!stack_has_room()) {
+        return false;
+    }
 
     cbRecord *record = field->pData;
     record->fields.funcs.decode = &decode_record_field;
+    ctx.records_opened++;
     ctx.depth++;
     bool ok = pb_decode(stream, com_daml_ledger_api_v2_cb_Record_fields, record);
     ctx.depth--;
@@ -319,6 +362,7 @@ MUST_CHECK static bool decode_create(pb_istream_t *stream) {
     ctx.has_amount = false;
     ctx.has_admin = false;
     ctx.has_instrument = false;
+    ctx.unreadable = false;
     create.argument.funcs.decode = &decode_argument;
     ok = pb_decode(stream,
                    com_daml_ledger_api_v2_interactive_transaction_v1_cb_Create_fields,
@@ -326,7 +370,7 @@ MUST_CHECK static bool decode_create(pb_istream_t *stream) {
     pb_release(com_daml_ledger_api_v2_interactive_transaction_v1_cb_Create_fields, &create);
     if (ok) {
         bool names_instrument = PIC(cfg->id_path) != NULL;
-        if (ctx.has_owner && ctx.has_amount && ctx.has_admin &&
+        if (!ctx.unreadable && ctx.has_owner && ctx.has_amount && ctx.has_admin &&
             (!names_instrument || ctx.has_instrument)) {
             values_report_holding(ctx.owner,
                                   ctx.amount,
