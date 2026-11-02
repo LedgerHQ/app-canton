@@ -48,6 +48,14 @@ static int process_transaction_hash(buffer_t *buffer);
 
 buffer_t buf = {.ptr = NULL, .size = 0, .offset = 0};
 
+// A refused transaction ends the session. More parts are refused until a new first APDU, so
+// nothing is parsed on top of a half-processed transaction.
+static int refuse_tx(int sw) {
+    G_context.req_type = CONFIRM_ADDRESS;
+    G_context.state = STATE_NONE;
+    return io_send_sw(sw);
+}
+
 MUST_CHECK int handler_sign_tx(buffer_t *cdata,
                                signing_type_e type,
                                bool first,
@@ -60,7 +68,7 @@ MUST_CHECK int handler_sign_tx(buffer_t *cdata,
 
     int result = process_tx_chunk(cdata, type, first, more, msg_end);
     if (result != 0) {
-        return io_send_sw(result);  // Send the error code via io_send_sw
+        return refuse_tx(result);
     }
 
     if (G_context.state == STATE_EXPECTING_MORE) {
@@ -88,7 +96,7 @@ MUST_CHECK int handler_sign_tx(buffer_t *cdata,
             // dead. Freeing them here covers every signing flow at once, instead of each of the
             // parsers' error paths having to remember.
             cleanup_display_items();
-            return io_send_sw(result);  // Send the error code via io_send_sw
+            return refuse_tx(result);
         }
 
         if (G_context.state == STATE_PARSED) {

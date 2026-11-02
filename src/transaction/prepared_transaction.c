@@ -176,11 +176,17 @@ MUST_CHECK int process_prepared_tx_part(buffer_t *buf) {
 
             // hash_metadata encodes the command id, the transaction uuid, the synchronizer id and
             // every act_as party. All are host-supplied and any of them can be absent, and an
-            // absent string writes no bytes, so the error has to be read here as well. This is the
-            // last point that reads it for a transaction disclosing no input contract.
+            // absent string writes no bytes, so the error is read right after, with or without
+            // input contracts.
             hash_metadata(&G_context.tx_info.hasher, &G_context.tx_info.tx_parts_ctx.metadata);
 
             release_metadata(&G_context.tx_info);
+
+            int hash_res = get_hash_error();
+            if (hash_res != HASH_OK) {
+                PRINTF("Failed to hash metadata. Hash error code : %d\n", hash_res);
+                return abort_prepared_tx(SW_TX_HASH_FAIL);
+            }
 
             G_context.tx_info.recv_node_idx = 0;
 
@@ -188,12 +194,6 @@ MUST_CHECK int process_prepared_tx_part(buffer_t *buf) {
                 return process_prepared_tx_finalize();
             } else {
                 tx_state = RECEIVING_METADATA_INPUT_CONTRACTS;
-                int hash_res = get_hash_error();
-                if (hash_res != HASH_OK) {
-                    PRINTF("Failed to hash metadata. Hash error code : %d\n", hash_res);
-                    release_metadata(&G_context.tx_info);
-                    return abort_prepared_tx(SW_TX_HASH_FAIL);
-                }
             }
 
         } break;

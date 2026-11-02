@@ -20,6 +20,10 @@ jobs:
     steps:
       - name: Clone
         uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - name: Installing PIP dependencies
         run: |
           pip install pylint==3.3.8
@@ -33,6 +37,10 @@ jobs:
     steps:
       - name: Clone
         uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - name: Installing PIP dependencies
         run: |
           pip install mypy==1.13.0
