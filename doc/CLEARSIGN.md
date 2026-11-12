@@ -124,9 +124,9 @@ The fields are read from the disclosed transfer instruction contract.
 - **Amount**: the app removes the trailing zeros after the decimal point, and the decimal point
   if the amount is a whole number.
 - **Ticker**: for token standard actions, the app looks up the instrument admin and ID in a list
-  of known tokens (`INSTRUMENT_TO_TICKER_MAPPINGS`). The list has CC, CBTC, USDCx, SBC and CUSD
-  for some networks. If the token is known, the app adds the ticker to the amount and does not
-  show the Token row. If the token is not known, the app falls back to blind signing.
+  of known tokens (`INSTRUMENT_TO_TICKER_MAPPINGS`). The list has CC, CBTC, USDCx, SBC, CUSD and
+  BETH for some networks. If the token is known, the app adds the ticker to the amount and does
+  not show the Token row. If the token is not known, the app falls back to blind signing.
 - **Expiration time**: the app shows the timestamp in UTC with a 12-hour clock, as
   `YYYY-MM-DD hh:mm:ss AM/PM UTC`. The line break is at a different place on Nano devices and on
   touchscreen devices.
