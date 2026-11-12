@@ -88,7 +88,19 @@ const instrument_to_ticker_mapping_t INSTRUMENT_TO_TICKER_MAPPINGS[] = {
     {.admin = "party-28dc4516-b5ca-44ff-86c7-2107e90a6807::"
               "1220b8301e18aa8a401d6e34e6c20f8b0243183c514373bca8f1b6b9270246341a9e",  // Mainnet
      .id = "481871d4-ca56-42a8-b2d3-4b7d28742946",
-     .ticker = "CUSD"}};
+     .ticker = "CUSD"},
+    {.admin = "beth-network::"
+              "12207547956b2fbcc5c7b85ee3eeb13705b641e233fb17cebb4057d14e1a3f81bea6",  // Devnet
+     .id = "BETH",
+     .ticker = "BETH"},
+    {.admin = "beth-network::"
+              "122027d91679105c721435c6f08f8d0cd684e6679f385731f5b3691cb9bf93cd126e",  // Testnet
+     .id = "BETH",
+     .ticker = "BETH"},
+    {.admin = "beth-network::"
+              "1220704c3cebc23916785557ebe79a5c7f68d034890a5b15690ea7ce050c7d463075",  // Mainnet
+     .id = "BETH",
+     .ticker = "BETH"}};
 
 const size_t INSTRUMENT_TO_TICKER_MAPPING_NB =
     sizeof(INSTRUMENT_TO_TICKER_MAPPINGS) / sizeof(instrument_to_ticker_mapping_t);

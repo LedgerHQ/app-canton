@@ -340,6 +340,18 @@ def test_sign_token_transfer_cbtc_send(backend: BackendInterface, scenario_navig
     )
 
 
+# A BETH send. BitSafe issues BETH through the same Digital Asset Registry Utility as CBTC, so the
+# fixture is token_transfer_cbtc_send.json with the instrument admin and the instrument id replaced
+# by BETH's MainNet values. It is not a recording of a real transfer.
+def test_sign_token_transfer_beth_send(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
+    sign_and_verify_prepared_transaction(
+        backend,
+        scenario_navigator,
+        tx_json="tests/tx_examples/token_transfer_beth_send.json",
+        custom_screen_text="Sign transaction to",
+    )
+
+
 def test_sign_token_transfer_cip107(backend: BackendInterface, scenario_navigator: NavigateWithScenario) -> None:
     sign_and_verify_prepared_transaction(
         backend,
